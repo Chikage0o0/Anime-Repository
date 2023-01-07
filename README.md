@@ -14,7 +14,7 @@
 - 设置
 
 技术栈：
-typescript、rust、tauri、vite、react、less、antd
+tauri、vite、react-ts、sass、antd
 
 参考文档：
 
