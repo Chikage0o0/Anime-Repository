@@ -21,7 +21,11 @@ function getItem(
   } as MenuItem
 }
 
-function MenuIndex(items: MenuItem[], menu: MenuMode) {
+function MenuIndex(
+  items: MenuItem[],
+  menu: MenuMode,
+  firstOpenKey: string[] = []
+) {
   const [openKeys, setOpenKeys] = useState([''])
 
   const navigateTo = useNavigate()
@@ -36,28 +40,25 @@ function MenuIndex(items: MenuItem[], menu: MenuMode) {
   }
   //自动展开导航
   useEffect(() => {
-    let firstOpenKey: string[] = []
-    const findKey = (obj: { key: string }) => {
-      return obj.key === location.pathname
-    }
-
-    for (let i = 0; i < items.length; i++) {
-      if (
-        items[i]!['children'] &&
-        items[i]!['children'].length > 0 &&
-        items[i]!['children'].find(findKey)
-      ) {
-        firstOpenKey = [items[i]!.key as string]
-        break
-      }
-    }
     setOpenKeys(firstOpenKey)
   }, [])
 
+  //自动根据路径寻找当前key
   let defaultSelectedKeys: string[] = [items[0]?.key as string]
   for (let i = 0; i < items.length; i++) {
-    if (location.pathname.startsWith(items[i]?.key as string)) {
+    if (items[i]!['children'] && items[i]!['children'].length > 0) {
+      for (let j = 0; j < items[i]!['children'].length; j++) {
+        if (
+          location.pathname.startsWith(items[i]!['children'][j].key as string)
+        ) {
+          defaultSelectedKeys = [items[i]!['children'][j].key as string]
+          break
+        }
+      }
+      break
+    } else if (location.pathname.startsWith(items[i]?.key as string)) {
       defaultSelectedKeys = [items[i]?.key as string]
+      console.log(defaultSelectedKeys)
       break
     }
   }

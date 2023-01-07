@@ -1,12 +1,7 @@
 import React from 'react'
 
-import collapsed from './collapsedStore'
-
 class RootStore {
-  collapsedStore
-  constructor() {
-    this.collapsedStore = collapsed
-  }
+  constructor() {}
 }
 
 const rootStore = new RootStore()

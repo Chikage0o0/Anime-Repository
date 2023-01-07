@@ -1,4 +1,5 @@
 import MenuIndex, { getItem, MenuItem } from '.'
+import { useState } from 'react'
 import { Layout } from 'antd'
 import {
   PlaySquareOutlined,
@@ -6,12 +7,10 @@ import {
   HomeOutlined,
   SettingOutlined,
 } from '@ant-design/icons'
-import { observer } from 'mobx-react-lite'
-import { useStore } from '@/store'
 
 const { Sider } = Layout
 function SiderMenu() {
-  const store = useStore()
+  const [collapsed, setCollapsed] = useState(false)
   const items: MenuItem[] = [
     getItem('主页', '/home', <HomeOutlined />),
     getItem('媒体库', 'repository', <PlaySquareOutlined />, [
@@ -21,13 +20,31 @@ function SiderMenu() {
     getItem('订阅列表', '/subscribe', <HeartOutlined />),
     getItem('设置', '/setting', <SettingOutlined />),
   ]
+
+  //自动展开导航
+  let firstOpenKey: string[] = []
+  const findKey = (obj: { key: string }) => {
+    return location.pathname.startsWith(obj.key)
+  }
+
+  for (let i = 0; i < items.length; i++) {
+    if (
+      items[i]!['children'] &&
+      items[i]!['children'].length > 0 &&
+      items[i]!['children'].find(findKey) &&
+      !collapsed
+    ) {
+      firstOpenKey = [items[i]!.key as string]
+      break
+    }
+  }
   return (
     <Sider
       breakpoint="lg"
       collapsible
-      collapsed={store.collapsedStore.collapsed}
-      onCollapse={store.collapsedStore.change}>
-      {MenuIndex(items, 'inline')}
+      collapsed={collapsed}
+      onCollapse={(value) => setCollapsed(value)}>
+      {MenuIndex(items, 'inline', firstOpenKey)}
     </Sider>
   )
 }
