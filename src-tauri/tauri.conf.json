@@ -28,7 +28,7 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "me.939.anime-repository",
+      "identifier": "me.chikage.anime-repository",
       "longDescription": "",
       "macOS": {
         "entitlements": null,

@@ -8,9 +8,6 @@ function Subscribe() {
     getItem('规则', '/subscribe/rules'),
     getItem('未识别', '/subscribe/undefined'),
   ]
-  const {
-    token: { colorBgContainer },
-  } = theme.useToken()
   return (
     <>
       <Header>{MenuIndex(items, 'horizontal')}</Header>

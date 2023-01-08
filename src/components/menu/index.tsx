@@ -57,7 +57,6 @@ function MenuIndex(
       }
     } else if (location.pathname.startsWith(items[i]?.key as string)) {
       defaultSelectedKeys = [items[i]?.key as string]
-      console.log(defaultSelectedKeys)
       break
     }
   }

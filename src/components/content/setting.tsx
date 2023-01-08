@@ -1,4 +1,5 @@
-import { Layout, theme, Space, Button, Anchor, Row, Col, Affix } from 'antd'
+import { Layout, theme, Space, Button, Anchor, Row, Col } from 'antd'
+import styles from '@/assets/styles//components/content/setting.module.scss'
 const { Content, Footer } = Layout
 function Setting() {
   const {
@@ -7,6 +8,7 @@ function Setting() {
   return (
     <>
       <Content
+        id="content"
         style={{
           background: colorBgContainer,
           overflowY: 'auto',
@@ -14,24 +16,19 @@ function Setting() {
         }}>
         <Row>
           <Col span={18}>
-            <div
-              id="part-1"
-              style={{ height: '100vh', background: 'rgba(255,0,0,0.02)' }}>
+            <div className={styles.settingItem} id="part-1">
               1
             </div>
-            <div
-              id="part-2"
-              style={{ height: '100vh', background: 'rgba(0,255,0,0.02)' }}>
+            <div className={styles.settingItem} id="part-2">
               2
             </div>
-            <div
-              id="part-3"
-              style={{ height: '100vh', background: 'rgba(0,0,255,0.02)' }}>
+            <div className={styles.settingItem} id="part-3">
               3
             </div>
           </Col>
           <Col span={6}>
             <Anchor
+              getContainer={() => document.getElementById('content')!}
               items={[
                 {
                   key: 'part-1',
