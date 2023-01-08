@@ -9,7 +9,8 @@ function Setting() {
       <Content
         style={{
           background: colorBgContainer,
-          overflow: 'auto',
+          overflowY: 'auto',
+          overflowX: 'hidden',
         }}>
         <Row>
           <Col span={18}>

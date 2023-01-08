@@ -7,6 +7,11 @@ import '@/assets/styles/global.scss'
 import App from './App'
 import { BrowserRouter } from 'react-router-dom'
 
+//全局禁止右击
+document.addEventListener('contextmenu', function (e) {
+  e.preventDefault()
+})
+
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <BrowserRouter>
