@@ -6,7 +6,9 @@ const Movie = lazy(() => import('../components/content/movie'))
 const TvShows = lazy(() => import('../components/content/tv-shows'))
 const Subscribe = lazy(() => import('../components/content/subscribe'))
 const Setting = lazy(() => import('../components/content/setting'))
-const Undefined = lazy(() => import('@/components/content/subscribe/undefined'))
+const Unrecognized = lazy(
+  () => import('@/components/content/subscribe/unrecognized')
+)
 const Rules = lazy(() => import('@/components/content/subscribe/rules'))
 const waitLoadingComponent = (component: JSX.Element) => (
   <React.Suspense fallback={<div>Loading...</div>}>{component}</React.Suspense>
@@ -42,8 +44,8 @@ const routes = [
         element: waitLoadingComponent(<Rules />),
       },
       {
-        path: 'undefined',
-        element: waitLoadingComponent(<Undefined />),
+        path: 'unrecognized',
+        element: waitLoadingComponent(<Unrecognized />),
       },
     ],
   },

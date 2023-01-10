@@ -6,7 +6,7 @@ import { Outlet } from 'react-router-dom'
 function Subscribe() {
   const items: MenuItem[] = [
     getItem('规则', '/subscribe/rules'),
-    getItem('未识别', '/subscribe/undefined'),
+    getItem('未识别', '/subscribe/unrecognized'),
   ]
   return (
     <>

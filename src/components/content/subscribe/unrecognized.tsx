@@ -1,6 +1,6 @@
 import { Layout, theme } from 'antd'
 const { Content } = Layout
-function Undefined() {
+function Unrecognized() {
   const {
     token: { colorBgContainer },
   } = theme.useToken()
@@ -10,9 +10,9 @@ function Undefined() {
         padding: 24,
         background: colorBgContainer,
       }}>
-      Undefined
+      Unrecognized
     </Content>
   )
 }
 
-export default Undefined
+export default Unrecognized

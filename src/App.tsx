@@ -6,6 +6,7 @@ import { observer } from 'mobx-react-lite'
 
 function App() {
   const outlet = useRoutes(routes)
+
   return (
     <div className="container">
       <Layout style={{ height: '100vh' }}>
