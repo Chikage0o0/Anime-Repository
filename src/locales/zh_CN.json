@@ -1,0 +1,32 @@
+{
+  "home": {
+    "title": "主页"
+  },
+  "repository": {
+    "title": "媒体库",
+    "movie": {
+      "title": "电影"
+    },
+    "tv-shows": {
+      "title": "电视剧"
+    }
+  },
+  "subscribe": {
+    "title": "订阅列表",
+    "rules": {
+      "title": "规则"
+    },
+    "unrecognized": {
+      "title": "未识别"
+    }
+  },
+  "setting": {
+    "title": "设置"
+  },
+  "UI": {
+    "new": "新建",
+    "save": "保存",
+    "reset": "重置",
+    "cancel": "取消"
+  }
+}

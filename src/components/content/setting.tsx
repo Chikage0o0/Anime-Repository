@@ -1,10 +1,12 @@
 import { Layout, theme, Space, Button, Anchor, Row, Col } from 'antd'
 import styles from '@/assets/styles//components/content/setting.module.scss'
+import { useTranslation } from 'react-i18next'
 const { Content, Footer } = Layout
 function Setting() {
   const {
     token: { colorBgContainer },
   } = theme.useToken()
+  const { t } = useTranslation()
   return (
     <>
       <Content
@@ -56,9 +58,9 @@ function Setting() {
           background: colorBgContainer,
         }}>
         <Space>
-          <Button>重置</Button>
-          <Button>取消</Button>
-          <Button type="primary">保存</Button>
+          <Button>{t('UI.reset')}</Button>
+          <Button>{t('UI.cancel')}</Button>
+          <Button type="primary">{t('UI.save')}</Button>
         </Space>
       </Footer>
     </>

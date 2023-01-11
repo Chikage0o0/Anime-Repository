@@ -7,18 +7,20 @@ import {
   HomeOutlined,
   SettingOutlined,
 } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
 
 const { Sider } = Layout
 function SiderMenu() {
   const [collapsed, setCollapsed] = useState(false)
+  const { t } = useTranslation()
   const items: MenuItem[] = [
-    getItem('主页', '/home', <HomeOutlined />),
-    getItem('媒体库', 'repository', <PlaySquareOutlined />, [
-      getItem('电影', '/movie'),
-      getItem('TV', '/tv-shows'),
+    getItem(t('home.title'), '/home', <HomeOutlined />),
+    getItem(t('repository.title'), 'repository', <PlaySquareOutlined />, [
+      getItem(t('repository.movie.title'), '/movie'),
+      getItem(t('repository.tv-shows.title'), '/tv-shows'),
     ]),
-    getItem('订阅列表', '/subscribe', <HeartOutlined />),
-    getItem('设置', '/setting', <SettingOutlined />),
+    getItem(t('subscribe.title'), '/subscribe', <HeartOutlined />),
+    getItem(t('setting.title'), '/setting', <SettingOutlined />),
   ]
 
   //自动展开导航

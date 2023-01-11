@@ -1,0 +1,32 @@
+{
+  "home": {
+    "title": "Home"
+  },
+  "repository": {
+    "title": "Repository",
+    "movie": {
+      "title": "Movie"
+    },
+    "tv-shows": {
+      "title": "TV-Shows"
+    }
+  },
+  "subscribe": {
+    "title": "Subscribe",
+    "rules": {
+      "title": "Rules"
+    },
+    "unrecognized": {
+      "title": "Unrecognized"
+    }
+  },
+  "setting": {
+    "title": "Setting"
+  },
+  "UI": {
+    "new": "New",
+    "save": "Save",
+    "reset": "Reset",
+    "cancel": "Cancel"
+  }
+}
