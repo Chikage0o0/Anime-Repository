@@ -1,3 +1,5 @@
+ui_lang = "zh-CN"
+
 [storage]
 pending_path = "C:\\Users\\chika\\Downloads\\AnimeRepository"
 repository_path = "C:\\Users\\chika\\Videos\\AnimeRepository"

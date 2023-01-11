@@ -2,11 +2,14 @@ import { Layout, theme, Space, Button, Anchor, Row, Col } from 'antd'
 import styles from '@/assets/styles//components/content/setting.module.scss'
 import { useTranslation } from 'react-i18next'
 const { Content, Footer } = Layout
+import { useStore } from '@/store'
 function Setting() {
   const {
     token: { colorBgContainer },
   } = theme.useToken()
   const { t } = useTranslation()
+  const { settingStore } = useStore()
+
   return (
     <>
       <Content
@@ -19,7 +22,7 @@ function Setting() {
         <Row>
           <Col span={18}>
             <div className={styles.settingItem} id="part-1">
-              1
+              {JSON.stringify(settingStore.setting)}
             </div>
             <div className={styles.settingItem} id="part-2">
               2

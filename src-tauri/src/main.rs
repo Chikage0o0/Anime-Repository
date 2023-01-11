@@ -3,15 +3,13 @@
     windows_subsystem = "windows"
 )]
 
-use tauri::Window;
+use model::setting::Setting;
 
 mod model;
 
 #[tauri::command]
-fn get_setting(window: Window) {
-    window
-        .emit("get_setting", model::setting::Setting::get().unwrap())
-        .unwrap();
+async fn get_setting() -> Setting {
+    Setting::global().clone()
 }
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 fn main() {

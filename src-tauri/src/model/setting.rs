@@ -1,39 +1,36 @@
+use once_cell::sync::OnceCell;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::{ErrorKind, Read, Write};
 use std::path::PathBuf;
-use std::sync::Mutex;
+use sys_locale::get_locale;
 
 const SETTING_PATH: &str = "setting.toml";
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Setting {
+    ui_lang: String,
     storage: Storage,
     network: Network,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Storage {
-    pub pending_path: PathBuf,
-    pub repository_path: PathBuf,
+struct Storage {
+    pending_path: PathBuf,
+    repository_path: PathBuf,
 }
 
 /// 网络相关配置
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Network {
-    pub use_proxy: bool,
-    pub proxy: Option<String>,
-}
-
-use lazy_static::lazy_static;
-lazy_static! {
-    pub static ref SETTING: Mutex<Setting> = Mutex::new(Setting::get().unwrap());
+struct Network {
+    use_proxy: bool,
+    proxy: Option<String>,
 }
 
 impl Setting {
     /// - `new` 获取一个默认的配置结构
     /// - 用于配置不存在时，生成默认的配置,并写入文件,并返回文件
-    pub fn new() -> Result<Setting, std::io::Error> {
+    fn new() -> Result<Setting, std::io::Error> {
         use tauri::api::path::{download_dir, video_dir};
 
         let mut video_dir = video_dir().unwrap();
@@ -43,6 +40,7 @@ impl Setting {
         download_dir.push("AnimeRepository");
 
         let setting = Setting {
+            ui_lang: get_locale().unwrap_or_else(|| String::from("en-US")),
             storage: Storage {
                 pending_path: download_dir,
                 repository_path: video_dir,
@@ -64,7 +62,7 @@ impl Setting {
     }
 
     /// ### 获取配置
-    pub fn get() -> Result<Setting, GetConfigError> {
+    fn get() -> Result<Setting, GetConfigError> {
         let f = File::open(SETTING_PATH);
 
         let setting = match f {
@@ -83,6 +81,11 @@ impl Setting {
         };
 
         return Ok(setting);
+    }
+
+    pub fn global() -> &'static Setting {
+        static CONFIG: OnceCell<Setting> = OnceCell::new();
+        CONFIG.get_or_init(|| Setting::get().unwrap())
     }
 }
 

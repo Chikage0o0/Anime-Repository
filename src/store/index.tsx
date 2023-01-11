@@ -1,7 +1,11 @@
 import React from 'react'
+import setting from './settingStore'
 
 class RootStore {
-  constructor() {}
+  settingStore
+  constructor() {
+    this.settingStore = setting
+  }
 }
 
 const rootStore = new RootStore()

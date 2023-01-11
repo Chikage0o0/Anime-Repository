@@ -6,14 +6,34 @@ import 'reset-css'
 import '@/assets/styles/global.scss'
 import App from './App'
 import { BrowserRouter } from 'react-router-dom'
-
-import '@/i18n'
+import i18n from 'i18next'
+import { initReactI18next } from 'react-i18next'
+import { resources } from '@/locales/locales'
+import setting, { SettingObject } from '@/store/settingStore'
 // import { listen } from '@tauri-apps/api/event'
-// import { invoke } from '@tauri-apps/api'
+
 //全局禁止右击
 document.addEventListener('contextmenu', function (e) {
   e.preventDefault()
 })
+
+//初始化配置信息
+await setting.init()
+//设置用户界面语言
+i18n
+  // 将 i18n 实例传递给 react-i18next
+  .use(initReactI18next)
+  // 初始化 i18next
+  // 所有配置选项: https://www.i18next.com/overview/configuration-options
+  .init({
+    resources,
+    fallbackLng: 'en_US',
+    lng: (setting.setting as SettingObject).ui_lang.replace(/-/, '_'),
+    debug: false,
+    interpolation: {
+      escapeValue: false, // not needed for react as it escapes by default
+    },
+  })
 
 //监听后端错误信息
 // await listen<Object>('get_setting', (event) => {
