@@ -14,13 +14,13 @@ function SiderMenu() {
   const [collapsed, setCollapsed] = useState(false)
   const { t } = useTranslation()
   const items: MenuItem[] = [
-    getItem(t('home.title'), '/home', <HomeOutlined />),
-    getItem(t('repository.title'), 'repository', <PlaySquareOutlined />, [
-      getItem(t('repository.movie.title'), '/movie'),
-      getItem(t('repository.tv-shows.title'), '/tv-shows'),
+    getItem(t('home'), '/home', <HomeOutlined />),
+    getItem(t('repository'), 'repository', <PlaySquareOutlined />, [
+      getItem(t('repository.movie'), '/movie'),
+      getItem(t('repository.tv-shows'), '/tv-shows'),
     ]),
-    getItem(t('subscribe.title'), '/subscribe', <HeartOutlined />),
-    getItem(t('setting.title'), '/setting', <SettingOutlined />),
+    getItem(t('subscribe'), '/subscribe', <HeartOutlined />),
+    getItem(t('setting'), '/setting', <SettingOutlined />),
   ]
 
   //自动展开导航

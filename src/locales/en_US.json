@@ -1,32 +1,30 @@
 {
-  "home": {
-    "title": "Home"
-  },
-  "repository": {
-    "title": "Repository",
-    "movie": {
-      "title": "Movie"
-    },
-    "tv-shows": {
-      "title": "TV-Shows"
-    }
-  },
-  "subscribe": {
-    "title": "Subscribe",
-    "rules": {
-      "title": "Rules"
-    },
-    "unrecognized": {
-      "title": "Unrecognized"
-    }
-  },
-  "setting": {
-    "title": "Setting"
-  },
-  "UI": {
-    "new": "New",
-    "save": "Save",
-    "reset": "Reset",
-    "cancel": "Cancel"
-  }
+  "home": "Home",
+  "repository": "Repository",
+  "repository.movie": "Movie",
+  "repository.tv-shows": "TV-Shows",
+  "subscribe": "Subscribe",
+  "subscribe.rules": "Rules",
+  "subscribe.unrecognized": "Unrecognized",
+  "setting": "Setting",
+  "setting.ui": "UI",
+  "setting.ui.lang": "Language",
+  "setting.ui.lang.zh-CN": "Chinese (Simplified)",
+  "setting.ui.lang.en-US": "English",
+  "setting.ui.theme": "Theme",
+  "setting.ui.theme.auto": "Auto",
+  "setting.ui.theme.dark": "Dark Mode",
+  "setting.ui.theme.light": "Light Mode",
+  "setting.storage": "Storage",
+  "setting.storage.pending_path": "Pending Path",
+  "setting.storage.repository_path": "Repository Path",
+  "setting.network": "Network",
+  "setting.network.use_proxy": "Use Proxy",
+  "setting.network.proxy": "Proxy Link",
+  "UI.new": "New",
+  "UI.save": "Save",
+  "UI.reset": "Reset",
+  "UI.cancel": "Cancel",
+  "UI.true": "Yes",
+  "UI.false": "No"
 }

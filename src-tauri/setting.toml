@@ -1,6 +1,6 @@
 [ui]
-lang = "zh-CN"
-theme = "Light"
+lang = "en-US"
+theme = "Dark"
 
 [storage]
 pending_path = "C:\\Users\\chika\\Downloads\\AnimeRepository"
