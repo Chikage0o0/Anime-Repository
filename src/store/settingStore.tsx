@@ -3,12 +3,12 @@ import { invoke } from '@tauri-apps/api'
 import { makeAutoObservable } from 'mobx'
 
 export type SettingObject = {
+  ui: { lang: string; theme: string }
   network: { proxy: any; use_proxy: boolean }
   storage: {
     pending_path: string
     repository_path: string
   }
-  ui_lang: string
 }
 
 class SettingStore {

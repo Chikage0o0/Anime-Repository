@@ -1,5 +1,5 @@
 import { Layout, theme, Space, Button, Anchor, Row, Col } from 'antd'
-import styles from '@/assets/styles//components/content/setting.module.scss'
+import styles from '@/assets/styles//components/content/setting.module.less'
 import { useTranslation } from 'react-i18next'
 const { Content, Footer } = Layout
 import { useStore } from '@/store'

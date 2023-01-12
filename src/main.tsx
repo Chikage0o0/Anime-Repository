@@ -3,13 +3,16 @@ import ReactDOM from 'react-dom/client'
 //样式初始化
 import 'reset-css'
 //全局样式
-import '@/assets/styles/global.scss'
+import '@/assets/styles/global.less'
 import App from './App'
 import { BrowserRouter } from 'react-router-dom'
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
-import { resources } from '@/locales/locales'
+import { resources, get_antd_locale } from '@/locales/locales'
 import setting, { SettingObject } from '@/store/settingStore'
+import { ConfigProvider, theme } from 'antd'
+import { getTheme } from './theme'
+
 // import { listen } from '@tauri-apps/api/event'
 
 //全局禁止右击
@@ -28,7 +31,7 @@ i18n
   .init({
     resources,
     fallbackLng: 'en_US',
-    lng: (setting.setting as SettingObject).ui_lang.replace(/-/, '_'),
+    lng: (setting.setting as SettingObject).ui.lang.replace(/-/, '_'),
     debug: false,
     interpolation: {
       escapeValue: false, // not needed for react as it escapes by default
@@ -43,8 +46,12 @@ i18n
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <ConfigProvider
+      locale={get_antd_locale(setting.setting as SettingObject)}
+      theme={{ algorithm: getTheme(setting.setting as SettingObject) }}>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </ConfigProvider>
   </React.StrictMode>
 )

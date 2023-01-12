@@ -9,11 +9,21 @@ const SETTING_PATH: &str = "setting.toml";
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Setting {
-    ui_lang: String,
+    ui: UI,
     storage: Storage,
     network: Network,
 }
-
+#[derive(Serialize, Deserialize, Debug, Clone)]
+struct UI {
+    lang: String,
+    theme: Theme,
+}
+#[derive(Serialize, Deserialize, Debug, Clone)]
+enum Theme {
+    Dark,
+    Light,
+    Auto,
+}
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct Storage {
     pending_path: PathBuf,
@@ -40,7 +50,10 @@ impl Setting {
         download_dir.push("AnimeRepository");
 
         let setting = Setting {
-            ui_lang: get_locale().unwrap_or_else(|| String::from("en-US")),
+            ui: UI {
+                lang: get_locale().unwrap_or_else(|| String::from("en-US")),
+                theme: Theme::Auto,
+            },
             storage: Storage {
                 pending_path: download_dir,
                 repository_path: video_dir,
