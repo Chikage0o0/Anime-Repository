@@ -1,8 +1,9 @@
-use once_cell::sync::OnceCell;
+use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::{ErrorKind, Read, Write};
 use std::path::PathBuf;
+use std::sync::Mutex;
 use sys_locale::get_locale;
 
 const SETTING_PATH: &str = "setting.toml";
@@ -36,7 +37,9 @@ struct Network {
     use_proxy: bool,
     proxy: Option<String>,
 }
-
+lazy_static! {
+    pub static ref CONFIG: Mutex<Setting> = Mutex::new(Setting::get_from_file().unwrap());
+}
 impl Setting {
     /// - `new` 获取一个默认的配置结构
     /// - 用于配置不存在时，生成默认的配置,并写入文件,并返回文件
@@ -75,7 +78,7 @@ impl Setting {
     }
 
     /// ### 获取配置
-    fn get() -> Result<Setting, GetConfigError> {
+    fn get_from_file() -> Result<Setting, SettingError> {
         let f = File::open(SETTING_PATH);
 
         let setting = match f {
@@ -96,16 +99,31 @@ impl Setting {
         return Ok(setting);
     }
 
-    pub fn global() -> &'static Setting {
-        static CONFIG: OnceCell<Setting> = OnceCell::new();
-        CONFIG.get_or_init(|| Setting::get().unwrap())
+    pub fn get() -> Setting {
+        CONFIG.lock().unwrap().clone()
+    }
+
+    pub fn save(setting: Setting) -> Result<(), SettingError> {
+        let mut old_setting = CONFIG.lock().unwrap();
+        setting.write_to_file(SETTING_PATH)?;
+        *old_setting = setting;
+        Ok(())
     }
 }
 
 #[derive(thiserror::Error, Debug)]
-pub enum GetConfigError {
+pub enum SettingError {
     #[error(transparent)]
     DeserializeError(#[from] toml::de::Error),
     #[error(transparent)]
     IOError(#[from] std::io::Error),
+}
+
+impl serde::Serialize for SettingError {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::ser::Serializer,
+    {
+        serializer.serialize_str(self.to_string().as_ref())
+    }
 }

@@ -36,7 +36,7 @@ dependencies = [
 name = "anime-repository"
 version = "0.0.0"
 dependencies = [
- "once_cell",
+ "lazy_static",
  "serde",
  "serde_json",
  "sys-locale",

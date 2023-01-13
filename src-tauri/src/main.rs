@@ -3,18 +3,24 @@
     windows_subsystem = "windows"
 )]
 
-use model::setting::Setting;
+use model::setting::{Setting, SettingError};
 
 mod model;
 
 #[tauri::command]
 async fn get_setting() -> Setting {
-    Setting::global().clone()
+    Setting::get()
 }
+
+#[tauri::command]
+fn save_setting(setting: Setting) -> Result<(), SettingError> {
+    Setting::save(setting)
+}
+
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![get_setting])
+        .invoke_handler(tauri::generate_handler![get_setting, save_setting])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

@@ -7,6 +7,7 @@ import UI from './ui'
 import Network from './network'
 import { SettingObject } from '@/store/settingStore'
 import { flatten } from 'flat'
+import { invoke } from '@tauri-apps/api'
 
 // Open a selection dialog for directories
 
@@ -21,6 +22,7 @@ function Setting() {
   const save = () => {
     let data = form.getFieldsValue()
     settingStore.save(flatten.unflatten(data)!['setting'] as SettingObject)
+    invoke('save_setting', { setting: settingStore.setting })
   }
   return (
     <>
