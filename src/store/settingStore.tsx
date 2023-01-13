@@ -1,6 +1,6 @@
 // 异步的获取
 import { invoke } from '@tauri-apps/api'
-import { makeAutoObservable } from 'mobx'
+import { flow, makeAutoObservable } from 'mobx'
 
 export type SettingObject = {
   ui: { lang: string; theme: string }
@@ -14,16 +14,18 @@ export type SettingObject = {
 class SettingStore {
   setting: SettingObject | Object = {}
   constructor() {
-    makeAutoObservable(this)
+    makeAutoObservable(this, {
+      init: flow,
+    })
   }
   save = (a: SettingObject) => {
     this.setting = a
   }
   changeTheme = (theme: string) => {
     this.setting['ui']['theme'] = theme
-  }
-  init = async () => {
-    const res: SettingObject = await invoke('get_setting')
+  };
+  *init() {
+    const res: SettingObject = yield invoke('get_setting')
     this.setting = res
   }
 }

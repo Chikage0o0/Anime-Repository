@@ -8,8 +8,7 @@ import Network from './network'
 import { SettingObject } from '@/store/settingStore'
 import { flatten } from 'flat'
 import { invoke } from '@tauri-apps/api'
-
-// Open a selection dialog for directories
+import i18n from 'i18next'
 
 function Setting() {
   const { t } = useTranslation()
@@ -21,9 +20,11 @@ function Setting() {
   const [form] = Form.useForm()
   const save = () => {
     let data = form.getFieldsValue()
+    i18n.changeLanguage(data['setting.ui.lang'].replace(/-/, '_'))
     settingStore.save(flatten.unflatten(data)!['setting'] as SettingObject)
     invoke('save_setting', { setting: settingStore.setting })
   }
+
   return (
     <>
       <Content
@@ -77,7 +78,7 @@ function Setting() {
           background: colorBgContainer,
         }}>
         <Space>
-          <Button>{t('UI.cancel')}</Button>
+          <Button onClick={() => form.resetFields()}>{t('UI.cancel')}</Button>
           <Button type="primary" onClick={save}>
             {t('UI.save')}
           </Button>

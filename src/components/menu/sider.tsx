@@ -42,6 +42,7 @@ function SiderMenu() {
   }
   return (
     <Sider
+      theme="light"
       breakpoint="lg"
       collapsible
       collapsed={collapsed}

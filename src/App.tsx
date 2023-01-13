@@ -11,16 +11,21 @@ function App() {
   const outlet = useRoutes(routes)
 
   return (
-    <ConfigProvider
-      locale={get_antd_locale(setting.setting as SettingObject)}
-      theme={{ algorithm: getTheme(setting.setting as SettingObject) }}>
-      <div className="container">
+    <div className="container">
+      <ConfigProvider
+        locale={get_antd_locale(setting.setting as SettingObject)}
+        theme={{
+          algorithm: getTheme(setting.setting as SettingObject),
+          token: {
+            colorPrimary: '#8d32d4',
+          },
+        }}>
         <Layout style={{ height: '100vh' }}>
           <SiderMenu />
           <Layout className="site-layout">{outlet}</Layout>
         </Layout>
-      </div>
-    </ConfigProvider>
+      </ConfigProvider>
+    </div>
   )
 }
 export default observer(App)

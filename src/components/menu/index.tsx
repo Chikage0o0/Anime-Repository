@@ -63,7 +63,6 @@ function MenuIndex(
 
   return (
     <Menu
-      theme="dark"
       mode={menu}
       defaultSelectedKeys={defaultSelectedKeys}
       items={items}
