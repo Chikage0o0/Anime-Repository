@@ -6,12 +6,10 @@ import 'reset-css'
 import '@/assets/styles/global.less'
 import App from './App'
 import { BrowserRouter } from 'react-router-dom'
-import i18n from 'i18next'
+import setting, { SettingObject } from './store/settingStore'
 import { initReactI18next } from 'react-i18next'
-import { resources, get_antd_locale } from '@/locales/locales'
-import setting, { SettingObject } from '@/store/settingStore'
-import { ConfigProvider, theme } from 'antd'
-import { getTheme } from './theme'
+import { resources } from './locales/locales'
+import i18n from 'i18next'
 
 // import { listen } from '@tauri-apps/api/event'
 
@@ -22,7 +20,6 @@ document.addEventListener('contextmenu', function (e) {
 
 //初始化配置信息
 await setting.init()
-//设置用户界面语言
 i18n
   // 将 i18n 实例传递给 react-i18next
   .use(initReactI18next)
@@ -37,7 +34,6 @@ i18n
       escapeValue: false, // not needed for react as it escapes by default
     },
   })
-
 //监听后端错误信息
 // await listen<Object>('get_setting', (event) => {
 //   console.log(event.payload)
@@ -46,12 +42,8 @@ i18n
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <ConfigProvider
-      locale={get_antd_locale(setting.setting as SettingObject)}
-      theme={{ algorithm: getTheme(setting.setting as SettingObject) }}>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </ConfigProvider>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
   </React.StrictMode>
 )

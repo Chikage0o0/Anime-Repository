@@ -1,4 +1,4 @@
-import { Layout, theme } from 'antd'
+import { Layout } from 'antd'
 const { Header } = Layout
 import MenuIndex, { getItem, MenuItem } from '../../menu'
 import { Outlet } from 'react-router-dom'

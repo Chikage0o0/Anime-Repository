@@ -3,6 +3,7 @@ import setting from './settingStore'
 
 class RootStore {
   settingStore
+
   constructor() {
     this.settingStore = setting
   }

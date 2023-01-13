@@ -13,6 +13,7 @@
     "@ant-design/icons": "^4.8.0",
     "@tauri-apps/api": "^1.2.0",
     "antd": "^5.1.2",
+    "flat": "^5.0.2",
     "i18next": "^22.4.9",
     "mobx": "^6.7.0",
     "mobx-react-lite": "^3.4.0",
@@ -24,6 +25,7 @@
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1.2.2",
+    "@types/flat": "^5.0.2",
     "@types/node": "^18.7.10",
     "@types/react": "^18.0.15",
     "@types/react-dom": "^18.0.6",

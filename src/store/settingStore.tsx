@@ -16,9 +16,14 @@ class SettingStore {
   constructor() {
     makeAutoObservable(this)
   }
+  save = (a: SettingObject) => {
+    this.setting = a
+  }
+  changeTheme = (theme: string) => {
+    this.setting['ui']['theme'] = theme
+  }
   init = async () => {
     const res: SettingObject = await invoke('get_setting')
-    console.log(res)
     this.setting = res
   }
 }
