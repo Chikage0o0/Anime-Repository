@@ -18,10 +18,9 @@ function Setting() {
   } = theme.useToken()
 
   const [form] = Form.useForm()
-  const save = () => {
+  const apply = () => {
     let data = form.getFieldsValue()
-    i18n.changeLanguage(data['setting.ui.lang'].replace(/-/, '_'))
-    settingStore.save(flatten.unflatten(data)!['setting'] as SettingObject)
+    settingStore.apply(flatten.unflatten(data)!['setting'] as SettingObject)
     invoke('save_setting', { setting: settingStore.setting })
   }
 
@@ -78,9 +77,17 @@ function Setting() {
           background: colorBgContainer,
         }}>
         <Space>
-          <Button onClick={() => form.resetFields()}>{t('UI.cancel')}</Button>
-          <Button type="primary" onClick={save}>
-            {t('UI.save')}
+          <Button
+            onClick={() => {
+              form.resetFields()
+              i18n.changeLanguage(
+                form.getFieldValue('setting.ui.lang').replace(/-/, '_')
+              )
+            }}>
+            {t('UI.cancel')}
+          </Button>
+          <Button type="primary" onClick={apply}>
+            {t('UI.apply')}
           </Button>
         </Space>
       </Footer>

@@ -1,7 +1,8 @@
 import { Navigate } from 'react-router-dom'
 import React, { lazy } from 'react'
 import Home from '../components/content/home'
-
+import styles from '@/assets/styles/components/content/loading.module.less'
+import { Spin } from 'antd'
 const Movie = lazy(() => import('../components/content/movie'))
 const TvShows = lazy(() => import('../components/content/tv-shows'))
 const Subscribe = lazy(() => import('../components/content/subscribe'))
@@ -10,8 +11,16 @@ const Unrecognized = lazy(
   () => import('@/components/content/subscribe/unrecognized')
 )
 const Rules = lazy(() => import('@/components/content/subscribe/rules'))
+
 const waitLoadingComponent = (component: JSX.Element) => (
-  <React.Suspense fallback={<div>Loading...</div>}>{component}</React.Suspense>
+  <React.Suspense
+    fallback={
+      <div className={styles.container}>
+        <Spin size="large" delay={1000} className={styles.content} />
+      </div>
+    }>
+    {component}
+  </React.Suspense>
 )
 
 const routes = [

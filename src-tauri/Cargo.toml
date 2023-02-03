@@ -21,6 +21,7 @@ toml = "0.5.10"
 thiserror = "1.0.38"
 sys-locale = "0.2.3"
 lazy_static = "1.4.0"
+reqwest = { version = "0.11.13", features = ["socks"] }
 
 [features]
 # by default Tauri runs in production mode

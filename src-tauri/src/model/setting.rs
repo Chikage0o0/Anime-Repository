@@ -38,7 +38,7 @@ struct Network {
     proxy: Option<String>,
 }
 lazy_static! {
-    pub static ref CONFIG: Mutex<Setting> = Mutex::new(Setting::get_from_file().unwrap());
+    static ref CONFIG: Mutex<Setting> = Mutex::new(Setting::get_from_file().unwrap());
 }
 impl Setting {
     /// - `new` 获取一个默认的配置结构
@@ -99,11 +99,21 @@ impl Setting {
         return Ok(setting);
     }
 
+    /// 获取代理信息
+    pub fn get_proxy() -> Option<String> {
+        let setting = Setting::get();
+        if setting.network.use_proxy && setting.network.proxy.is_some() {
+            setting.network.proxy
+        } else {
+            None
+        }
+    }
+
     pub fn get() -> Setting {
         CONFIG.lock().unwrap().clone()
     }
 
-    pub fn save(setting: Setting) -> Result<(), SettingError> {
+    pub fn apply(setting: Setting) -> Result<(), SettingError> {
         let mut old_setting = CONFIG.lock().unwrap();
         setting.write_to_file(SETTING_PATH)?;
         *old_setting = setting;

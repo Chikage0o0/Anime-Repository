@@ -22,7 +22,7 @@
   "setting.network.use_proxy": "使用代理",
   "setting.network.proxy": "代理链接",
   "UI.new": "新建",
-  "UI.save": "保存",
+  "UI.apply": "应用",
   "UI.reset": "重置",
   "UI.cancel": "取消",
   "UI.true": "是",

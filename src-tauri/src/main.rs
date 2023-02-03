@@ -5,6 +5,7 @@
 
 use model::setting::{Setting, SettingError};
 
+mod http;
 mod model;
 
 #[tauri::command]
@@ -14,7 +15,7 @@ async fn get_setting() -> Setting {
 
 #[tauri::command]
 fn save_setting(setting: Setting) -> Result<(), SettingError> {
-    Setting::save(setting)
+    Setting::apply(setting)
 }
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command

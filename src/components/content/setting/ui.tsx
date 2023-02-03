@@ -1,6 +1,7 @@
 import { Divider, Form, Select } from 'antd'
 import styles from '@/assets/styles//components/content/setting.module.less'
 import { SettingObject } from '@/store/settingStore'
+import i18n from 'i18next'
 import { useTranslation } from 'react-i18next'
 import { useStore } from '@/store'
 function UI() {
@@ -28,6 +29,7 @@ function UI() {
               label: t('setting.ui.lang.zh-CN'),
             },
           ]}
+          onChange={(e) => i18n.changeLanguage(e.replace(/-/, '_'))}
         />
       </Form.Item>
 

@@ -18,7 +18,7 @@ class SettingStore {
       init: flow,
     })
   }
-  save = (a: SettingObject) => {
+  apply = (a: SettingObject) => {
     this.setting = a
   }
   changeTheme = (theme: string) => {

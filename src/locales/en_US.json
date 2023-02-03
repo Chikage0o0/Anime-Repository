@@ -22,7 +22,7 @@
   "setting.network.use_proxy": "Use Proxy",
   "setting.network.proxy": "Proxy Link",
   "UI.new": "New",
-  "UI.save": "Save",
+  "UI.apply": "Apply",
   "UI.reset": "Reset",
   "UI.cancel": "Cancel",
   "UI.true": "Yes",
