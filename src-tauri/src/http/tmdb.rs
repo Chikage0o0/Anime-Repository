@@ -55,12 +55,15 @@ pub fn search_tvshows(key: String, lang: String, page: usize) -> impl Future<Out
 
 #[cfg(test)]
 mod tests {
+
     use super::*;
 
     #[test]
     fn test_get_movie_info() {
+        use serde_json::Value;
         use tauri::async_runtime::block_on;
         let info = block_on(get_movie_info(655431, String::from("zh-CN")));
-        println!("{:#?}", info);
+        let parsed: Value = serde_json::from_str(&info).unwrap();
+        println!("{}", parsed["overview"]);
     }
 }
