@@ -13,7 +13,7 @@ Authorization: Bearer {{key}}
 ###
 
 //TV API
-GET https://api.themoviedb.org/3/tv/43865?language=zh-CN&append_to_response=images,aggregate_credits&include_image_language=zh,ja
+GET https://api.themoviedb.org/3/tv/123249?language=zh-CN&append_to_response=images,aggregate_credits&include_image_language=zh
 Content-Type: application/json;charset=utf-8
 Authorization: Bearer {{key}}
 ###

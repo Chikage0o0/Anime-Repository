@@ -1,11 +1,12 @@
+use super::public::*;
 use serde::{Deserialize, Serialize};
-use serde_with::{rust::deserialize_ignore_any, skip_serializing_none};
+use serde_with::rust::deserialize_ignore_any;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
 struct Episodedetails {
     #[serde(rename = "$value")]
-    value: Vec<Items>,
+    items: Vec<Items>,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -38,80 +39,37 @@ enum Items {
     Other,
 }
 
-#[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-struct ValueString {
-    #[serde(rename = "$value", default)]
-    value: String,
-}
-#[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-struct Ratings {
-    #[serde(rename = "$value", default)]
-    value: Vec<Rating>,
-}
+impl Episodedetails {
+    pub fn new(id: &str) -> Self {
+        Self {
+            items: vec![Items::Uniqueid(Uniqueid {
+                r#type: Some("tmdb".to_string()),
+                default: Some(true),
+                value: id.to_string(),
+            })],
+        }
+    }
 
-#[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-struct Rating {
-    name: String,
-    max: String,
-    default: bool,
-    #[serde(rename = "$value", default)]
-    value: Vec<ValueRating>,
-}
+    fn get_id(&self) -> Option<&String> {
+        self.items.iter().find_map(|i| {
+            if let Items::Uniqueid(j) = i {
+                if let Some(h) = &j.r#type {
+                    if h == "tmdb" {
+                        return Some(&j.value);
+                    }
+                }
+            }
+            None
+        })
+    }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-#[serde(rename_all = "lowercase")]
-enum ValueRating {
-    Value(ValueString),
-    Votes(ValueString),
-}
-#[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-struct Thumb {
-    aspect: Option<String>,
-    preview: Option<String>,
-    #[serde(rename = "$value", default)]
-    value: String,
-}
-#[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-struct Uniqueid {
-    r#type: Option<String>,
-    default: Option<String>,
-    #[serde(rename = "$value", default)]
-    value: String,
-}
-#[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-struct Actor {
-    #[serde(rename = "$value", default)]
-    value: Vec<ValueActor>,
-}
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-#[serde(rename_all = "lowercase")]
-enum ValueActor {
-    Name(ValueString),
-    Role(ValueString),
-    Order(ValueString),
-    Thumb(ValueString),
-    #[serde(other, deserialize_with = "deserialize_ignore_any")]
-    Other,
-}
-#[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-struct Resume {
-    #[serde(rename = "$value", default)]
-    value: Vec<ValueResume>,
-}
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-#[serde(rename_all = "lowercase")]
-enum ValueResume {
-    Position(ValueString),
-    Total(ValueString),
-    #[serde(other, deserialize_with = "deserialize_ignore_any")]
-    Other,
+    pub fn update(&mut self) {
+        todo!()
+    }
+
+    pub fn read_from_file() -> Episodedetails {
+        todo!()
+    }
 }
 
 #[cfg(test)]
@@ -277,7 +235,7 @@ mod tests {
         </episodedetails>"#;
         let mut plate_appearance: Episodedetails = serde_xml_rs::from_str(document).unwrap();
         let d: Vec<_> = plate_appearance
-            .value
+            .items
             .iter()
             .filter_map(|x| {
                 if let Items::Plot(d) = x {
@@ -288,7 +246,7 @@ mod tests {
             .collect();
         println!("{:#?}", d);
 
-        let d1: Option<&String> = plate_appearance.value.iter().find_map(|x| {
+        let d1: Option<&String> = plate_appearance.items.iter().find_map(|x| {
             if let Items::Dateadded(d) = x {
                 return Some(&d.value);
             }
@@ -296,7 +254,7 @@ mod tests {
         });
         println!("{:#?}", d1.unwrap());
         //修改内部元素
-        plate_appearance.value.iter_mut().for_each(|x| {
+        plate_appearance.items.iter_mut().for_each(|x| {
             if let Items::Dateadded(d) = x {
                 d.value = "s".to_string();
             }

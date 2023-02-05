@@ -1,9 +1,9 @@
+use super::public::*;
 use serde::{Deserialize, Serialize};
-use serde_with::{rust::deserialize_ignore_any, skip_serializing_none};
-
+use serde_with::rust::deserialize_ignore_any;
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
-struct Movie {
+pub struct Movie {
     #[serde(rename = "$value")]
     items: Vec<Items>,
 }
@@ -41,87 +41,37 @@ enum Items {
     Other,
 }
 
-#[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-struct ValueString {
-    #[serde(rename = "$value", default)]
-    value: String,
-}
+impl Movie {
+    pub fn new(id: &str) -> Self {
+        Self {
+            items: vec![Items::Uniqueid(Uniqueid {
+                r#type: Some("tmdb".to_string()),
+                default: Some(true),
+                value: id.to_string(),
+            })],
+        }
+    }
 
-#[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-struct Ratings {
-    #[serde(rename = "$value", default)]
-    value: Vec<Rating>,
-}
+    fn get_id(&self) -> Option<&String> {
+        self.items.iter().find_map(|i| {
+            if let Items::Uniqueid(j) = i {
+                if let Some(h) = &j.r#type {
+                    if h == "tmdb" {
+                        return Some(&j.value);
+                    }
+                }
+            }
+            None
+        })
+    }
 
-#[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-struct Rating {
-    name: String,
-    max: String,
-    default: bool,
-    #[serde(rename = "$value", default)]
-    value: Vec<ValueRating>,
-}
+    pub fn update(&mut self) {
+        todo!()
+    }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-#[serde(rename_all = "lowercase")]
-enum ValueRating {
-    Value(ValueString),
-    Votes(ValueString),
-}
-#[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-struct Thumb {
-    aspect: Option<String>,
-    preview: Option<String>,
-    #[serde(rename = "$value", default)]
-    value: String,
-}
-#[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-struct Fanart {
-    #[serde(rename = "$value", default)]
-    value: Vec<Thumb>,
-}
-#[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-struct Uniqueid {
-    r#type: Option<String>,
-    default: Option<String>,
-    #[serde(rename = "$value", default)]
-    value: String,
-}
-#[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-struct Actor {
-    #[serde(rename = "$value", default)]
-    value: Vec<ValueActor>,
-}
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-#[serde(rename_all = "lowercase")]
-enum ValueActor {
-    Name(ValueString),
-    Role(ValueString),
-    Order(ValueString),
-    Thumb(ValueString),
-    #[serde(other, deserialize_with = "deserialize_ignore_any")]
-    Other,
-}
-#[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-struct Resume {
-    #[serde(rename = "$value", default)]
-    value: Vec<ValueResume>,
-}
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-#[serde(rename_all = "lowercase")]
-enum ValueResume {
-    Position(ValueString),
-    Total(ValueString),
-    #[serde(other, deserialize_with = "deserialize_ignore_any")]
-    Other,
+    pub fn read_from_file() -> Movie {
+        todo!()
+    }
 }
 
 #[cfg(test)]

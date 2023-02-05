@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use serde_with::{rust::deserialize_ignore_any, skip_serializing_none};
 
+use super::public::*;
+
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
 struct Tvshow {
@@ -44,79 +46,49 @@ enum Items {
 
 #[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
-struct ValueString {
-    #[serde(rename = "$value", default)]
-    value: String,
-}
-#[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-struct Ratings {
-    #[serde(rename = "$value", default)]
-    value: Vec<Rating>,
-}
-
-#[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-struct Rating {
-    name: String,
-    max: String,
-    default: bool,
-    #[serde(rename = "$value", default)]
-    value: Vec<ValueRating>,
-}
-
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-#[serde(rename_all = "lowercase")]
-enum ValueRating {
-    Value(ValueString),
-    Votes(ValueString),
-}
-#[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-struct Thumb {
-    aspect: Option<String>,
-    r#type: Option<String>,
-    season: Option<String>,
-    preview: Option<String>,
-    #[serde(rename = "$value", default)]
-    value: String,
-}
-#[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-struct Fanart {
-    #[serde(rename = "$value", default)]
-    value: Vec<Thumb>,
-}
-#[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-struct Uniqueid {
-    r#type: Option<String>,
-    default: Option<String>,
-    #[serde(rename = "$value", default)]
-    value: String,
-}
-#[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-struct Actor {
-    #[serde(rename = "$value", default)]
-    value: Vec<ValueActor>,
-}
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-#[serde(rename_all = "lowercase")]
-enum ValueActor {
-    Name(ValueString),
-    Role(ValueString),
-    Order(ValueString),
-    Thumb(ValueString),
-    #[serde(other, deserialize_with = "deserialize_ignore_any")]
-    Other,
-}
-#[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
 struct Namedseason {
     number: String,
     #[serde(rename = "$value", default)]
     value: String,
+}
+
+impl Tvshow {
+    pub fn new(id: &str) -> Self {
+        Self {
+            items: vec![Items::Uniqueid(Uniqueid {
+                r#type: Some("tmdb".to_string()),
+                default: Some(true),
+                value: id.to_string(),
+            })],
+        }
+    }
+
+    fn get_id(&self) -> Option<&String> {
+        self.items.iter().find_map(|i| {
+            if let Items::Uniqueid(j) = i {
+                if let Some(h) = &j.r#type {
+                    if h == "tmdb" {
+                        return Some(&j.value);
+                    }
+                }
+            }
+            None
+        })
+    }
+
+    pub async fn update(&mut self, lang: &str) {
+        use crate::http::tmdb::*;
+        use serde_json::Value;
+        if let Some(id) = self.get_id() {
+            let json = get_tvshow_info(id, lang).await;
+            let data: Value = serde_json::from_str(&json).unwrap();
+            println!("{:#?},{}", data, json)
+        }
+    }
+
+    pub fn read_from_file() -> Tvshow {
+        todo!()
+    }
 }
 
 #[cfg(test)]
@@ -255,5 +227,13 @@ mod tests {
                 d.value = "s".to_string()
             }
         });
+
+        println!("{:#?}", plate_appearance.get_id().unwrap());
+    }
+
+    #[test]
+    fn test_update() {
+        use tauri::async_runtime::block_on;
+        block_on(Tvshow::new("123249").update("zh-CN"))
     }
 }
