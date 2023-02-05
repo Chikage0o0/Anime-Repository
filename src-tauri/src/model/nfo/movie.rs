@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 use serde_with::{rust::deserialize_ignore_any, skip_serializing_none};
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "lowercase")]
 struct Movie {
     #[serde(rename = "$value")]
     items: Vec<Items>,
@@ -43,13 +44,14 @@ enum Items {
 #[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 struct ValueString {
-    #[serde(rename = "$value")]
+    #[serde(rename = "$value", default)]
     value: String,
 }
 
+#[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 struct Ratings {
-    #[serde(rename = "$value")]
+    #[serde(rename = "$value", default)]
     value: Vec<Rating>,
 }
 
@@ -59,7 +61,7 @@ struct Rating {
     name: String,
     max: String,
     default: bool,
-    #[serde(rename = "$value")]
+    #[serde(rename = "$value", default)]
     value: Vec<ValueRating>,
 }
 
@@ -74,13 +76,13 @@ enum ValueRating {
 struct Thumb {
     aspect: Option<String>,
     preview: Option<String>,
-    #[serde(rename = "$value")]
+    #[serde(rename = "$value", default)]
     value: String,
 }
-
+#[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 struct Fanart {
-    #[serde(rename = "$value")]
+    #[serde(rename = "$value", default)]
     value: Vec<Thumb>,
 }
 #[skip_serializing_none]
@@ -88,12 +90,13 @@ struct Fanart {
 struct Uniqueid {
     r#type: Option<String>,
     default: Option<String>,
-    #[serde(rename = "$value")]
+    #[serde(rename = "$value", default)]
     value: String,
 }
+#[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 struct Actor {
-    #[serde(rename = "$value")]
+    #[serde(rename = "$value", default)]
     value: Vec<ValueActor>,
 }
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -106,9 +109,10 @@ enum ValueActor {
     #[serde(other, deserialize_with = "deserialize_ignore_any")]
     Other,
 }
+#[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 struct Resume {
-    #[serde(rename = "$value")]
+    #[serde(rename = "$value", default)]
     value: Vec<ValueResume>,
 }
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
