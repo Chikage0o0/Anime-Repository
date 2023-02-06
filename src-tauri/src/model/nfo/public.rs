@@ -1,92 +1,78 @@
 use serde::{Deserialize, Serialize};
-use serde_with::{rust::deserialize_ignore_any, skip_serializing_none};
-
-#[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-pub struct ValueString {
-    #[serde(rename = "$value", default)]
-    pub value: String,
-}
+use serde_with::skip_serializing_none;
 
 #[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Actor {
-    #[serde(rename = "$value", default)]
-    pub value: Vec<ValueActor>,
-}
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-#[serde(rename_all = "lowercase")]
-pub enum ValueActor {
-    Name(ValueString),
-    Role(ValueString),
-    Order(ValueString),
-    Thumb(ValueString),
-    #[serde(other, deserialize_with = "deserialize_ignore_any")]
-    Other,
+    pub name: String,
+    pub role: String,
+    pub order: Option<usize>,
+    pub thumb: Option<String>,
 }
 
 #[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Ratings {
-    #[serde(rename = "$value", default)]
-    pub value: Vec<Rating>,
+    #[serde(default)]
+    pub rating: Vec<Rating>,
 }
 
 #[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Rating {
+    #[serde(rename = "@name")]
     pub name: String,
+    #[serde(rename = "@max")]
     pub max: String,
+    #[serde(rename = "@default", default)]
     pub default: bool,
-    #[serde(rename = "$value", default)]
-    pub value: Vec<ValueRating>,
-}
-
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-#[serde(rename_all = "lowercase")]
-pub enum ValueRating {
-    Value(ValueString),
-    Votes(ValueString),
+    pub value: String,
+    pub votes: String,
 }
 
 #[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Thumb {
+    #[serde(rename = "@aspect")]
     pub aspect: Option<String>,
+    #[serde(rename = "@type")]
     pub r#type: Option<String>,
-    pub season: Option<String>,
+    #[serde(rename = "@season")]
+    pub season: Option<i32>,
+    #[serde(rename = "@preview")]
     pub preview: Option<String>,
-    #[serde(rename = "$value", default)]
+    #[serde(rename = "$value")]
     pub value: String,
 }
 
 #[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Fanart {
-    #[serde(rename = "$value", default)]
-    pub value: Vec<Thumb>,
+    pub thumb: Vec<Thumb>,
 }
 
 #[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Uniqueid {
-    pub r#type: Option<String>,
-    pub default: Option<bool>,
-    #[serde(rename = "$value", default)]
+    #[serde(rename = "@type")]
+    pub r#type: String,
+    #[serde(rename = "@default", default)]
+    pub default: bool,
+    #[serde(rename = "$value")]
     pub value: String,
 }
 
 #[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Resume {
-    #[serde(rename = "$value", default)]
-    pub value: Vec<ValueResume>,
+    pub position: String,
+    pub tolal: String,
 }
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-#[serde(rename_all = "lowercase")]
-pub enum ValueResume {
-    Position(ValueString),
-    Total(ValueString),
-    #[serde(other, deserialize_with = "deserialize_ignore_any")]
-    Other,
+
+pub fn get_img_url(path: &str) -> String {
+    format!("https://image.tmdb.org/t/p/original{}", path)
+}
+
+pub fn get_date() -> String {
+    chrono::Local::now().format("%Y-%m-%d %H:%m:%s").to_string()
 }

@@ -1,67 +1,118 @@
 use super::public::*;
 use serde::{Deserialize, Serialize};
-use serde_with::rust::deserialize_ignore_any;
+use serde_with::skip_serializing_none;
+
+#[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
-#[serde(rename_all = "lowercase")]
-pub struct Movie {
-    #[serde(rename = "$value")]
-    items: Vec<Items>,
+#[serde(rename = "movie")]
+struct Movie {
+    title: String,
+    #[serde(rename = "originaltitle")]
+    original_title: Option<String>,
+    #[serde(rename = "sorttitle")]
+    sort_title: Option<String>,
+    ratings: Option<Ratings>,
+    #[serde(rename = "userrating")]
+    user_rating: Option<String>,
+    top250: Option<i16>,
+    outline: Option<String>,
+    plot: Option<String>,
+    tagline: Option<String>,
+    runtime: Option<String>,
+    #[serde(default)]
+    thumb: Vec<Thumb>,
+    fanart: Option<Fanart>,
+    mpaa: Option<String>,
+    playcount: Option<i8>,
+    lastplayed: Option<String>,
+    #[serde(rename = "uniqueid")]
+    unique_id: Vec<Uniqueid>,
+    #[serde(default)]
+    genre: Vec<String>,
+    #[serde(default)]
+    tag: Vec<String>,
+    #[serde(default)]
+    set: Vec<Set>,
+    #[serde(default)]
+    country: Vec<String>,
+    #[serde(default)]
+    credits: Vec<String>,
+    #[serde(default)]
+    director: Vec<String>,
+    premiered: Option<String>,
+    #[serde(default)]
+    studio: Vec<String>,
+    trailer: Option<String>,
+    #[serde(default)]
+    actor: Vec<Actor>,
+    showlink: Option<String>,
+    resume: Option<Resume>,
+    #[serde(rename = "dateadded")]
+    date_added: Option<String>,
 }
 
+#[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
-#[serde(rename_all = "lowercase")]
-enum Items {
-    Title(ValueString),
-    Originaltitle(ValueString),
-    Sorttitle(ValueString),
-    Ratings(Ratings),
-    Userrating(ValueString),
-    Top250(ValueString),
-    Outline(ValueString),
-    Plot(ValueString),
-    Tagline(ValueString),
-    Runtime(ValueString),
-    Thumb(Thumb),
-    Fanart(Fanart),
-    Mpaa(ValueString),
-    Playcount(ValueString),
-    Lastplayed(ValueString),
-    Uniqueid(Uniqueid),
-    Genre(ValueString),
-    Tag(ValueString),
-    Country(ValueString),
-    Credits(ValueString),
-    Director(ValueString),
-    Premiered(ValueString),
-    Studio(ValueString),
-    Actor(Actor),
-    Resume(Resume),
-    Dateadded(ValueString),
-    #[serde(other, deserialize_with = "deserialize_ignore_any")]
-    Other,
+struct Set {
+    name: String,
+    overview: Option<String>,
+}
+
+impl Default for Movie {
+    fn default() -> Self {
+        Self {
+            title: "".to_string(),
+            original_title: None,
+            ratings: None,
+            user_rating: None,
+            plot: None,
+            tagline: None,
+            runtime: None,
+            thumb: Vec::new(),
+            playcount: None,
+            lastplayed: None,
+            unique_id: Vec::new(),
+            genre: Vec::new(),
+            credits: Vec::new(),
+            director: Vec::new(),
+            premiered: None,
+            studio: Vec::new(),
+            actor: Vec::new(),
+            showlink: None,
+            resume: None,
+            date_added: Some(get_date()),
+            sort_title: None,
+            top250: None,
+            outline: None,
+            fanart: None,
+            mpaa: None,
+            tag: Vec::new(),
+            set: Vec::new(),
+            country: Vec::new(),
+            trailer: None,
+        }
+    }
 }
 
 impl Movie {
     pub fn new(id: &str) -> Self {
         Self {
-            items: vec![Items::Uniqueid(Uniqueid {
-                r#type: Some("tmdb".to_string()),
-                default: Some(true),
+            unique_id: vec![Uniqueid {
+                r#type: "tmdb".to_string(),
+                default: true,
                 value: id.to_string(),
-            })],
+            }],
+            ..Default::default()
         }
     }
 
     fn get_id(&self) -> Option<&String> {
-        self.items.iter().find_map(|i| {
-            if let Items::Uniqueid(j) = i {
-                if let Some(h) = &j.r#type {
-                    if h == "tmdb" {
-                        return Some(&j.value);
-                    }
-                }
+        self.unique_id.iter().find_map(|i| {
+            if i.r#type == "tmdb".to_string() {
+                Some(&i.value)
+            } else {
+                None
             }
-            None
         })
     }
 
@@ -79,9 +130,7 @@ mod tests {
 
     use super::*;
 
-    #[test]
-    fn test_get_movie_info() {
-        let document = r#"
+    const NFO: &str = r#"
         <?xml version="1.0" encoding="utf-8" standalone="yes"?>
         <movie>
           <plot>昴等人打倒了诅咒的元凶——魔兽沃尔加姆，拯救了阿拉姆村的孩子们。终于到来的安稳并未持续很久，昴就瞒着所有人前去挑战某个极秘任务。但尽管昴做了变装，也很快就被以佩特拉为首的村里的孩子们识破了真实身份。开始后5秒就曝光的这一任务，是事前调查和爱蜜莉雅约会的路线……</plot>
@@ -173,7 +222,7 @@ mod tests {
             <thumb>/config/data/metadata/People/T/Takehito Koyasu/folder.jpg</thumb>
           </actor>
           <id>tt8565186</id>
-          <set>Re：从零开始的异世界生活（系列）</set>
+          <set><name>Re：从零开始的异世界生活（系列）</name></set>
           <fileinfo>
             <streamdetails>
               <video>
@@ -236,31 +285,36 @@ mod tests {
           <original_filename>Re Zero kara Hajimeru Isekai Seikatsu Memory Snow.mkv</original_filename>
           <user_note />
         </movie>"#;
-        let mut plate_appearance: Movie = serde_xml_rs::from_str(document).unwrap();
-        let d: Vec<_> = plate_appearance
-            .items
-            .iter()
-            .filter_map(|x| {
-                if let Items::Tag(d) = x {
-                    return Some(&d.value);
-                }
-                return None;
-            })
-            .collect();
-        println!("{:#?}", d);
+    #[test]
+    fn test_get_movie_info() {
+        let plate_appearance: Movie = quick_xml::de::from_str(NFO).unwrap();
+        println!("{:#?}", &plate_appearance);
+        let se = quick_xml::se::to_string(&plate_appearance).unwrap();
+        println!("{}", &se);
+        // let d: Vec<_> = plate_appearance
+        //     .items
+        //     .iter()
+        //     .filter_map(|x| {
+        //         if let Items::Tag(d) = x {
+        //             return Some(&d.value);
+        //         }
+        //         return None;
+        //     })
+        //     .collect();
+        // println!("{:#?}", d);
 
-        let d1: Option<&String> = plate_appearance.items.iter().find_map(|x| {
-            if let Items::Dateadded(d) = x {
-                return Some(&d.value);
-            }
-            return None;
-        });
-        println!("{:#?}", d1.unwrap());
-        //修改内部元素
-        plate_appearance.items.iter_mut().for_each(|x| {
-            if let Items::Dateadded(d) = x {
-                d.value = "s".to_string()
-            }
-        });
+        // let d1: Option<&String> = plate_appearance.items.iter().find_map(|x| {
+        //     if let Items::Dateadded(d) = x {
+        //         return Some(&d.value);
+        //     }
+        //     return None;
+        // });
+        // println!("{:#?}", d1.unwrap());
+        // //修改内部元素
+        // plate_appearance.items.iter_mut().for_each(|x| {
+        //     if let Items::Dateadded(d) = x {
+        //         d.value = "s".to_string()
+        //     }
+        // });
     }
 }
