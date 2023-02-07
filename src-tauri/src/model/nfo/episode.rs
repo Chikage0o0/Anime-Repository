@@ -1,5 +1,6 @@
 use super::public::*;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use serde_with::skip_serializing_none;
 
 #[skip_serializing_none]
@@ -13,15 +14,15 @@ struct Episode {
     #[serde(rename = "userrating")]
     user_rating: Option<String>,
     #[serde(rename = "displayepisode")]
-    display_episode: Option<String>,
+    display_episode: Option<u64>,
     #[serde(rename = "displayseason")]
-    display_season: Option<String>,
+    display_season: Option<u64>,
     plot: Option<String>,
     tagline: Option<String>,
     runtime: Option<String>,
     #[serde(default)]
     thumb: Vec<Thumb>,
-    playcount: Option<i8>,
+    playcount: Option<i64>,
     lastplayed: Option<String>,
     #[serde(rename = "uniqueid")]
     unique_id: Vec<Uniqueid>,
@@ -73,11 +74,11 @@ impl Default for Episode {
     }
 }
 
-impl Episode {
-    pub fn new(id: &str) -> Self {
+impl Nfo for Episode {
+    fn new(id: &str, provider: Provider) -> Self {
         Self {
             unique_id: vec![Uniqueid {
-                r#type: "tmdb".to_string(),
+                r#type: provider,
                 default: true,
                 value: id.to_string(),
             }],
@@ -85,9 +86,9 @@ impl Episode {
         }
     }
 
-    fn get_id(&self) -> Option<&String> {
+    fn get_id(&self, provider: Provider) -> Option<&String> {
         self.unique_id.iter().find_map(|i| {
-            if i.r#type == "tmdb".to_string() {
+            if i.r#type == provider {
                 Some(&i.value)
             } else {
                 None
@@ -95,12 +96,107 @@ impl Episode {
         })
     }
 
-    pub fn update(&mut self) {
-        todo!()
+    fn get_default_id(&self) -> Option<(&String, &Provider)> {
+        self.unique_id.iter().find_map(|i| {
+            if i.default == true {
+                Some((&i.value, &i.r#type))
+            } else {
+                None
+            }
+        })
     }
 
-    pub fn read_from_file() -> Episode {
+    fn read_from_file() -> Self {
         todo!()
+    }
+}
+
+impl Episode {
+    pub async fn update(&mut self, lang: &str, season: u64, episode: u64) {
+        use crate::http::tmdb::*;
+        if let Some((id, provider)) = self.get_default_id() {
+            match provider {
+                Provider::Known(ProviderKnown::TMDB) => {
+                    let json = get_tv_episode_info(id, season, episode, lang).await;
+                    let data: Value = serde_json::from_str(&json).unwrap();
+
+                    self.display_episode = Some(episode);
+                    self.display_season = Some(season);
+
+                    if let Some(name) = data.get("name") {
+                        self.title = name.as_str().unwrap().to_string();
+                    }
+
+                    if let Some(vote_average) = data.get("vote_average") {
+                        if let Some(vote_count) = data.get("vote_count") {
+                            if let Some(ratings) = &mut self.ratings {
+                                let themoviedb_rating = ratings
+                                    .rating
+                                    .iter_mut()
+                                    .find(|rating| rating.name == "themoviedb");
+                                match themoviedb_rating {
+                                    Some(rating) => {
+                                        rating.value = vote_average.as_f64().unwrap();
+                                        rating.votes = vote_count.as_i64().unwrap();
+                                    }
+                                    None => ratings.rating.push(Rating {
+                                        name: "themoviedb".to_string(),
+                                        max: 10,
+                                        default: true,
+                                        value: vote_average.as_f64().unwrap(),
+                                        votes: vote_count.as_i64().unwrap(),
+                                    }),
+                                }
+                            }
+                        }
+                    }
+
+                    if let Some(overview) = data.get("overview") {
+                        self.plot = Some(overview.as_str().unwrap().to_string());
+                    }
+
+                    if let Some(still_path) = data.get("still_path") {
+                        self.update_thumb(
+                            get_img_url(still_path.as_str().unwrap()),
+                            Some("thumb".to_string()),
+                            None,
+                            None,
+                            None,
+                        );
+                    }
+
+                    if let Some(air_date) = data.get("air_date") {
+                        self.aired = Some(air_date.as_str().unwrap().to_string());
+                    }
+                }
+                _ => todo!(),
+            }
+        }
+    }
+
+    fn update_thumb(
+        &mut self,
+        img_path: String,
+        aspect: Option<String>,
+        r#type: Option<String>,
+        season: Option<i64>,
+        preview: Option<String>,
+    ) {
+        let poster_thumb = self.thumb.iter_mut().find(|thumb| {
+            thumb.aspect == aspect && thumb.r#type == r#type && thumb.season == season
+        });
+        match poster_thumb {
+            Some(thumb) => {
+                thumb.value = img_path;
+            }
+            None => self.thumb.push(Thumb {
+                aspect,
+                r#type,
+                season,
+                preview,
+                value: img_path,
+            }),
+        }
     }
 }
 
@@ -268,30 +364,13 @@ mod tests {
         println!("{:#?}", &plate_appearance);
         let se = quick_xml::se::to_string(&plate_appearance).unwrap();
         println!("{}", &se);
-        // let d: Vec<_> = plate_appearance
-        //     .items
-        //     .iter()
-        //     .filter_map(|x| {
-        //         if let Items::Plot(d) = x {
-        //             return Some(&d.value);
-        //         }
-        //         return None;
-        //     })
-        //     .collect();
-        // println!("{:#?}", d);
+    }
 
-        // let d1: Option<&String> = plate_appearance.items.iter().find_map(|x| {
-        //     if let Items::Dateadded(d) = x {
-        //         return Some(&d.value);
-        //     }
-        //     return None;
-        // });
-        // println!("{:#?}", d1.unwrap());
-        // //修改内部元素
-        // plate_appearance.items.iter_mut().for_each(|x| {
-        //     if let Items::Dateadded(d) = x {
-        //         d.value = "s".to_string();
-        //     }
-        // });
+    #[test]
+    fn test_update() {
+        use tauri::async_runtime::block_on;
+        let mut data = Episode::new("45782", Provider::Known(ProviderKnown::TMDB));
+        block_on(data.update("zh-CN", 1, 1));
+        println!("{}", quick_xml::se::to_string(&data).unwrap());
     }
 }

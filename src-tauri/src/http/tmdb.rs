@@ -25,10 +25,10 @@ pub fn get_tvshow_info(id: &str, lang: &str) -> impl Future<Output = String> {
 }
 
 pub fn get_tv_episode_info(
-    id: String,
-    season: usize,
-    episode: usize,
-    lang: String,
+    id: &str,
+    season: u64,
+    episode: u64,
+    lang: &str,
 ) -> impl Future<Output = String> {
     let url = format!(
         "https://api.themoviedb.org/3/tv/{}/season/{}/episode/{}?language={}",
@@ -37,7 +37,7 @@ pub fn get_tv_episode_info(
     client::get_string(url, get_header())
 }
 
-pub fn search_movie(key: &str, lang: &str, page: usize) -> impl Future<Output = String> {
+pub fn search_movie(key: &str, lang: &str, page: u64) -> impl Future<Output = String> {
     let url = format!(
         "https://api.themoviedb.org/3/search/movie?query={}&language={}&page={}&include_adult=true",
         key, lang, page
@@ -45,7 +45,7 @@ pub fn search_movie(key: &str, lang: &str, page: usize) -> impl Future<Output = 
     client::get_string(url, get_header())
 }
 
-pub fn search_tvshows(key: &str, lang: &str, page: usize) -> impl Future<Output = String> {
+pub fn search_tvshows(key: &str, lang: &str, page: u64) -> impl Future<Output = String> {
     let url = format!(
         "https://api.themoviedb.org/3/search/tv?query={}&language={}&page={}&include_adult=true",
         key, lang, page

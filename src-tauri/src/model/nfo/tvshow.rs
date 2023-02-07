@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-// use serde_json::Value;
+use serde_json::Value;
 use serde_with::skip_serializing_none;
 
 use super::public::*;
@@ -16,16 +16,16 @@ struct Tvshow {
     ratings: Option<Ratings>,
     #[serde(rename = "userrating")]
     user_rating: Option<String>,
-    top250: Option<i16>,
-    season: Option<i32>,
-    episode: Option<i32>,
+    top250: Option<i64>,
+    season: Option<i64>,
+    episode: Option<i64>,
     plot: Option<String>,
     tagline: Option<String>,
     #[serde(default)]
     thumb: Vec<Thumb>,
     fanart: Option<Fanart>,
     mpaa: Option<String>,
-    playcount: Option<i8>,
+    playcount: Option<i64>,
     lastplayed: Option<String>,
     #[serde(rename = "uniqueid")]
     unique_id: Vec<Uniqueid>,
@@ -49,7 +49,7 @@ struct Tvshow {
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 struct Namedseason {
     #[serde(rename = "@number")]
-    number: i8,
+    number: i64,
     #[serde(rename = "$value")]
     value: String,
 }
@@ -86,11 +86,11 @@ impl Default for Tvshow {
     }
 }
 
-impl Tvshow {
-    pub fn new(id: &str) -> Self {
+impl Nfo for Tvshow {
+    fn new(id: &str, provider: Provider) -> Self {
         Self {
             unique_id: vec![Uniqueid {
-                r#type: "tmdb".to_string(),
+                r#type: provider,
                 default: true,
                 value: id.to_string(),
             }],
@@ -98,9 +98,9 @@ impl Tvshow {
         }
     }
 
-    fn get_id(&self) -> Option<&String> {
+    fn get_id(&self, provider: Provider) -> Option<&String> {
         self.unique_id.iter().find_map(|i| {
-            if i.r#type == "tmdb".to_string() {
+            if i.r#type == provider {
                 Some(&i.value)
             } else {
                 None
@@ -108,76 +108,173 @@ impl Tvshow {
         })
     }
 
-    // pub async fn update(&mut self, lang: &str) {
-    //     use crate::http::tmdb::*;
-    //     if let Some(id) = self.get_id() {
-    //         let json = get_tvshow_info(id, lang).await;
-    //         let data: Value = serde_json::from_str(&json).unwrap();
-    //         // println!("{:#?}", data);
-    //         let items = &mut self.items;
-    //         items.retain(|item| {
-    //             matches!(
-    //                 item,
-    //                 Items::Status(_)
-    //                     | Items::Dateadded(_)
-    //                     | Items::Playcount(_)
-    //                     | Items::Lastplayed(_)
-    //                     | Items::Userrating(_)
-    //             )
-    //         });
+    fn get_default_id(&self) -> Option<(&String, &Provider)> {
+        self.unique_id.iter().find_map(|i| {
+            if i.default == true {
+                Some((&i.value, &i.r#type))
+            } else {
+                None
+            }
+        })
+    }
 
-    //         if let Some(name) = data.get("name") {
-    //             items.push(Items::Title(ValueString {
-    //                 value: name.as_str().unwrap().to_string(),
-    //             }))
-    //         }
-
-    //         if let Some(original_name) = data.get("original_name") {
-    //             items.push(Items::Originaltitle(ValueString {
-    //                 value: original_name.as_str().unwrap().to_string(),
-    //             }))
-    //         }
-
-    //         // if let Some(vote_average) = data.get("vote_average") {
-    //         //     if let Some(vote_count) = data.get("vote_count") {
-    //         //         items.push(Items::Ratings(Ratings {
-    //         //             value: vec![Rating {
-    //         //                 name: "themoviedb".to_string(),
-    //         //                 max: "10".to_string(),
-    //         //                 default: true,
-    //         //                 value: vec![
-    //         //                     ValueRating::Value(ValueString {
-    //         //                         value: vote_average.as_f64().unwrap().to_string(),
-    //         //                     }),
-    //         //                     ValueRating::Votes(ValueString {
-    //         //                         value: vote_count.as_i64().unwrap().to_string(),
-    //         //                     }),
-    //         //                 ],
-    //         //             }],
-    //         //         }))
-    //         //     }
-    //         // }
-
-    //         if let Some(overview) = data.get("overview") {
-    //             items.push(Items::Plot(ValueString {
-    //                 value: overview.as_str().unwrap().to_string(),
-    //             }))
-    //         }
-
-    //         if let Some(poster_path) = data.get("poster_path") {
-    //             items.push(Items::Thumb(Thumb {
-    //                 aspect: Some("poster".to_string()),
-    //                 r#type: None,
-    //                 season: None,
-    //                 preview: None,
-    //                 value: get_img_url(poster_path.as_str().unwrap()),
-    //             }))
-    //         }
-    //     }
-    // }
-
-    pub fn read_from_file() -> Tvshow {
+    fn read_from_file() -> Self {
         todo!()
+    }
+}
+impl Tvshow {
+    pub async fn update(&mut self, lang: &str) {
+        use crate::http::tmdb::*;
+        if let Some((id, provider)) = self.get_default_id() {
+            match provider {
+                Provider::Known(ProviderKnown::TMDB) => {
+                    let json = get_tvshow_info(id, lang).await;
+                    let data: Value = serde_json::from_str(&json).unwrap();
+
+                    if let Some(name) = data.get("name") {
+                        self.title = name.as_str().unwrap().to_string();
+                    }
+
+                    if let Some(original_name) = data.get("original_name") {
+                        self.original_title = Some(original_name.as_str().unwrap().to_string());
+                    }
+
+                    if let Some(vote_average) = data.get("vote_average") {
+                        if let Some(vote_count) = data.get("vote_count") {
+                            if let Some(ratings) = &mut self.ratings {
+                                let themoviedb_rating = ratings
+                                    .rating
+                                    .iter_mut()
+                                    .find(|rating| rating.name == "themoviedb");
+                                match themoviedb_rating {
+                                    Some(rating) => {
+                                        rating.value = vote_average.as_f64().unwrap();
+                                        rating.votes = vote_count.as_i64().unwrap();
+                                    }
+                                    None => ratings.rating.push(Rating {
+                                        name: "themoviedb".to_string(),
+                                        max: 10,
+                                        default: true,
+                                        value: vote_average.as_f64().unwrap(),
+                                        votes: vote_count.as_i64().unwrap(),
+                                    }),
+                                }
+                            }
+                        }
+                    }
+
+                    if let Some(overview) = data.get("overview") {
+                        self.plot = Some(overview.as_str().unwrap().to_string());
+                    }
+
+                    if let Some(poster_path) = data.get("poster_path") {
+                        self.update_thumb(
+                            get_img_url(poster_path.as_str().unwrap()),
+                            Some("poster".to_string()),
+                            None,
+                            None,
+                            None,
+                        );
+                    }
+
+                    if let Some(genres) = data.get("genres") {
+                        self.genre = genres
+                            .as_array()
+                            .unwrap()
+                            .into_iter()
+                            .map(|f| f["name"].as_str().unwrap().to_string())
+                            .collect();
+                    }
+
+                    if let Some(first_air_date) = data.get("first_air_date") {
+                        self.premiered = Some(first_air_date.as_str().unwrap().to_string());
+                    }
+
+                    if let Some(production_companies) = data.get("production_companies") {
+                        self.studio = production_companies
+                            .as_array()
+                            .unwrap()
+                            .into_iter()
+                            .map(|f| f["name"].as_str().unwrap().to_string())
+                            .collect();
+                    }
+
+                    if let Some(seasons) = data.get("seasons") {
+                        self.name_season = seasons
+                            .as_array()
+                            .unwrap()
+                            .into_iter()
+                            .map(|f| {
+                                let number = f["season_number"].as_i64().unwrap();
+                                self.update_thumb(
+                                    get_img_url(f["poster_path"].as_str().unwrap()),
+                                    Some("poster".to_string()),
+                                    Some("season".to_string()),
+                                    Some(number),
+                                    None,
+                                );
+                                Namedseason {
+                                    number,
+                                    value: f["name"].as_str().unwrap().to_string(),
+                                }
+                            })
+                            .collect();
+                    }
+
+                    if let Some(backdrop_path) = data.get("backdrop_path") {
+                        self.fanart = Some(Fanart {
+                            thumb: vec![Thumb {
+                                aspect: None,
+                                r#type: None,
+                                season: None,
+                                preview: None,
+                                value: get_img_url(backdrop_path.as_str().unwrap()),
+                            }],
+                        });
+                    }
+
+                    if let Some(images) = data.get("images") {
+                        if let Some(logos) = images.get("logos") {
+                            if let Some(logo) = logos.as_array().unwrap().get(0) {
+                                self.update_thumb(
+                                    get_img_url(logo["file_path"].as_str().unwrap()),
+                                    Some("clearlogo".to_string()),
+                                    None,
+                                    None,
+                                    None,
+                                );
+                            }
+                        }
+                    }
+                }
+                _ => todo!(),
+            }
+        }
+    }
+
+    fn update_thumb(
+        &mut self,
+        img_path: String,
+        aspect: Option<String>,
+        r#type: Option<String>,
+        season: Option<i64>,
+        preview: Option<String>,
+    ) {
+        let poster_thumb = self.thumb.iter_mut().find(|thumb| {
+            thumb.aspect == aspect && thumb.r#type == r#type && thumb.season == season
+        });
+        match poster_thumb {
+            Some(thumb) => {
+                thumb.value = img_path;
+            }
+            None => self.thumb.push(Thumb {
+                aspect,
+                r#type,
+                season,
+                preview,
+                value: img_path,
+            }),
+        }
     }
 }
 
@@ -284,7 +381,7 @@ mod tests {
           </fanart>
           <certification>US:TV-14</certification>
           <uniqueid default="false" type="tmdb">123249</uniqueid>
-          <uniqueid  type="imdb">tt15765670</uniqueid>
+          <uniqueid  type="imd">tt15765670</uniqueid>
           <uniqueid default="true" type="tvdb">401233</uniqueid>
           <user_note />
         </tvshow>"#;
@@ -295,40 +392,13 @@ mod tests {
         println!("{:#?}", &plate_appearance);
         let se = quick_xml::se::to_string(&plate_appearance).unwrap();
         println!("{}", &se);
-        // let d: Vec<_> = plate_appearance
-        //     .items
-        //     .iter()
-        //     .filter_map(|x| {
-        //         if let Items::Tag(d) = x {
-        //             return Some(&d.value);
-        //         }
-        //         return None;
-        //     })
-        //     .collect();
-        // println!("{:#?}", d);
-
-        // let d1: Option<&String> = plate_appearance.items.iter().find_map(|x| {
-        //     if let Items::Dateadded(d) = x {
-        //         return Some(&d.value);
-        //     }
-        //     return None;
-        // });
-        // println!("{:#?}", d1.unwrap());
-        // //修改内部元素
-        // plate_appearance.items.iter_mut().for_each(|x| {
-        //     if let Items::Dateadded(d) = x {
-        //         d.value = "s".to_string()
-        //     }
-        // });
-
-        // println!("{:#?}", plate_appearance.get_id().unwrap());
     }
 
-    // #[test]
-    // fn test_update() {
-    //     use tauri::async_runtime::block_on;
-    //     let mut data: Tvshow = Tvshow::new("123249");
-    //     block_on(data.update("zh-CN"));
-    //     // println!("{:#?}", serde_xml_rs::to_string(&data));
-    // }
+    #[test]
+    fn test_update() {
+        use tauri::async_runtime::block_on;
+        let mut data: Tvshow = Tvshow::new("123249", Provider::Known(ProviderKnown::TMDB));
+        block_on(data.update("zh-CN"));
+        println!("{}", quick_xml::se::to_string(&data).unwrap());
+    }
 }

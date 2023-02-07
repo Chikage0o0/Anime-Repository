@@ -6,7 +6,7 @@ use serde_with::skip_serializing_none;
 pub struct Actor {
     pub name: String,
     pub role: String,
-    pub order: Option<usize>,
+    pub order: Option<u64>,
     pub thumb: Option<String>,
 }
 
@@ -23,11 +23,11 @@ pub struct Rating {
     #[serde(rename = "@name")]
     pub name: String,
     #[serde(rename = "@max")]
-    pub max: String,
+    pub max: i64,
     #[serde(rename = "@default", default)]
     pub default: bool,
-    pub value: String,
-    pub votes: String,
+    pub value: f64,
+    pub votes: i64,
 }
 
 #[skip_serializing_none]
@@ -38,7 +38,7 @@ pub struct Thumb {
     #[serde(rename = "@type")]
     pub r#type: Option<String>,
     #[serde(rename = "@season")]
-    pub season: Option<i32>,
+    pub season: Option<i64>,
     #[serde(rename = "@preview")]
     pub preview: Option<String>,
     #[serde(rename = "$value")]
@@ -55,7 +55,7 @@ pub struct Fanart {
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Uniqueid {
     #[serde(rename = "@type")]
-    pub r#type: String,
+    pub r#type: Provider,
     #[serde(rename = "@default", default)]
     pub default: bool,
     #[serde(rename = "$value")]
@@ -69,10 +69,34 @@ pub struct Resume {
     pub tolal: String,
 }
 
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "lowercase")]
+pub enum ProviderKnown {
+    TMDB,
+    IMDB,
+}
+
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum Provider {
+    Known(ProviderKnown),
+    Unknown(String),
+}
+
 pub fn get_img_url(path: &str) -> String {
     format!("https://image.tmdb.org/t/p/original{}", path)
 }
 
 pub fn get_date() -> String {
-    chrono::Local::now().format("%Y-%m-%d %H:%m:%s").to_string()
+    chrono::Local::now().format("%Y-%m-%d %H:%m:%S").to_string()
+}
+
+pub trait Nfo {
+    fn new(id: &str, provider: Provider) -> Self;
+
+    /// 根据NFO获取指定提供商的ID
+    fn get_id(&self, provider: Provider) -> Option<&String>;
+    /// 根据NFO获取默认的ID
+    fn get_default_id(&self) -> Option<(&String, &Provider)>;
+    fn read_from_file() -> Self;
 }
