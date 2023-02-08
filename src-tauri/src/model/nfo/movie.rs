@@ -254,6 +254,18 @@ impl Movie {
                             }
                         }
                     }
+
+                    if let Some(belongs_to_collection) = data.get("belongs_to_collection") {
+                        let collection =
+                            belongs_to_collection["name"].as_str().unwrap().to_string();
+                        let set = self.set.iter().find(|f| f.name == collection);
+                        if set.is_none() {
+                            self.set.push(Set {
+                                name: collection,
+                                overview: None,
+                            })
+                        }
+                    }
                 }
                 _ => todo!(),
             }
@@ -448,17 +460,16 @@ mod tests {
         </movie>"#;
     #[test]
     fn test_get_movie_info() {
-        let plate_appearance: Movie = quick_xml::de::from_str(NFO).unwrap();
-        println!("{:#?}", &plate_appearance);
-        let se = quick_xml::se::to_string(&plate_appearance).unwrap();
-        println!("{}", &se);
+        let data: Movie = quick_xml::de::from_str(NFO).unwrap();
+        assert!(data.get_id(Provider::Known(ProviderKnown::TMDB)) == Some(&"532321".to_string()));
     }
 
     #[test]
     fn test_update() {
         use tauri::async_runtime::block_on;
-        let mut data: Movie = Movie::new("655431", Provider::Known(ProviderKnown::TMDB));
+        let mut data: Movie = Movie::new("532321", Provider::Known(ProviderKnown::TMDB));
         block_on(data.update("zh-CN"));
-        println!("{}", quick_xml::se::to_string(&data).unwrap());
+        println!("{:#?}", data);
+        assert!(data.premiered == Some("2018-10-06".to_string()))
     }
 }

@@ -360,17 +360,15 @@ mod tests {
     </episodedetails>"#;
     #[test]
     fn test_get_episode_info() {
-        let plate_appearance: Episode = quick_xml::de::from_str(NFO).unwrap();
-        println!("{:#?}", &plate_appearance);
-        let se = quick_xml::se::to_string(&plate_appearance).unwrap();
-        println!("{}", &se);
+        let data: Episode = quick_xml::de::from_str(NFO).unwrap();
+        assert!(data.get_id(Provider::Known(ProviderKnown::TMDB)) == Some(&"1168864".to_string()));
     }
 
     #[test]
     fn test_update() {
         use tauri::async_runtime::block_on;
-        let mut data = Episode::new("45782", Provider::Known(ProviderKnown::TMDB));
+        let mut data = Episode::new("63322", Provider::Known(ProviderKnown::TMDB));
         block_on(data.update("zh-CN", 1, 1));
-        println!("{}", quick_xml::se::to_string(&data).unwrap());
+        assert!(data.aired == Some("2012-01-06".to_string()));
     }
 }

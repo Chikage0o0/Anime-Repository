@@ -6,7 +6,7 @@ authors = ["you"]
 license = ""
 repository = ""
 edition = "2021"
-rust-version = "1.57"
+rust-version = "1.62"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -25,6 +25,7 @@ reqwest = { version = "0.11.13", features = ["socks"] }
 quick-xml = { version = "0.27.1", features = ["serialize", "overlapped-lists"] }
 serde_with = "2.2.0"
 chrono = "0.4.23"
+sled = "0.34.7"
 
 [features]
 # by default Tauri runs in production mode

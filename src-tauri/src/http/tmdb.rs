@@ -62,8 +62,8 @@ mod tests {
     fn test_get_movie_info() {
         use serde_json::Value;
         use tauri::async_runtime::block_on;
-        let info = block_on(get_movie_info("655431", "zh-CN"));
+        let info = block_on(get_movie_info("532321", "zh-CN"));
         let parsed: Value = serde_json::from_str(&info).unwrap();
-        println!("{}", parsed["overview"]);
+        assert!(parsed["id"].as_i64()==Some(532321));
     }
 }

@@ -2,7 +2,7 @@
 //使用插件REST Client测试
 
 //电影 API
-GET https://api.themoviedb.org/3/movie/655431?language=zh-CN&append_to_response=images,credits&include_image_language=zh,null
+GET https://api.themoviedb.org/3/movie/532321?language=zh-CN&append_to_response=images,credits&include_image_language=zh,null
 Content-Type: application/json;charset=utf-8
 Authorization: Bearer {{key}}
 
@@ -19,7 +19,7 @@ Authorization: Bearer {{key}}
 ###
 
 //TV episode API
-GET https://api.themoviedb.org/3/tv/45782/season/1/episode/1?language=zh-CN
+GET https://api.themoviedb.org/3/tv/63322/season/1/episode/1?language=zh-CN
 Content-Type: application/json;charset=utf-8
 Authorization: Bearer {{key}}
 

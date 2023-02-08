@@ -388,10 +388,8 @@ mod tests {
 
     #[test]
     fn test_get_tvshow_info() {
-        let plate_appearance: Tvshow = quick_xml::de::from_str(NFO).unwrap();
-        println!("{:#?}", &plate_appearance);
-        let se = quick_xml::se::to_string(&plate_appearance).unwrap();
-        println!("{}", &se);
+        let data: Tvshow = quick_xml::de::from_str(NFO).unwrap();
+        assert!(data.get_id(Provider::Known(ProviderKnown::TMDB)) == Some(&"123249".to_string()));
     }
 
     #[test]
@@ -399,6 +397,6 @@ mod tests {
         use tauri::async_runtime::block_on;
         let mut data: Tvshow = Tvshow::new("123249", Provider::Known(ProviderKnown::TMDB));
         block_on(data.update("zh-CN"));
-        println!("{}", quick_xml::se::to_string(&data).unwrap());
+        assert!(data.premiered == Some("2022-01-09".to_string()))
     }
 }
