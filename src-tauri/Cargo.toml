@@ -26,6 +26,7 @@ quick-xml = { version = "0.27.1", features = ["serialize", "overlapped-lists"] }
 serde_with = "2.2.0"
 chrono = "0.4.23"
 sled = "0.34.7"
+notify-debouncer-mini = { version = "0.2.1", default-features = false }
 
 [features]
 # by default Tauri runs in production mode

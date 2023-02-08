@@ -10,32 +10,32 @@ const SETTING_PATH: &str = "setting.toml";
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Setting {
-    ui: UI,
-    storage: Storage,
-    network: Network,
+    pub ui: UI,
+    pub storage: Storage,
+    pub network: Network,
 }
 #[derive(Serialize, Deserialize, Debug, Clone)]
-struct UI {
-    lang: String,
-    theme: Theme,
+pub struct UI {
+    pub lang: String,
+    pub theme: Theme,
 }
 #[derive(Serialize, Deserialize, Debug, Clone)]
-enum Theme {
+pub enum Theme {
     Dark,
     Light,
     Auto,
 }
 #[derive(Serialize, Deserialize, Debug, Clone)]
-struct Storage {
-    pending_path: PathBuf,
-    repository_path: PathBuf,
+pub struct Storage {
+    pub pending_path: PathBuf,
+    pub repository_path: PathBuf,
 }
 
 /// 网络相关配置
 #[derive(Serialize, Deserialize, Debug, Clone)]
-struct Network {
-    use_proxy: bool,
-    proxy: Option<String>,
+pub struct Network {
+    pub use_proxy: bool,
+    pub proxy: Option<String>,
 }
 lazy_static! {
     static ref CONFIG: Mutex<Setting> = Mutex::new(Setting::get_from_file().unwrap());
