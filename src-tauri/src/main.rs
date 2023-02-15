@@ -5,6 +5,7 @@
 
 use model::setting::{Setting, SettingError};
 
+mod data;
 mod http;
 mod model;
 mod scan;

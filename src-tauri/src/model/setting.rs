@@ -1,12 +1,12 @@
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
-use std::fs::File;
+use std::fs::{self, File};
 use std::io::{ErrorKind, Read, Write};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 use sys_locale::get_locale;
 
-const SETTING_PATH: &str = "setting.toml";
+const SETTING_PATH: &str = "config/setting.toml";
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Setting {
@@ -66,12 +66,19 @@ impl Setting {
                 proxy: None,
             },
         };
-        setting.write_to_file(SETTING_PATH)?;
+        setting.write_to_file()?;
         return Ok(setting);
     }
 
     /// 将配置写入文件
-    pub fn write_to_file(&self, path: &str) -> Result<(), std::io::Error> {
+    pub fn write_to_file(&self) -> Result<(), std::io::Error> {
+        let path = Path::new(SETTING_PATH);
+
+        // 不存在目录则创建
+        if let Some(p) = path.parent() {
+            fs::create_dir_all(p).unwrap();
+        }
+
         let mut file = File::create(path)?;
         file.write_all(toml::to_string(self).unwrap().as_bytes())?;
         return Ok(());
@@ -115,7 +122,7 @@ impl Setting {
 
     pub fn apply(setting: Setting) -> Result<(), SettingError> {
         let mut old_setting = CONFIG.lock().unwrap();
-        setting.write_to_file(SETTING_PATH)?;
+        setting.write_to_file()?;
         *old_setting = setting;
         Ok(())
     }
