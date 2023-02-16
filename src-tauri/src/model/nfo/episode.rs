@@ -6,7 +6,7 @@ use serde_with::skip_serializing_none;
 #[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 #[serde(rename = "episodedetails")]
-struct Episode {
+pub struct Episode {
     title: String,
     #[serde(rename = "originaltitle")]
     original_title: Option<String>,
