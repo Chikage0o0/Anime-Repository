@@ -5,7 +5,7 @@ use serde_with::skip_serializing_none;
 use super::public::*;
 
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Default)]
 #[serde(rename = "tvshow")]
 struct Tvshow {
     title: String,
@@ -54,38 +54,6 @@ struct Namedseason {
     value: String,
 }
 
-impl Default for Tvshow {
-    fn default() -> Self {
-        Self {
-            title: "".to_string(),
-            original_title: None,
-            ratings: None,
-            user_rating: None,
-            plot: None,
-            tagline: None,
-            thumb: Vec::new(),
-            playcount: None,
-            lastplayed: None,
-            unique_id: Vec::new(),
-            genre: Vec::new(),
-            premiered: None,
-            studio: Vec::new(),
-            actor: Vec::new(),
-            date_added: Some(get_date()),
-            sort_title: None,
-            top250: None,
-            fanart: None,
-            mpaa: None,
-            tag: Vec::new(),
-            trailer: None,
-            season: None,
-            episode: None,
-            status: None,
-            name_season: Vec::new(),
-        }
-    }
-}
-
 impl Nfo for Tvshow {
     fn new(id: &str, provider: Provider) -> Self {
         Self {
@@ -94,6 +62,7 @@ impl Nfo for Tvshow {
                 default: true,
                 value: id.to_string(),
             }],
+            date_added: Some(get_date()),
             ..Default::default()
         }
     }

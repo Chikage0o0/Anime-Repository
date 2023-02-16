@@ -25,7 +25,8 @@ impl From<Key> for Uniqueid {
 
 impl Key {
     pub fn get(&self) -> Result<Value, ScribeError> {
-        if let Some(x) = &DB.get(bincode::serialize(self).unwrap()).unwrap() {
+        let serialized_self = bincode::serialize(self).unwrap();
+        if let Some(x) = &DB.get(serialized_self).unwrap() {
             Ok(bincode::deserialize(&x.to_vec()[..]).unwrap())
         } else {
             Err(ScribeError::KeyNotFound(json!(self).to_string()))
@@ -41,7 +42,8 @@ impl Key {
     }
 
     pub fn delete(&self) -> sled::Result<()> {
-        DB.remove(bincode::serialize(self).unwrap())?;
+        let serialized_self = bincode::serialize(self).unwrap();
+        DB.remove(serialized_self)?;
         Ok(())
     }
 }

@@ -4,7 +4,7 @@ use serde_json::Value;
 use serde_with::skip_serializing_none;
 
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Default)]
 #[serde(rename = "episodedetails")]
 pub struct Episode {
     title: String,
@@ -44,36 +44,6 @@ pub struct Episode {
     date_added: Option<String>,
 }
 
-impl Default for Episode {
-    fn default() -> Self {
-        Self {
-            title: "".to_string(),
-            original_title: None,
-            ratings: None,
-            user_rating: None,
-            display_episode: None,
-            display_season: None,
-            plot: None,
-            tagline: None,
-            runtime: None,
-            thumb: Vec::new(),
-            playcount: None,
-            lastplayed: None,
-            unique_id: Vec::new(),
-            genre: Vec::new(),
-            credits: Vec::new(),
-            director: Vec::new(),
-            premiered: None,
-            aired: None,
-            studio: Vec::new(),
-            actor: Vec::new(),
-            showlink: None,
-            resume: None,
-            date_added: Some(get_date()),
-        }
-    }
-}
-
 impl Nfo for Episode {
     fn new(id: &str, provider: Provider) -> Self {
         Self {
@@ -82,6 +52,7 @@ impl Nfo for Episode {
                 default: true,
                 value: id.to_string(),
             }],
+            date_added: Some(get_date()),
             ..Default::default()
         }
     }

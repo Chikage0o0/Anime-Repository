@@ -4,7 +4,7 @@ use serde_json::Value;
 use serde_with::skip_serializing_none;
 
 #[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Default)]
 #[serde(rename = "movie")]
 struct Movie {
     title: String,
@@ -59,42 +59,6 @@ struct Set {
     overview: Option<String>,
 }
 
-impl Default for Movie {
-    fn default() -> Self {
-        Self {
-            title: "".to_string(),
-            original_title: None,
-            ratings: None,
-            user_rating: None,
-            plot: None,
-            tagline: None,
-            runtime: None,
-            thumb: Vec::new(),
-            playcount: None,
-            lastplayed: None,
-            unique_id: Vec::new(),
-            genre: Vec::new(),
-            credits: Vec::new(),
-            director: Vec::new(),
-            premiered: None,
-            studio: Vec::new(),
-            actor: Vec::new(),
-            showlink: None,
-            resume: None,
-            date_added: Some(get_date()),
-            sort_title: None,
-            top250: None,
-            outline: None,
-            fanart: None,
-            mpaa: None,
-            tag: Vec::new(),
-            set: Vec::new(),
-            country: Vec::new(),
-            trailer: None,
-        }
-    }
-}
-
 impl Nfo for Movie {
     fn new(id: &str, provider: Provider) -> Self {
         Self {
@@ -103,6 +67,7 @@ impl Nfo for Movie {
                 default: true,
                 value: id.to_string(),
             }],
+            date_added: Some(get_date()),
             ..Default::default()
         }
     }
@@ -140,12 +105,12 @@ impl Movie {
                     let json = get_movie_info(id, lang).await;
                     let data: Value = serde_json::from_str(&json).unwrap();
 
-                    if let Some(name) = data.get("name") {
-                        self.title = name.as_str().unwrap().to_string();
+                    if let Some(title) = data.get("title") {
+                        self.title = title.as_str().unwrap().to_string();
                     }
 
-                    if let Some(original_name) = data.get("original_name") {
-                        self.original_title = Some(original_name.as_str().unwrap().to_string());
+                    if let Some(original_title) = data.get("original_title") {
+                        self.original_title = Some(original_title.as_str().unwrap().to_string());
                     }
 
                     if let Some(imdb_id) = data.get("imdb_id") {

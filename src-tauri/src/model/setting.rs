@@ -66,28 +66,25 @@ impl Setting {
                 proxy: None,
             },
         };
+
         setting.write_to_file()?;
-        return Ok(setting);
+        Ok(setting)
     }
 
-    /// 将配置写入文件
     pub fn write_to_file(&self) -> Result<(), std::io::Error> {
         let path = Path::new(SETTING_PATH);
-
-        // 不存在目录则创建
         if let Some(p) = path.parent() {
             fs::create_dir_all(p).unwrap();
         }
 
         let mut file = File::create(path)?;
-        file.write_all(toml::to_string(self).unwrap().as_bytes())?;
-        return Ok(());
+        let toml_str = toml::to_string(self).unwrap();
+        file.write_all(toml_str.as_bytes())?;
+        Ok(())
     }
 
-    /// ### 获取配置
     fn get_from_file() -> Result<Setting, SettingError> {
         let f = File::open(SETTING_PATH);
-
         let setting = match f {
             Ok(mut file) => {
                 let mut file_contents = String::new();
@@ -95,18 +92,15 @@ impl Setting {
                 toml::from_str(&file_contents)?
             }
             Err(error) => match error.kind() {
-                ErrorKind::NotFound => match Setting::new() {
-                    Ok(setting) => setting,
-                    Err(e) => panic!("Problem creating the setting: {:?}", e),
-                },
+                ErrorKind::NotFound => Setting::new()
+                    .unwrap_or_else(|e| panic!("Problem creating the setting: {:?}", e)),
                 other_error => panic!("Problem opening the setting: {:?}", other_error),
             },
         };
 
-        return Ok(setting);
+        Ok(setting)
     }
 
-    /// 获取代理信息
     pub fn get_proxy() -> Option<String> {
         let setting = Setting::get();
         if setting.network.use_proxy && setting.network.proxy.is_some() {
@@ -142,5 +136,24 @@ impl serde::Serialize for SettingError {
         S: serde::ser::Serializer,
     {
         serializer.serialize_str(self.to_string().as_ref())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_apply() {
+        let mut setting = Setting::get();
+        setting.network.use_proxy = false;
+        setting.network.proxy = Some("http://127.0.0.1:8080".to_string());
+        assert!(Setting::apply(setting).is_ok());
+
+        let setting = Setting::get();
+        assert_eq!(
+            setting.network.proxy,
+            Some("http://127.0.0.1:8080".to_string())
+        );
     }
 }
