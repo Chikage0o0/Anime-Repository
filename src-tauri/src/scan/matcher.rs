@@ -122,6 +122,8 @@ mod test {
             episode_regex: r"\d+".to_string(),
         };
 
+        key.insert(&value).unwrap();
+
         let matcher: Matcher = key.try_into().unwrap();
         let result = matcher.match_video(r"C:\Users\chika\Downloads\AnimeRepository\[Lilith-Raws] Tensei Oujo to Tensai Reijou no Mahou Kakumei - 07 [Baha][WEB-DL][1080p][AVC AAC][CHT][MP4].mp4").unwrap();
         assert_eq!(

@@ -3,10 +3,10 @@ use notify_debouncer_mini::{new_debouncer, notify::*};
 use std::{path::Path, thread, time::Duration};
 
 pub fn watch_pending_path() {
-    let path = Setting::get().storage.pending_path;
-    thread::spawn(move || {
-        watch(path.as_path());
-    });
+    // let path = Setting::get().storage.pending_path;
+    // thread::spawn(move || {
+    //     watch(path.as_path());
+    // });
 }
 
 fn watch(path: &Path) {
