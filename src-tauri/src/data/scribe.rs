@@ -59,13 +59,15 @@ pub struct Value {
 
 pub fn list() -> Vec<(Key, Value)> {
     DB.iter()
-        .filter(|f| f.is_ok())
-        .map(|f| {
-            let tmp = f.unwrap();
-            (
-                bincode::deserialize(&tmp.0.to_vec()[..]).unwrap(),
-                bincode::deserialize(&tmp.1.to_vec()[..]).unwrap(),
-            )
+        .filter_map(|f| {
+            if let Some(tmp) = f.ok() {
+                Some((
+                    bincode::deserialize(&tmp.0.to_vec()[..]).unwrap(),
+                    bincode::deserialize(&tmp.1.to_vec()[..]).unwrap(),
+                ))
+            } else {
+                None
+            }
         })
         .collect::<Vec<(Key, Value)>>()
 }

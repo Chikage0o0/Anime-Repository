@@ -9,6 +9,7 @@ mod data;
 mod http;
 mod model;
 mod scan;
+mod utils;
 
 #[tauri::command]
 async fn get_setting() -> Setting {

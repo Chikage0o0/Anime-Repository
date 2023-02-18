@@ -1,4 +1,8 @@
-use crate::{data::scribe::Key, model::nfo::public::ProviderKnown};
+use crate::{
+    data::scribe::Key,
+    model::{nfo::public::ProviderKnown, setting::Setting},
+    utils::file::walk_file,
+};
 use regex::Regex;
 use std::path::{Path, PathBuf};
 
@@ -36,12 +40,26 @@ impl Matcher {
         &self,
         file_path: P,
     ) -> Result<(PathBuf, u64, u64), MatcherError> {
+        if !file_path.as_ref().is_file() {
+            return Err(MatcherError::NotFile(file_path.as_ref().to_path_buf()));
+        }
+
+        let ext = file_path
+            .as_ref()
+            .extension()
+            .unwrap_or_default()
+            .to_str()
+            .unwrap();
+
+        if !matches!(ext, "mkv" | "mp4" | "webm") {
+            return Err(MatcherError::FileNotVideo(file_path.as_ref().to_path_buf()));
+        }
+
         if self
             .tvshow_regex
-            .is_match(file_path.as_ref().to_str().unwrap_or(""))
+            .is_match(file_path.as_ref().to_str().unwrap_or_default())
         {
             let file_name = file_path.as_ref().file_name().unwrap().to_str().unwrap();
-
             match self.episode_regex.captures(file_name) {
                 Some(caps) if caps.len() == 1 => Ok((
                     file_path.as_ref().to_path_buf(),
@@ -62,8 +80,11 @@ impl Matcher {
         }
     }
 
-    fn match_all_videos(&self) -> Vec<Option<(u64, u64)>> {
-        todo!()
+    fn match_all_videos(&self) -> Vec<(PathBuf, u64, u64)> {
+        walk_file(Setting::get().storage.pending_path.as_path())
+            .iter()
+            .filter_map(|f| self.match_video(f).ok())
+            .collect::<Vec<(PathBuf, u64, u64)>>()
     }
 }
 
@@ -78,7 +99,9 @@ pub enum MatcherError {
     #[error("Can't match `{0}`")]
     FileNotMatch(std::path::PathBuf),
     #[error("`{0}` not a file")]
-    NotAFile(std::path::PathBuf),
+    NotFile(std::path::PathBuf),
+    #[error("`{0}` not a video file")]
+    FileNotVideo(std::path::PathBuf),
 }
 
 #[cfg(test)]
@@ -100,7 +123,7 @@ mod test {
             episode_position: 0,
             episode_regex: r"\d+".to_string(),
         };
-
+        key.insert(&value).unwrap();
         let matcher: Matcher = key.try_into().unwrap();
         assert_eq!(matcher.id, "207965");
         assert_eq!(matcher.provider, ProviderKnown::TMDB);
@@ -134,5 +157,28 @@ mod test {
         );
         assert_eq!(result.1, 1);
         assert_eq!(result.2, 7);
+    }
+
+    #[test]
+    fn test_match_all_video() {
+        use crate::data::scribe::*;
+        let key = Key {
+            id: "207965".to_string(),
+            provider: ProviderKnown::TMDB,
+        };
+
+        let value = Value {
+            tvshow_regex: "Tensei Oujo to Tensai Reijou no Mahou Kakumei".to_string(),
+            season: 1,
+            episode_offset: 0,
+            episode_position: 0,
+            episode_regex: r"\d+".to_string(),
+        };
+
+        key.insert(&value).unwrap();
+
+        let matcher: Matcher = key.try_into().unwrap();
+        let result = matcher.match_all_videos();
+        dbg!(result);
     }
 }

@@ -3,13 +3,13 @@ use notify_debouncer_mini::{new_debouncer, notify::*};
 use std::{path::Path, thread, time::Duration};
 
 pub fn watch_pending_path() {
-    // let path = Setting::get().storage.pending_path;
-    // thread::spawn(move || {
-    //     watch(path.as_path());
-    // });
+    let path = Setting::get().storage.pending_path;
+    thread::spawn(move || {
+        watch(path.as_path());
+    });
 }
 
-fn watch(path: &Path) {
+fn watch<P: AsRef<Path>>(path: P) {
     let (tx, rx) = std::sync::mpsc::channel();
 
     //  间隔30秒向通道发送信息
@@ -17,7 +17,7 @@ fn watch(path: &Path) {
 
     debouncer
         .watcher()
-        .watch(path, RecursiveMode::Recursive)
+        .watch(path.as_ref(), RecursiveMode::Recursive)
         .unwrap();
 
     // print all events, non returning
