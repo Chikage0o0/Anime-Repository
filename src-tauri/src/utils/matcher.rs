@@ -1,19 +1,26 @@
 use crate::{
-    data::scribe::Key,
+    data::scribe::{list, Key, Value},
     model::{nfo::public::ProviderKnown, setting::Setting},
     utils::file::walk_file,
 };
+use lazy_static::lazy_static;
 use regex::Regex;
 use std::path::{Path, PathBuf};
+use std::sync::Mutex;
 
-struct Matcher {
-    id: String,
-    provider: ProviderKnown,
-    tvshow_regex: Regex,
-    season: u64,
-    episode_offset: i64,
-    episode_position: u8,
-    episode_regex: Regex,
+lazy_static! {
+    static ref MATCHERS: Mutex<Vec<Matcher>> = Mutex::new(Matcher::get_all());
+}
+
+#[derive(Clone)]
+pub struct Matcher {
+    pub id: String,
+    pub provider: ProviderKnown,
+    pub tvshow_regex: Regex,
+    pub season: u64,
+    pub episode_offset: i64,
+    pub episode_position: u8,
+    pub episode_regex: Regex,
 }
 
 impl TryFrom<Key> for Matcher {
@@ -30,6 +37,40 @@ impl TryFrom<Key> for Matcher {
             episode_position: value.episode_position,
             episode_regex: Regex::new(&value.episode_regex)?,
         })
+    }
+}
+
+impl TryFrom<(Key, Value)> for Matcher {
+    type Error = MatcherError;
+
+    fn try_from((key, value): (Key, Value)) -> Result<Self, Self::Error> {
+        Ok(Self {
+            id: key.id,
+            provider: key.provider,
+            season: value.season,
+            tvshow_regex: Regex::new(&value.tvshow_regex)?,
+            episode_offset: value.episode_offset,
+            episode_position: value.episode_position,
+            episode_regex: Regex::new(&value.episode_regex)?,
+        })
+    }
+}
+
+impl From<Matcher> for (Key, Value) {
+    fn from(matcher: Matcher) -> Self {
+        (
+            Key {
+                id: matcher.id,
+                provider: matcher.provider,
+            },
+            Value {
+                season: matcher.season,
+                tvshow_regex: matcher.tvshow_regex.as_str().to_string(),
+                episode_offset: matcher.episode_offset,
+                episode_position: matcher.episode_position,
+                episode_regex: matcher.episode_regex.as_str().to_string(),
+            },
+        )
     }
 }
 
@@ -86,12 +127,31 @@ impl Matcher {
             .filter_map(|f| self.match_video(f).ok())
             .collect::<Vec<(PathBuf, u64, u64)>>()
     }
+
+    fn get_all() -> Vec<Self> {
+        list()
+            .into_iter()
+            .filter_map(|f| match f.try_into() {
+                Ok(m) => Some(m),
+                Err(e) => {
+                    eprintln!("Matcher Error: {}", e);
+                    None
+                }
+            })
+            .collect()
+    }
+
+    fn persist(&self) -> Result<(), MatcherError> {
+        let (key, value) = self.clone().into();
+        key.insert(&value)?;
+        Ok(())
+    }
 }
 
 #[derive(thiserror::Error, Debug)]
 pub enum MatcherError {
     #[error(transparent)]
-    DataGetError(#[from] crate::data::scribe::ScribeError),
+    SledError(#[from] crate::data::scribe::ScribeError),
     #[error(transparent)]
     RegexBuildError(#[from] regex::Error),
     #[error(transparent)]

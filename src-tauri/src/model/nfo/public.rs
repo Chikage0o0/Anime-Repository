@@ -69,7 +69,7 @@ pub struct Resume {
     pub tolal: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum ProviderKnown {
     TMDB,

@@ -33,7 +33,7 @@ impl Key {
         }
     }
 
-    pub fn insert(&self, value: &Value) -> sled::Result<()> {
+    pub fn insert(&self, value: &Value) -> Result<(), ScribeError> {
         DB.insert(
             bincode::serialize(self).unwrap(),
             bincode::serialize(&value).unwrap(),
@@ -41,7 +41,7 @@ impl Key {
         Ok(())
     }
 
-    pub fn delete(&self) -> sled::Result<()> {
+    pub fn delete(&self) -> Result<(), ScribeError> {
         let serialized_self = bincode::serialize(self).unwrap();
         DB.remove(serialized_self)?;
         Ok(())
@@ -76,6 +76,8 @@ pub fn list() -> Vec<(Key, Value)> {
 pub enum ScribeError {
     #[error("Key `{0}` not found in database")]
     KeyNotFound(String),
+    #[error(transparent)]
+    SledError(#[from] sled::Error),
 }
 
 #[cfg(test)]
