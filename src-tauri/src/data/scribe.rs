@@ -7,7 +7,7 @@ lazy_static! {
     static ref DB: sled::Db = sled::open("config/scribe").unwrap();
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Key {
     pub id: String,
     pub provider: ProviderKnown,
@@ -48,7 +48,7 @@ impl Key {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Value {
     pub tvshow_regex: String,
     pub season: u64,

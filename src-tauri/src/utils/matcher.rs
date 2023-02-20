@@ -29,7 +29,7 @@ impl TryFrom<Key> for Matcher {
     fn try_from(key: Key) -> Result<Self, Self::Error> {
         let value = key.get()?;
         Ok(Self {
-            id: key.id,
+            id: key.id.clone(),
             provider: key.provider,
             season: value.season,
             tvshow_regex: Regex::new(&value.tvshow_regex)?,
@@ -45,7 +45,7 @@ impl TryFrom<(Key, Value)> for Matcher {
 
     fn try_from((key, value): (Key, Value)) -> Result<Self, Self::Error> {
         Ok(Self {
-            id: key.id,
+            id: key.id.clone(),
             provider: key.provider,
             season: value.season,
             tvshow_regex: Regex::new(&value.tvshow_regex)?,
@@ -121,29 +121,53 @@ impl Matcher {
         }
     }
 
-    fn match_all_videos(&self) -> Vec<(PathBuf, u64, u64)> {
+    pub fn match_all_videos(&self) -> Vec<(PathBuf, u64, u64)> {
         walk_file(Setting::get().storage.pending_path.as_path())
             .iter()
             .filter_map(|f| self.match_video(f).ok())
             .collect::<Vec<(PathBuf, u64, u64)>>()
     }
 
+    pub fn matchers_video<P: AsRef<Path>>(file_path: P) -> Option<(PathBuf, u64, u64)> {
+        let matchers = MATCHERS.lock().unwrap();
+        for matcher in matchers.iter() {
+            if let Ok((path, season, episode)) = matcher.match_video(file_path.as_ref()) {
+                return Some((path, season, episode));
+            }
+        }
+        None
+    }
+
     fn get_all() -> Vec<Self> {
         list()
             .into_iter()
-            .filter_map(|f| match f.try_into() {
-                Ok(m) => Some(m),
-                Err(e) => {
-                    eprintln!("Matcher Error: {}", e);
-                    None
+            .filter_map(|f| -> Option<Matcher> {
+                let tmp = f.clone().try_into();
+                match tmp {
+                    Ok(v) => Some(v),
+                    Err(MatcherError::RegexBuildError(_)) => {
+                        f.0.delete().unwrap();
+                        None
+                    }
+                    _ => panic!("Can't match {:?}", f),
                 }
             })
             .collect()
     }
 
-    fn persist(&self) -> Result<(), MatcherError> {
+    pub fn insert(&self) -> Result<(), MatcherError> {
         let (key, value) = self.clone().into();
         key.insert(&value)?;
+        let mut matchers = MATCHERS.lock().unwrap();
+        matchers.push(self.clone());
+        Ok(())
+    }
+
+    pub fn delete(&self) -> Result<(), MatcherError> {
+        let (key, _) = self.clone().into();
+        key.delete()?;
+        let mut matchers = MATCHERS.lock().unwrap();
+        matchers.retain(|m| m.id != self.id && m.provider != self.provider);
         Ok(())
     }
 }

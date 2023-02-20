@@ -7,7 +7,7 @@ use super::public::*;
 #[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize, PartialEq, Default)]
 #[serde(rename = "tvshow")]
-struct Tvshow {
+pub struct Tvshow {
     title: String,
     #[serde(rename = "originaltitle")]
     original_title: Option<String>,
