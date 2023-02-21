@@ -1,4 +1,4 @@
-use crate::model::setting::Setting;
+use crate::{model::setting::Setting, utils::matcher::Matcher};
 use notify_debouncer_mini::{new_debouncer, notify::*};
 use std::{path::Path, thread, time::Duration};
 
@@ -25,7 +25,12 @@ fn watch<P: AsRef<Path>>(path: P) {
         if let Ok(e) = events {
             // Call Event
             e.iter()
-                .for_each(|f| println!("{}", f.path.as_os_str().to_str().unwrap()))
+                .filter_map(|e| e.path.is_file().then(|| &e.path))
+                .filter_map(|path| Matcher::matchers_video(path))
+                .for_each(|f| {
+                    crate::service::scribe::process(f.0, f.1, f.2, f.3)
+                        .unwrap_or_else(|err| eprint!("{:?}", err))
+                });
         }
     }
 }

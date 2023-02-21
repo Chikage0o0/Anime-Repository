@@ -56,21 +56,12 @@ impl TryFrom<(Key, Value)> for Matcher {
     }
 }
 
-impl From<Matcher> for (Key, Value) {
+impl From<Matcher> for Key {
     fn from(matcher: Matcher) -> Self {
-        (
-            Key {
-                id: matcher.id,
-                provider: matcher.provider,
-            },
-            Value {
-                season: matcher.season,
-                tvshow_regex: matcher.tvshow_regex.as_str().to_string(),
-                episode_offset: matcher.episode_offset,
-                episode_position: matcher.episode_position,
-                episode_regex: matcher.episode_regex.as_str().to_string(),
-            },
-        )
+        Key {
+            id: matcher.id,
+            provider: matcher.provider,
+        }
     }
 }
 
@@ -128,11 +119,11 @@ impl Matcher {
             .collect::<Vec<(PathBuf, u64, u64)>>()
     }
 
-    pub fn matchers_video<P: AsRef<Path>>(file_path: P) -> Option<(PathBuf, u64, u64)> {
+    pub fn matchers_video<P: AsRef<Path>>(file_path: P) -> Option<(Key, PathBuf, u64, u64)> {
         let matchers = MATCHERS.lock().unwrap();
         for matcher in matchers.iter() {
             if let Ok((path, season, episode)) = matcher.match_video(file_path.as_ref()) {
-                return Some((path, season, episode));
+                return Some((matcher.clone().into(), path, season, episode));
             }
         }
         None
@@ -149,33 +140,27 @@ impl Matcher {
                         f.0.delete().unwrap();
                         None
                     }
-                    _ => panic!("Can't match {:?}", f),
+                    _ => panic!("Can't build match {:?}", f),
                 }
             })
             .collect()
     }
 
-    pub fn insert(&self) -> Result<(), MatcherError> {
-        let (key, value) = self.clone().into();
-        key.insert(&value)?;
+    pub fn insert(&self) {
         let mut matchers = MATCHERS.lock().unwrap();
         matchers.push(self.clone());
-        Ok(())
     }
 
-    pub fn delete(&self) -> Result<(), MatcherError> {
-        let (key, _) = self.clone().into();
-        key.delete()?;
+    pub fn delete(&self) {
         let mut matchers = MATCHERS.lock().unwrap();
         matchers.retain(|m| m.id != self.id && m.provider != self.provider);
-        Ok(())
     }
 }
 
 #[derive(thiserror::Error, Debug)]
 pub enum MatcherError {
     #[error(transparent)]
-    SledError(#[from] crate::data::scribe::ScribeError),
+    SledError(#[from] crate::data::scribe::ScribeDataError),
     #[error(transparent)]
     RegexBuildError(#[from] regex::Error),
     #[error(transparent)]
@@ -201,11 +186,13 @@ mod test {
         };
 
         let value = Value {
+            title: "転生王女と天才令嬢の魔法革命".to_string(),
             tvshow_regex: "Tensei Oujo to Tensai Reijou no Mahou Kakumei".to_string(),
             season: 1,
             episode_offset: 0,
             episode_position: 0,
             episode_regex: r"\d+".to_string(),
+            lang: "ja-JP".to_string(),
         };
         key.insert(&value).unwrap();
         let matcher: Matcher = key.try_into().unwrap();
@@ -222,11 +209,13 @@ mod test {
         };
 
         let value = Value {
+            title: "転生王女と天才令嬢の魔法革命".to_string(),
             tvshow_regex: "Tensei Oujo to Tensai Reijou no Mahou Kakumei".to_string(),
             season: 1,
             episode_offset: 0,
             episode_position: 0,
             episode_regex: r"\d+".to_string(),
+            lang: "ja-JP".to_string(),
         };
 
         key.insert(&value).unwrap();
@@ -252,11 +241,13 @@ mod test {
         };
 
         let value = Value {
+            title: "転生王女と天才令嬢の魔法革命".to_string(),
             tvshow_regex: "Tensei Oujo to Tensai Reijou no Mahou Kakumei".to_string(),
             season: 1,
             episode_offset: 0,
             episode_position: 0,
             episode_regex: r"\d+".to_string(),
+            lang: "ja-JP".to_string(),
         };
 
         key.insert(&value).unwrap();

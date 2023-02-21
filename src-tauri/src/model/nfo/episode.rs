@@ -7,7 +7,7 @@ use serde_with::skip_serializing_none;
 #[derive(Debug, Serialize, Deserialize, PartialEq, Default)]
 #[serde(rename = "episodedetails")]
 pub struct Episode {
-    title: String,
+    pub title: String,
     #[serde(rename = "originaltitle")]
     original_title: Option<String>,
     ratings: Option<Ratings>,

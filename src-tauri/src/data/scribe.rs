@@ -24,16 +24,16 @@ impl From<Key> for Uniqueid {
 }
 
 impl Key {
-    pub fn get(&self) -> Result<Value, ScribeError> {
+    pub fn get(&self) -> Result<Value, ScribeDataError> {
         let serialized_self = bincode::serialize(self).unwrap();
         if let Some(x) = &DB.get(serialized_self).unwrap() {
             Ok(bincode::deserialize(&x.to_vec()[..]).unwrap())
         } else {
-            Err(ScribeError::KeyNotFound(json!(self).to_string()))
+            Err(ScribeDataError::KeyNotFound(json!(self).to_string()))
         }
     }
 
-    pub fn insert(&self, value: &Value) -> Result<(), ScribeError> {
+    pub fn insert(&self, value: &Value) -> Result<(), ScribeDataError> {
         DB.insert(
             bincode::serialize(self).unwrap(),
             bincode::serialize(&value).unwrap(),
@@ -41,7 +41,7 @@ impl Key {
         Ok(())
     }
 
-    pub fn delete(&self) -> Result<(), ScribeError> {
+    pub fn delete(&self) -> Result<(), ScribeDataError> {
         let serialized_self = bincode::serialize(self).unwrap();
         DB.remove(serialized_self)?;
         Ok(())
@@ -50,11 +50,13 @@ impl Key {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Value {
+    pub title: String,
     pub tvshow_regex: String,
     pub season: u64,
     pub episode_offset: i64,
     pub episode_position: u8,
     pub episode_regex: String,
+    pub lang: String,
 }
 
 pub fn list() -> Vec<(Key, Value)> {
@@ -73,7 +75,7 @@ pub fn list() -> Vec<(Key, Value)> {
 }
 
 #[derive(thiserror::Error, Debug)]
-pub enum ScribeError {
+pub enum ScribeDataError {
     #[error("Key `{0}` not found in database")]
     KeyNotFound(String),
     #[error(transparent)]

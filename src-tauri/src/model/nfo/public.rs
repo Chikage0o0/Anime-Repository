@@ -76,6 +76,12 @@ pub enum ProviderKnown {
     IMDB,
 }
 
+impl From<ProviderKnown> for Provider {
+    fn from(value: ProviderKnown) -> Self {
+        Provider::Known(value)
+    }
+}
+
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Provider {

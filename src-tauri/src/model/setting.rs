@@ -34,15 +34,13 @@ pub struct Storage {
 /// 网络相关配置
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Network {
-    pub use_proxy: bool,
-    pub proxy: Option<String>,
+    use_proxy: bool,
+    proxy: Option<String>,
 }
 lazy_static! {
     static ref CONFIG: Mutex<Setting> = Mutex::new(Setting::get_from_file().unwrap());
 }
 impl Setting {
-    /// - `new` 获取一个默认的配置结构
-    /// - 用于配置不存在时，生成默认的配置,并写入文件,并返回文件
     fn new() -> Result<Setting, std::io::Error> {
         use tauri::api::path::{download_dir, video_dir};
 

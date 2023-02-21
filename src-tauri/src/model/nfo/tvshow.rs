@@ -8,7 +8,7 @@ use super::public::*;
 #[derive(Debug, Serialize, Deserialize, PartialEq, Default)]
 #[serde(rename = "tvshow")]
 pub struct Tvshow {
-    title: String,
+    pub title: String,
     #[serde(rename = "originaltitle")]
     original_title: Option<String>,
     #[serde(rename = "sorttitle")]
