@@ -24,6 +24,8 @@ fn save_setting(setting: Setting) -> Result<(), SettingError> {
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 fn main() {
+    handler::watcher::watch_pending_path();
+    handler::pending_videos_list::run();
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![get_setting, save_setting])
         .run(tauri::generate_context!())

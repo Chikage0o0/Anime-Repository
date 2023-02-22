@@ -1,5 +1,8 @@
 use crate::{
-    data::scribe::{Key, Value},
+    data::{
+        pending_videos::insert_pending_video,
+        scribe::{Key, Value},
+    },
     model::{
         nfo::{episode::Episode, public::Nfo, tvshow::Tvshow},
         setting,
@@ -104,7 +107,10 @@ pub fn process(
         path.extension().unwrap().to_str().unwrap()
     ));
 
-    file::move_file(&path, &episode_path)?;
+    if let Err(_err) = file::move_file(&path, &episode_path) {
+        insert_pending_video(path, episode_path);
+        // eprintln!("Error: {}", err)
+    }
     write_nfo(&episode_nfo_path, &episode_nfo).unwrap();
 
     Ok(())
