@@ -28,7 +28,9 @@ where
     }
 
     let mut file = File::create(path)?;
-    let mut ser = Serializer::new(String::new());
+    let mut ser = Serializer::new(
+        String::from(r#"<?xml version="1.0" encoding="utf-8" standalone="yes"?>"#) + "\n",
+    );
     ser.indent(' ', 4);
     let data = data.serialize(ser)?;
 
@@ -93,7 +95,7 @@ pub fn process(
 
     let episode_title = episode_nfo.title.clone();
 
-    let episode_folder_path = tvshow_path.join(format!("Season {:02}", season));
+    let episode_folder_path = tvshow_path.join(format!("Season {}", season));
     let episode_nfo_path = episode_folder_path.join(format!(
         "{} - S{:02}E{:02} - {}.nfo",
         &tvshow_title, season, episode, &episode_title

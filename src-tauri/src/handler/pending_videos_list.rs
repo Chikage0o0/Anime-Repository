@@ -1,4 +1,7 @@
-use crate::data::pending_videos::{delete_pending_video, get_pending_videos};
+use crate::{
+    data::pending_videos::{delete_pending_video, get_pending_videos},
+    utils::file,
+};
 
 pub fn process() {
     let list = get_pending_videos();
@@ -11,7 +14,7 @@ pub fn process() {
                     return;
                 }
             }
-            if let Ok(_) = std::fs::rename(src_path, target_path) {
+            if let Ok(_) = file::move_file(src_path, target_path) {
                 delete_pending_video(src_path.to_path_buf());
             }
         } else {
