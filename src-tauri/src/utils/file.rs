@@ -18,3 +18,23 @@ pub fn move_file<P: AsRef<Path>>(from: P, to: P) -> Result<(), std::io::Error> {
     std::fs::rename(from, to)?;
     Ok(())
 }
+
+pub fn create_shortcut<P: AsRef<Path>>(src: P, target: P) -> Result<(), std::io::Error> {
+    #[cfg(target_os = "windows")]
+    {
+        use std::os::windows::fs::symlink_file;
+        symlink_file(src, target)?;
+    }
+    #[cfg(target_os = "linux")]
+    {
+        use std::os::unix::fs::symlink;
+        symlink(src, target)?;
+    }
+    #[cfg(target_os = "macos")]
+    {
+        use std::os::unix::fs::symlink;
+        symlink(src, target)?;
+    }
+
+    Ok(())
+}

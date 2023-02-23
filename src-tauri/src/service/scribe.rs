@@ -130,6 +130,10 @@ pub fn process(
     if let Err(_err) = file::move_file(&path, &episode_path) {
         insert_pending_video(path, episode_path);
         // eprintln!("Error: {}", err)
+    } else {
+        file::create_shortcut(&episode_path, &path).unwrap_or_else(|err| {
+            eprintln!("Error: {}", err);
+        });
     }
     write_nfo(&episode_nfo_path, &episode_nfo).unwrap();
     if let Some(thumb) = episode_nfo.get_thumb() {

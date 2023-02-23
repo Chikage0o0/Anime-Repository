@@ -30,6 +30,7 @@ fn watch<P: AsRef<Path>>(path: P) {
                     let path = &e.path;
                     (e.kind == DebouncedEventKind::Any
                         && path.is_file()
+                        && !path.is_symlink()
                         && get_pending_video(path).is_none())
                     .then(|| path)
                 })

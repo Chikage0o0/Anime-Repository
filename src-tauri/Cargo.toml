@@ -2,7 +2,7 @@
 name = "anime-repository"
 version = "0.0.0"
 description = "A Tauri App"
-authors = ["you"]
+authors = ["Chikage <chikage@939.me>"]
 license = ""
 repository = ""
 edition = "2021"
