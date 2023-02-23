@@ -3,6 +3,7 @@ use crate::{
         pending_videos::insert_pending_video,
         scribe::{Key, Value},
     },
+    http::client,
     model::{
         nfo::{episode::Episode, public::Nfo, tvshow::Tvshow},
         setting,
@@ -10,6 +11,7 @@ use crate::{
     utils::{file, matcher::Matcher},
 };
 use quick_xml::se::Serializer;
+use reqwest::header::HeaderMap;
 use serde::Deserialize;
 use std::{
     fmt::Debug,
@@ -36,6 +38,18 @@ where
 
     file.write_all(data.as_bytes())?;
 
+    Ok(())
+}
+
+fn download_thumb<P: AsRef<Path>>(path: P, url: &str) -> Result<(), ScribeServiceError> {
+    use tauri::async_runtime::block_on;
+    let img = block_on(client::get_bytes(url.to_string(), HeaderMap::new()));
+    if let Some(path) = path.as_ref().parent() {
+        std::fs::create_dir_all(path)?;
+    }
+
+    let mut file = std::fs::File::create(path.as_ref())?;
+    file.write_all(&img)?;
     Ok(())
 }
 
@@ -89,6 +103,10 @@ pub fn process(
     }
 
     write_nfo(&tvshow_nfo_path, &tvshow_nfo).unwrap();
+    tvshow_nfo
+        .get_thumb(&tvshow_path)
+        .iter()
+        .for_each(|(path, thumb)| download_thumb(&path, &thumb).unwrap());
 
     let mut episode_nfo = Episode::new(&key.id, key.provider.into());
     block_on(episode_nfo.update(&value.lang, season, episode));
@@ -114,6 +132,15 @@ pub fn process(
         // eprintln!("Error: {}", err)
     }
     write_nfo(&episode_nfo_path, &episode_nfo).unwrap();
+    if let Some(thumb) = episode_nfo.get_thumb() {
+        download_thumb(
+            episode_folder_path.join(format!(
+                "{} - S{:02}E{:02} - {}-thumb.jpg",
+                &tvshow_title, season, episode, &episode_title
+            )),
+            &thumb,
+        )?;
+    }
 
     Ok(())
 }

@@ -27,7 +27,7 @@ pub fn process() {
 // Run processes at 5 minute intervals
 pub fn run() {
     std::thread::spawn(|| loop {
-        std::thread::sleep(std::time::Duration::from_secs(120));
+        std::thread::sleep(std::time::Duration::from_secs(2));
         process();
     });
 }

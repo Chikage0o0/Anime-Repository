@@ -169,6 +169,19 @@ impl Episode {
             }),
         }
     }
+
+    pub fn get_thumb(&self) -> Option<&String> {
+        self.thumb.iter().find_map(|thumb| {
+            if thumb.aspect == Some("thumb".to_string())
+                && thumb.r#type == None
+                && thumb.season == None
+            {
+                Some(&thumb.value)
+            } else {
+                None
+            }
+        })
+    }
 }
 
 #[cfg(test)]

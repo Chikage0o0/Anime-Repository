@@ -15,7 +15,7 @@ fn watch<P: AsRef<Path>>(path: P) {
     let (tx, rx) = std::sync::mpsc::channel();
 
     //  间隔30秒向通道发送信息
-    let mut debouncer = new_debouncer(Duration::from_secs(120), None, tx).unwrap();
+    let mut debouncer = new_debouncer(Duration::from_secs(2), None, tx).unwrap();
 
     debouncer
         .watcher()
