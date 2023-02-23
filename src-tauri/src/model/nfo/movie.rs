@@ -1,3 +1,8 @@
+use std::{
+    collections::HashMap,
+    path::{Path, PathBuf},
+};
+
 use super::public::*;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -261,6 +266,36 @@ impl Movie {
                 value: img_path,
             }),
         }
+    }
+
+    pub fn get_thumb<P: AsRef<Path>>(&self, path: P) -> HashMap<PathBuf, String> {
+        let path = path.as_ref();
+        let mut thumbs: HashMap<PathBuf, String> = HashMap::new();
+        // get clearlogo
+        if let Some(clearlogo) = self
+            .thumb
+            .iter()
+            .find(|thumb| thumb.r#type == Some("clearlogo".to_string()))
+        {
+            thumbs.insert(path.join("clearlogo.png"), clearlogo.value.clone());
+        }
+
+        //get poster
+        if let Some(poster) = self
+            .thumb
+            .iter()
+            .find(|thumb| thumb.aspect == Some("poster".to_string()) && thumb.r#type == None)
+        {
+            thumbs.insert(path.join("poster.jpg"), poster.value.clone());
+        }
+
+        //get fanart
+        if let Some(fanart) = &self.fanart {
+            for thumb in &fanart.thumb {
+                thumbs.insert(path.join("fanart.jpg"), thumb.value.clone());
+            }
+        }
+        thumbs
     }
 }
 
