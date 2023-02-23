@@ -1,12 +1,12 @@
 [package]
 name = "anime-repository"
 version = "0.0.0"
-description = "A Tauri App"
+description = "Developed by Chikage"
 authors = ["Chikage <chikage@939.me>"]
 license = ""
-repository = ""
+repository = "https://github.com/Chikage0o0/Anime-Repository"
 edition = "2021"
-rust-version = "1.62"
+rust-version = "1.67.1"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -14,10 +14,12 @@ rust-version = "1.62"
 tauri-build = { version = "1.2", features = [] }
 
 [dependencies]
+log = "0.4.17"
+env_logger = "0.10.0"
 serde_json = "1.0.91"
 serde = { version = "1.0.152", features = ["derive"] }
 tauri = { version = "1.2.3", features = ["api-all"] }
-toml = "0.5.10"
+toml = "0.7.2"
 thiserror = "1.0.38"
 sys-locale = "0.2.3"
 lazy_static = "1.4.0"

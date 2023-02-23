@@ -16,7 +16,8 @@ pub fn process() {
             }
             if let Ok(_) = file::move_file(src_path, target_path) {
                 delete_pending_video(src_path.to_path_buf());
-                file::create_shortcut(&target_path, &src_path).unwrap();
+                file::create_shortcut(&target_path, &src_path)
+                    .unwrap_or_else(|err| log::error!("Create shortcut failed: {:?}", err));
             }
         } else {
             eprintln!("{} not exists", src_path.to_str().unwrap());

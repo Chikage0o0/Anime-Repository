@@ -99,6 +99,7 @@ impl Tvshow {
         if let Some((id, provider)) = self.get_default_id() {
             match provider {
                 Provider::Known(ProviderKnown::TMDB) => {
+                    log::info!("Get tvshow with id: {} from TMDB", id);
                     let json = get_tvshow_info(id, lang).await;
                     let data: Value = serde_json::from_str(&json).unwrap();
 

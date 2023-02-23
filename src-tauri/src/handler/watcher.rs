@@ -7,7 +7,14 @@ use std::{path::Path, thread, time::Duration};
 pub fn watch_pending_path() {
     let path = Setting::get().storage.pending_path;
     thread::spawn(move || {
-        watch(path.as_path());
+        log::info!("Watching pending path: {:?}", path);
+        if !path.exists() {
+            std::fs::create_dir_all(&path).expect("Can't create pending path");
+        }
+        if !path.is_dir() {
+            panic!("Pending path is not a directory");
+        }
+        watch(path);
     });
 }
 
@@ -37,18 +44,8 @@ fn watch<P: AsRef<Path>>(path: P) {
                 .filter_map(|path| Matcher::matchers_video(path))
                 .for_each(|f| {
                     crate::service::scribe::process(f.0, f.1, f.2, f.3)
-                        .unwrap_or_else(|err| println!("{:?}", err))
+                        .unwrap_or_else(|err| log::error!("{:?}", err))
                 });
         }
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-    #[test]
-    fn test() {
-        watch_pending_path();
-        thread::sleep(Duration::from_secs(600));
     }
 }

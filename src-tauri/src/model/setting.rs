@@ -66,10 +66,12 @@ impl Setting {
         };
 
         setting.write_to_file()?;
+        log::info!("Setting init: {:?}", &setting);
         Ok(setting)
     }
 
     pub fn write_to_file(&self) -> Result<(), std::io::Error> {
+        log::info!("Writing setting to file");
         let path = Path::new(SETTING_PATH);
         if let Some(p) = path.parent() {
             fs::create_dir_all(p).unwrap();
@@ -116,6 +118,7 @@ impl Setting {
         let mut old_setting = CONFIG.lock().unwrap();
         setting.write_to_file()?;
         *old_setting = setting;
+        log::info!("Setting applied");
         Ok(())
     }
 }

@@ -22,6 +22,7 @@ fn new_client() -> reqwest::Client {
 //TODO: 错误处理
 
 pub async fn get_string(url: String, headers: HeaderMap) -> String {
+    log::debug!("GET {}", url);
     let body = HTTP_CLIENT
         .get(url)
         .headers(headers)
@@ -35,6 +36,7 @@ pub async fn get_string(url: String, headers: HeaderMap) -> String {
 }
 
 pub async fn get_bytes(url: String, headers: HeaderMap) -> Vec<u8> {
+    log::debug!("GET {}", url);
     let body = HTTP_CLIENT
         .get(url)
         .headers(headers)

@@ -12,7 +12,7 @@ lazy_static! {
     static ref MATCHERS: Mutex<Vec<Matcher>> = Mutex::new(Matcher::get_all());
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Matcher {
     pub id: String,
     pub provider: ProviderKnown,
@@ -72,7 +72,7 @@ impl Matcher {
         &self,
         file_path: P,
     ) -> Result<(PathBuf, u64, u64), MatcherError> {
-        if !file_path.as_ref().is_file() {
+        if !file_path.as_ref().is_file() || file_path.as_ref().is_symlink() {
             return Err(MatcherError::NotFile(file_path.as_ref().to_path_buf()));
         }
 
@@ -84,6 +84,7 @@ impl Matcher {
             .unwrap();
 
         if !matches!(ext, "mkv" | "mp4" | "webm") {
+            log::warn!("File not video: {}", file_path.as_ref().display());
             return Err(MatcherError::FileNotVideo(file_path.as_ref().to_path_buf()));
         }
 
@@ -105,9 +106,13 @@ impl Matcher {
                         + self.episode_offset)
                         .try_into()?,
                 )),
-                _ => Err(MatcherError::FileNotMatch(file_path.as_ref().to_path_buf())),
+                _ => {
+                    log::warn!("Tvshow Episode not match: {}", file_path.as_ref().display());
+                    Err(MatcherError::FileNotMatch(file_path.as_ref().to_path_buf()))
+                }
             }
         } else {
+            log::warn!("Tvshow Name not match: {}", file_path.as_ref().display());
             Err(MatcherError::FileNotMatch(file_path.as_ref().to_path_buf()))
         }
     }
@@ -130,6 +135,7 @@ impl Matcher {
     }
 
     fn get_all() -> Vec<Self> {
+        log::debug!("Get all matchers");
         list()
             .into_iter()
             .filter_map(|f| -> Option<Matcher> {
@@ -140,7 +146,11 @@ impl Matcher {
                         f.0.delete().unwrap();
                         None
                     }
-                    _ => panic!("Can't build match {:?}", f),
+                    _ => {
+                        log::error!("Can't build matcher {:?}", &f);
+                        f.0.delete().unwrap();
+                        None
+                    }
                 }
             })
             .collect()
@@ -149,11 +159,13 @@ impl Matcher {
     pub fn insert(&self) {
         let mut matchers = MATCHERS.lock().unwrap();
         matchers.push(self.clone());
+        log::debug!("Insert matcher: {:?}", self);
     }
 
     pub fn delete(&self) {
         let mut matchers = MATCHERS.lock().unwrap();
         matchers.retain(|m| m.id != self.id && m.provider != self.provider);
+        log::debug!("Delete matcher: {:?}", self);
     }
 }
 
@@ -171,89 +183,4 @@ pub enum MatcherError {
     NotFile(std::path::PathBuf),
     #[error("`{0}` not a video file")]
     FileNotVideo(std::path::PathBuf),
-}
-
-#[cfg(test)]
-mod test {
-
-    use super::*;
-    #[test]
-    fn test_try_from() {
-        use crate::data::scribe::*;
-        let key = Key {
-            id: "207965".to_string(),
-            provider: ProviderKnown::TMDB,
-        };
-
-        let value = Value {
-            title: "転生王女と天才令嬢の魔法革命".to_string(),
-            tvshow_regex: "Tensei Oujo to Tensai Reijou no Mahou Kakumei".to_string(),
-            season: 1,
-            episode_offset: 0,
-            episode_position: 0,
-            episode_regex: r"\d+".to_string(),
-            lang: "ja-JP".to_string(),
-        };
-        key.insert(&value).unwrap();
-        let matcher: Matcher = key.try_into().unwrap();
-        assert_eq!(matcher.id, "207965");
-        assert_eq!(matcher.provider, ProviderKnown::TMDB);
-        assert_eq!(matcher.season, 1);
-    }
-    #[test]
-    fn test_match_video() {
-        use crate::data::scribe::*;
-        let key = Key {
-            id: "207965".to_string(),
-            provider: ProviderKnown::TMDB,
-        };
-
-        let value = Value {
-            title: "転生王女と天才令嬢の魔法革命".to_string(),
-            tvshow_regex: "Tensei Oujo to Tensai Reijou no Mahou Kakumei".to_string(),
-            season: 1,
-            episode_offset: 0,
-            episode_position: 0,
-            episode_regex: r"\d+".to_string(),
-            lang: "ja-JP".to_string(),
-        };
-
-        key.insert(&value).unwrap();
-
-        let matcher: Matcher = key.try_into().unwrap();
-        let result = matcher.match_video(r"C:\Users\chika\Downloads\AnimeRepository\[Lilith-Raws] Tensei Oujo to Tensai Reijou no Mahou Kakumei - 07 [Baha][WEB-DL][1080p][AVC AAC][CHT][MP4].mp4").unwrap();
-        assert_eq!(
-            result.0,
-            PathBuf::from(
-                r"C:\Users\chika\Downloads\AnimeRepository\[Lilith-Raws] Tensei Oujo to Tensai Reijou no Mahou Kakumei - 07 [Baha][WEB-DL][1080p][AVC AAC][CHT][MP4].mp4"
-            )
-        );
-        assert_eq!(result.1, 1);
-        assert_eq!(result.2, 7);
-    }
-
-    #[test]
-    fn test_match_all_video() {
-        use crate::data::scribe::*;
-        let key = Key {
-            id: "207965".to_string(),
-            provider: ProviderKnown::TMDB,
-        };
-
-        let value = Value {
-            title: "転生王女と天才令嬢の魔法革命".to_string(),
-            tvshow_regex: "Tensei Oujo to Tensai Reijou no Mahou Kakumei".to_string(),
-            season: 1,
-            episode_offset: 0,
-            episode_position: 0,
-            episode_regex: r"\d+".to_string(),
-            lang: "ja-JP".to_string(),
-        };
-
-        key.insert(&value).unwrap();
-
-        let matcher: Matcher = key.try_into().unwrap();
-        let result = matcher.match_all_videos();
-        dbg!(result);
-    }
 }

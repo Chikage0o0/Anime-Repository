@@ -28,9 +28,12 @@ pub fn get_pending_video<P: AsRef<Path>>(path: P) -> Option<(PathBuf, PathBuf)> 
     }
 }
 
-pub fn insert_pending_video(src_path: PathBuf, target_path: PathBuf) {
-    DB.insert(src_path.to_str().unwrap(), target_path.to_str().unwrap())
-        .unwrap();
+pub fn insert_pending_video<P: AsRef<Path>>(src_path: P, target_path: P) {
+    DB.insert(
+        src_path.as_ref().to_str().unwrap(),
+        target_path.as_ref().to_str().unwrap(),
+    )
+    .unwrap();
 }
 
 pub fn delete_pending_video(path: PathBuf) {

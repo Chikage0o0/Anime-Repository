@@ -25,6 +25,7 @@ where
     P: AsRef<Path>,
     C: serde::Serialize,
 {
+    log::info!("Writing nfo {:?}", path.as_ref());
     if let Some(path) = path.as_ref().parent() {
         std::fs::create_dir_all(path)?;
     }
@@ -42,6 +43,7 @@ where
 }
 
 fn download_thumb<P: AsRef<Path>>(path: P, url: &str) -> Result<(), ScribeServiceError> {
+    log::info!("Downloading thumb {:?}", url);
     use tauri::async_runtime::block_on;
     let img = block_on(client::get_bytes(url.to_string(), HeaderMap::new()));
     if let Some(path) = path.as_ref().parent() {
@@ -54,6 +56,7 @@ fn download_thumb<P: AsRef<Path>>(path: P, url: &str) -> Result<(), ScribeServic
 }
 
 fn insert_scribe((key, value): (Key, Value)) -> Result<(), ScribeServiceError> {
+    log::info!("Inserting scribe {:?}", key);
     let matcher: Matcher = (key.clone(), value.clone()).try_into()?;
     key.insert(&value)?;
     matcher.insert();
@@ -82,6 +85,7 @@ pub fn process(
     season: u64,
     episode: u64,
 ) -> Result<(), ScribeServiceError> {
+    log::info!("Processing {:?}", path);
     let value = key.get().unwrap();
 
     use tauri::async_runtime::block_on;
@@ -128,11 +132,15 @@ pub fn process(
     ));
 
     if let Err(_err) = file::move_file(&path, &episode_path) {
-        insert_pending_video(path, episode_path);
+        insert_pending_video(&path, &episode_path);
+        log::info!(
+            "Failed to move {}, inserting into pending videos",
+            path.display()
+        );
         // eprintln!("Error: {}", err)
     } else {
         file::create_shortcut(&episode_path, &path).unwrap_or_else(|err| {
-            eprintln!("Error: {}", err);
+            log::error!("Failed to create shortcut: {}", err);
         });
     }
     write_nfo(&episode_nfo_path, &episode_nfo).unwrap();
@@ -153,6 +161,7 @@ fn remove_scribe((key, value): (Key, Value)) -> Result<(), ScribeServiceError> {
     let matcher: Matcher = (key.clone(), value.clone()).try_into()?;
     key.delete()?;
     matcher.delete();
+    log::debug!("Remove scribe: {:?}", key);
     Ok(())
 }
 
