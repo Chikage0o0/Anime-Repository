@@ -1,26 +1,29 @@
 use super::*;
 use crate::{
-    data::{pending_videos::insert, scribe::Key},
+    data::pending_videos::insert,
     model::{
-        nfo::{episode::Episode, public::Nfo, tvshow::Tvshow},
+        nfo::{episode::Episode, tvshow::Tvshow, Nfo, ProviderKnown},
         setting,
     },
 };
-use std::{fmt::Debug, path::PathBuf};
+use std::fmt::Debug;
 
 // TODO: 异步
-pub fn process(
-    key: Key,
-    path: PathBuf,
+pub fn process<P: AsRef<Path>>(
+    id: &str,
+    provider: ProviderKnown,
+    title: &str,
+    lang: &str,
     season: u64,
     episode: u64,
+    path: P,
 ) -> Result<(), TvshowNfoServiceError> {
+    let path = path.as_ref();
     log::info!("Processing {:?}", path);
-    let value = key.get().unwrap();
 
     use tauri::async_runtime::block_on;
 
-    let tvshow_title = value.title.clone();
+    let tvshow_title = title.clone();
     let tvshow_path = setting::Setting::get()
         .storage
         .repository_path
@@ -31,10 +34,13 @@ pub fn process(
     if tvshow_nfo_path.exists() {
         tvshow_nfo = read_nfo(&tvshow_nfo_path)?;
     } else {
-        tvshow_nfo = Tvshow::new(&key.id, key.provider.into());
+        tvshow_nfo = Tvshow::new(&id, provider.clone().into());
     }
-    // 从网络获取信息
-    block_on(tvshow_nfo.update(&value.lang)).unwrap();
+    // 从网络Tvshow获取信息
+    if let Err(e) = block_on(tvshow_nfo.update(lang)) {
+        log::error!("Get {} tvshow nfo error: {:?}", tvshow_title, e);
+        return Err(TvshowNfoServiceError::NetworkError(e));
+    }
 
     write_nfo(&tvshow_nfo_path, &tvshow_nfo).unwrap();
     tvshow_nfo
@@ -42,8 +48,18 @@ pub fn process(
         .iter()
         .for_each(|(path, thumb)| download_thumb(&path, &thumb).unwrap());
 
-    let mut episode_nfo = Episode::new(&key.id, key.provider.into());
-    block_on(episode_nfo.update(&value.lang, season, episode));
+    // 从网络Episode获取信息
+    let mut episode_nfo = Episode::new(&id, provider.clone().into());
+    if let Err(e) = block_on(episode_nfo.update(lang, season, episode)) {
+        log::error!(
+            "Get {} S{:02}E{:02} nfo error: {:?}",
+            tvshow_title,
+            season,
+            episode,
+            e
+        );
+        return Err(TvshowNfoServiceError::NetworkError(e));
+    }
 
     let episode_title = episode_nfo.title.clone();
 
@@ -66,7 +82,7 @@ pub fn process(
     ));
 
     // 添加到待处理列表
-    insert(&path, &episode_path);
+    insert(&path, &episode_path.as_path());
 
     write_nfo(&episode_nfo_path, &episode_nfo).unwrap();
     if let Some(thumb) = episode_nfo.get_thumb() {
@@ -90,4 +106,6 @@ pub enum TvshowNfoServiceError {
     NfoCreateError(#[from] NfoServiceError),
     #[error(transparent)]
     SledError(#[from] crate::data::scribe::ScribeDataError),
+    #[error(transparent)]
+    NetworkError(#[from] crate::model::nfo::NfoGetError),
 }

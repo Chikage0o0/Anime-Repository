@@ -3,7 +3,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use super::public::*;
+use super::*;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_with::skip_serializing_none;
@@ -102,13 +102,13 @@ impl Nfo for Movie {
     }
 }
 impl Movie {
-    pub async fn update(&mut self, lang: &str) {
+    pub async fn update(&mut self, lang: &str) -> Result<(), NfoGetError> {
         use crate::http::tmdb::*;
         if let Some((id, provider)) = self.get_default_id() {
             match provider {
                 Provider::Known(ProviderKnown::TMDB) => {
                     log::info!("Get movie with id: {} from TMDB", id);
-                    let json = get_movie_info(id, lang).await;
+                    let json = get_json(get_movie_info(id, lang).await?)?;
                     let data: Value = serde_json::from_str(&json).unwrap();
 
                     if let Some(title) = data.get("title") {
@@ -241,6 +241,7 @@ impl Movie {
                 _ => todo!(),
             }
         }
+        Ok(())
     }
 
     fn update_thumb(
@@ -469,7 +470,7 @@ mod tests {
     fn test_update() {
         use tauri::async_runtime::block_on;
         let mut data: Movie = Movie::new("532321", Provider::Known(ProviderKnown::TMDB));
-        block_on(data.update("zh-CN"));
+        block_on(data.update("zh-CN")).unwrap();
         println!("{:#?}", data);
         assert!(data.premiered == Some("2018-10-06".to_string()))
     }

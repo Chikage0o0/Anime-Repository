@@ -2,7 +2,7 @@ use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 
-use crate::model::nfo::public::ProviderKnown;
+use crate::model::nfo::ProviderKnown;
 
 lazy_static! {
     static ref DB: sled::Db = sled::open("config/unrecognized_videos").unwrap();

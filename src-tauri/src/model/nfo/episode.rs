@@ -1,4 +1,4 @@
-use super::public::*;
+use super::*;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_with::skip_serializing_none;
@@ -83,13 +83,18 @@ impl Nfo for Episode {
 }
 
 impl Episode {
-    pub async fn update(&mut self, lang: &str, season: u64, episode: u64) {
+    pub async fn update(
+        &mut self,
+        lang: &str,
+        season: u64,
+        episode: u64,
+    ) -> Result<(), NfoGetError> {
         use crate::http::tmdb::*;
         if let Some((id, provider)) = self.get_default_id() {
             match provider {
                 Provider::Known(ProviderKnown::TMDB) => {
                     log::info!("Get {:?} episode {}x{} from TMDB", id, season, episode);
-                    let json = get_tv_episode_info(id, season, episode, lang).await;
+                    let json = get_json(get_tv_episode_info(id, season, episode, lang).await?)?;
                     let data: Value = serde_json::from_str(&json).unwrap();
 
                     self.display_episode = Some(episode);
@@ -144,6 +149,7 @@ impl Episode {
                 _ => todo!(),
             }
         }
+        Ok(())
     }
 
     fn update_thumb(
@@ -353,7 +359,7 @@ mod tests {
     fn test_update() {
         use tauri::async_runtime::block_on;
         let mut data = Episode::new("63322", Provider::Known(ProviderKnown::TMDB));
-        block_on(data.update("zh-CN", 1, 1));
+        block_on(data.update("zh-CN", 1, 1)).unwrap();
         assert!(data.aired == Some("2012-01-06".to_string()));
     }
 }

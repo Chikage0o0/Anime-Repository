@@ -1,6 +1,6 @@
 use crate::{
     data::scribe::{list, Key, Value},
-    model::{nfo::public::ProviderKnown, setting::Setting},
+    model::{nfo::ProviderKnown, setting::Setting},
     utils::file::walk_file,
 };
 use lazy_static::lazy_static;
@@ -68,10 +68,7 @@ impl From<Matcher> for Key {
 impl Matcher {
     /// FullPath match tvshow_regex
     /// FileName match episode_regex + episode_offset
-    fn match_video<P: AsRef<Path>>(
-        &self,
-        file_path: P,
-    ) -> Result<(PathBuf, u64, u64), MatcherError> {
+    fn match_video<P: AsRef<Path>>(&self, file_path: P) -> Result<(PathBuf, u64), MatcherError> {
         if !file_path.as_ref().is_file() || file_path.as_ref().is_symlink() {
             return Err(MatcherError::NotFile(file_path.as_ref().to_path_buf()));
         }
@@ -84,7 +81,6 @@ impl Matcher {
             match self.episode_regex.captures(file_name) {
                 Some(caps) if caps.len() == 1 => Ok((
                     file_path.as_ref().to_path_buf(),
-                    self.season,
                     (caps
                         .get(self.episode_position.into())
                         .unwrap()
@@ -105,18 +101,18 @@ impl Matcher {
         }
     }
 
-    pub fn match_all_videos(&self) -> Vec<(PathBuf, u64, u64)> {
+    pub fn match_all_videos(&self) -> Vec<(PathBuf, u64)> {
         walk_file(Setting::get().storage.pending_path.as_path())
             .iter()
             .filter_map(|f| self.match_video(f).ok())
-            .collect::<Vec<(PathBuf, u64, u64)>>()
+            .collect::<Vec<(PathBuf, u64)>>()
     }
 
-    pub fn matchers_video<P: AsRef<Path>>(file_path: P) -> Option<(Key, PathBuf, u64, u64)> {
+    pub fn matchers_video<P: AsRef<Path>>(file_path: P) -> Option<(Key, PathBuf, u64)> {
         let matchers = MATCHERS.lock().unwrap();
         for matcher in matchers.iter() {
-            if let Ok((path, season, episode)) = matcher.match_video(file_path.as_ref()) {
-                return Some((matcher.clone().into(), path, season, episode));
+            if let Ok((path, episode)) = matcher.match_video(file_path.as_ref()) {
+                return Some((matcher.clone().into(), path, episode));
             }
         }
         None
@@ -150,10 +146,10 @@ impl Matcher {
         log::debug!("Insert matcher: {:?}", self);
     }
 
-    pub fn delete(&self) {
+    pub fn delete(id: &str, provider: ProviderKnown) {
         let mut matchers = MATCHERS.lock().unwrap();
-        matchers.retain(|m| m.id != self.id && m.provider != self.provider);
-        log::debug!("Delete matcher: {:?}", self);
+        matchers.retain(|m| m.id != id && m.provider != provider);
+        log::info!("Delete matcher: {} {:?}", id, provider);
     }
 }
 

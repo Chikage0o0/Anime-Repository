@@ -1,28 +1,38 @@
-use super::nfo::*;
+use super::nfo::{tvshow, *};
 use crate::{
     data::scribe::{Key, Value},
     utils::matcher::Matcher,
 };
 
-use std::fmt::Debug;
+use std::{fmt::Debug, path::PathBuf};
 
 fn insert((key, value): (Key, Value)) -> Result<(), ScribeServiceError> {
     log::info!("Inserting scribe {:?}", key);
     let matcher: Matcher = (key.clone(), value.clone()).try_into()?;
     key.insert(&value)?;
     matcher.insert();
-    let result = matcher.match_all_videos();
-    result
-        .into_iter()
-        .for_each(|(path, season, episode)| todo!("{:?} {:?} {:?}", path, season, episode));
     Ok(())
 }
 
-fn remove((key, value): (Key, Value)) -> Result<(), ScribeServiceError> {
-    let matcher: Matcher = (key.clone(), value.clone()).try_into()?;
+fn remove(key: Key) -> Result<(), ScribeServiceError> {
     key.delete()?;
-    matcher.delete();
+    Matcher::delete(&key.id, key.provider);
     log::debug!("Remove scribe: {:?}", key);
+    Ok(())
+}
+
+pub fn process(key: Key, path: PathBuf, episode: u64) -> Result<(), ScribeServiceError> {
+    let value = key.get()?;
+
+    tvshow::process(
+        &key.id,
+        key.provider,
+        &value.title,
+        &value.lang,
+        value.season,
+        episode,
+        path,
+    )?;
     Ok(())
 }
 
@@ -34,4 +44,6 @@ pub enum ScribeServiceError {
     NfoCreateError(#[from] NfoServiceError),
     #[error(transparent)]
     SledError(#[from] crate::data::scribe::ScribeDataError),
+    #[error(transparent)]
+    ProcessTvshowInfoError(#[from] super::nfo::tvshow::TvshowNfoServiceError),
 }

@@ -1,4 +1,4 @@
-use crate::model::nfo::public::{Provider, ProviderKnown, Uniqueid};
+use crate::model::nfo::{Provider, ProviderKnown, Uniqueid};
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use serde_json::json;

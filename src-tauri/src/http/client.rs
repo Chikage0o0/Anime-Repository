@@ -1,6 +1,6 @@
 use crate::model::setting::Setting;
 use lazy_static::lazy_static;
-use reqwest::{self, header::HeaderMap};
+use reqwest::{header::HeaderMap, Result, StatusCode};
 
 lazy_static! {
     static ref HTTP_CLIENT: reqwest::Client = new_client();
@@ -19,32 +19,16 @@ fn new_client() -> reqwest::Client {
     builder.build().unwrap()
 }
 
-//TODO: 错误处理
-
-pub async fn get_string(url: String, headers: HeaderMap) -> String {
-    log::debug!("GET {}", url);
-    let body = HTTP_CLIENT
-        .get(url)
-        .headers(headers)
-        .send()
-        .await
-        .unwrap()
-        .text()
-        .await
-        .unwrap();
-    body
+pub async fn get_string(url: String, headers: HeaderMap) -> Result<(String, StatusCode)> {
+    let res = HTTP_CLIENT.get(&url).headers(headers).send().await?;
+    let status = res.status();
+    let text = res.text().await?;
+    Ok((text, status))
 }
 
-pub async fn get_bytes(url: String, headers: HeaderMap) -> Vec<u8> {
-    log::debug!("GET {}", url);
-    let body = HTTP_CLIENT
-        .get(url)
-        .headers(headers)
-        .send()
-        .await
-        .unwrap()
-        .bytes()
-        .await
-        .unwrap();
-    body.to_vec()
+pub async fn get_bytes(url: String, headers: HeaderMap) -> Result<(Vec<u8>, StatusCode)> {
+    let res = HTTP_CLIENT.get(&url).headers(headers).send().await?;
+    let status = res.status();
+    let bytes = res.bytes().await?;
+    Ok((bytes.to_vec(), status))
 }

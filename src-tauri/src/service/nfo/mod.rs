@@ -1,8 +1,9 @@
+pub mod movie;
 pub mod tvshow;
 
 use crate::http::client;
 use quick_xml::se::Serializer;
-use reqwest::header::HeaderMap;
+use reqwest::{header::HeaderMap, StatusCode};
 use serde::Deserialize;
 use std::{
     fs::File,
@@ -13,7 +14,24 @@ use std::{
 fn download_thumb<P: AsRef<Path>>(path: P, url: &str) -> Result<(), NfoServiceError> {
     log::info!("Downloading thumb {:?}", url);
     use tauri::async_runtime::block_on;
-    let img = block_on(client::get_bytes(url.to_string(), HeaderMap::new()));
+    let img = match block_on(client::get_bytes(url.to_string(), HeaderMap::new())) {
+        Ok(res) => match res.1 {
+            reqwest::StatusCode::OK => res.0,
+            _ => {
+                log::error!(
+                    "Error downloading {} thumb: {}",
+                    path.as_ref().display(),
+                    res.1
+                );
+                return Err(NfoServiceError::DownloadThumbServerError(res.1));
+            }
+        },
+        Err(e) => {
+            log::error!("Error downloading {} thumb: {}", path.as_ref().display(), e);
+            return Err(NfoServiceError::DownloadThumbClientError(e));
+        }
+    };
+
     if let Some(path) = path.as_ref().parent() {
         std::fs::create_dir_all(path)?;
     }
@@ -65,4 +83,8 @@ pub enum NfoServiceError {
     SerializeError(#[from] quick_xml::DeError),
     #[error(transparent)]
     RegexBuildError(#[from] crate::utils::matcher::MatcherError),
+    #[error(transparent)]
+    DownloadThumbClientError(#[from] reqwest::Error),
+    #[error("Error downloading thumb")]
+    DownloadThumbServerError(StatusCode),
 }
