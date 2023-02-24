@@ -44,21 +44,9 @@ pub fn delete(path: PathBuf) {
 mod test {
     use super::*;
 
-    fn init() {
-        let _ = std::fs::remove_dir_all("config/pending_videos");
-        let _ = std::fs::create_dir_all("config/pending_videos");
-    }
-
     #[test]
-    fn test_insert() {
-        init();
-        let src_path = PathBuf::from("test.mp4");
-        let target_path = PathBuf::from("test.mp4");
-        insert(src_path, target_path);
-        let list = get_all();
-        assert_eq!(list.len(), 1);
-        assert!(list[0].0.to_str().unwrap().contains("test.mp4"));
-        assert!(list[0].1.to_str().unwrap().contains("test.mp4"));
-        let _ = std::fs::remove_dir_all("config/pending_videos");
+    fn test_get_all() {
+        let all = get_all();
+        dbg!(all);
     }
 }

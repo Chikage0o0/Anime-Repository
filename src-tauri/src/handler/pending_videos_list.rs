@@ -1,10 +1,10 @@
 use crate::{
     data::pending_videos::{delete, get_all},
-    model::setting::Setting,
     utils::file,
 };
 
-pub fn process() {
+pub(super) fn process() {
+    //log::info!("Pending videos list process");
     let list = get_all();
 
     list.iter().for_each(|(src_path, target_path)| {
@@ -24,15 +24,5 @@ pub fn process() {
             eprintln!("{} not exists", src_path.to_str().unwrap());
             delete(src_path.to_path_buf());
         }
-    });
-}
-
-// Run processes at 5 minute intervals
-pub fn run() {
-    std::thread::spawn(|| loop {
-        std::thread::sleep(std::time::Duration::from_secs(
-            Setting::get().storage.pending_path_scan_interval,
-        ));
-        process();
     });
 }

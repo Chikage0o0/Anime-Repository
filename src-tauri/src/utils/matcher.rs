@@ -102,7 +102,7 @@ impl Matcher {
     }
 
     pub fn match_all_videos(&self) -> Vec<(PathBuf, u64)> {
-        walk_file(Setting::get().storage.pending_path.as_path())
+        walk_file(Setting::get_pending_path())
             .iter()
             .filter_map(|f| self.match_video(f).ok())
             .collect::<Vec<(PathBuf, u64)>>()

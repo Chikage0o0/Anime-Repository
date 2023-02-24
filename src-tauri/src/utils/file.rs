@@ -15,6 +15,7 @@ pub fn move_file<P: AsRef<Path>>(from: P, to: P) -> Result<(), std::io::Error> {
     if let Some(p) = to.as_ref().parent() {
         std::fs::create_dir_all(p).unwrap();
     }
+    log::info!("move file from {:?} to {:?}", from.as_ref(), to.as_ref());
     std::fs::rename(from.as_ref(), to.as_ref())?;
     Ok(())
 }
@@ -35,7 +36,11 @@ pub fn create_shortcut<P: AsRef<Path>>(src: P, target: P) -> Result<(), std::io:
         use std::os::unix::fs::symlink;
         symlink(src.as_ref(), target.as_ref())?;
     }
-
+    log::info!(
+        "create shortcut from {:?} to {:?}",
+        src.as_ref(),
+        target.as_ref()
+    );
     Ok(())
 }
 

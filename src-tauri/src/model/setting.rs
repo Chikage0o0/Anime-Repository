@@ -10,14 +10,14 @@ const SETTING_PATH: &str = "config/setting.toml";
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Setting {
-    pub ui: UI,
-    pub storage: Storage,
-    pub network: Network,
+    ui: UI,
+    storage: Storage,
+    network: Network,
 }
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct UI {
-    pub lang: String,
-    pub theme: Theme,
+    lang: String,
+    theme: Theme,
 }
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Theme {
@@ -27,9 +27,9 @@ pub enum Theme {
 }
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Storage {
-    pub pending_path: PathBuf,
-    pub pending_path_scan_interval: u64,
-    pub repository_path: PathBuf,
+    pending_path: PathBuf,
+    pending_path_scan_interval: u64,
+    repository_path: PathBuf,
 }
 
 /// 网络相关配置
@@ -104,9 +104,9 @@ impl Setting {
     }
 
     pub fn get_proxy() -> Option<String> {
-        let setting = Setting::get();
-        if setting.network.use_proxy && setting.network.proxy.is_some() {
-            setting.network.proxy
+        let network = CONFIG.lock().unwrap().network.clone();
+        if network.use_proxy && network.proxy.is_some() {
+            network.proxy
         } else {
             None
         }
@@ -122,6 +122,18 @@ impl Setting {
         *old_setting = setting;
         log::info!("Setting applied");
         Ok(())
+    }
+
+    pub fn get_scan_interval() -> u64 {
+        CONFIG.lock().unwrap().storage.pending_path_scan_interval
+    }
+
+    pub fn get_pending_path() -> PathBuf {
+        CONFIG.lock().unwrap().storage.pending_path.clone()
+    }
+
+    pub fn get_repository_path() -> PathBuf {
+        CONFIG.lock().unwrap().storage.repository_path.clone()
     }
 }
 

@@ -11,8 +11,8 @@ use serde_with::skip_serializing_none;
 #[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize, PartialEq, Default)]
 #[serde(rename = "movie")]
-struct Movie {
-    title: String,
+pub struct Movie {
+    pub title: String,
     #[serde(rename = "originaltitle")]
     original_title: Option<String>,
     #[serde(rename = "sorttitle")]
@@ -297,6 +297,15 @@ impl Movie {
             }
         }
         thumbs
+    }
+
+    pub fn get_year(&self) -> Option<u64> {
+        if let Some(premiered) = &self.premiered {
+            let year = premiered.split('-').next().unwrap();
+            Some(year.parse::<u64>().unwrap())
+        } else {
+            None
+        }
     }
 }
 

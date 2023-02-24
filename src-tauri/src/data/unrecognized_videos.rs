@@ -10,13 +10,15 @@ lazy_static! {
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Hash)]
 /// The type of video that is unrecognized
-/// Movie(String) id
-/// TV(String, u64, u64) id, season, episode
+/// Movie: (id, provider, lang)
+/// TvShow: (id, provider, lang,title, season, episode)
 pub enum VideoData {
-    Movie(Option<String>, Option<ProviderKnown>),
+    Movie(Option<String>, Option<ProviderKnown>, Option<String>),
     TvShow(
         Option<String>,
         Option<ProviderKnown>,
+        Option<String>,
+        Option<String>,
         Option<u64>,
         Option<u64>,
     ),

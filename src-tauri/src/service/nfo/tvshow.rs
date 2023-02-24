@@ -24,9 +24,8 @@ pub fn process<P: AsRef<Path>>(
     use tauri::async_runtime::block_on;
 
     let tvshow_title = title.clone();
-    let tvshow_path = setting::Setting::get()
-        .storage
-        .repository_path
+    let tvshow_path = setting::Setting::get_repository_path()
+        .join("TV Shows")
         .join(&tvshow_title);
     let tvshow_nfo_path = tvshow_path.join("tvshow.nfo");
 
