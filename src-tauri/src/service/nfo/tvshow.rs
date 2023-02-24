@@ -6,9 +6,9 @@ use crate::{
         setting,
     },
 };
-
 use std::{fmt::Debug, path::PathBuf};
 
+// TODO: 异步
 pub fn process(
     key: Key,
     path: PathBuf,
@@ -30,11 +30,11 @@ pub fn process(
     let mut tvshow_nfo: Tvshow;
     if tvshow_nfo_path.exists() {
         tvshow_nfo = read_nfo(&tvshow_nfo_path)?;
-        block_on(tvshow_nfo.update(&value.lang));
     } else {
         tvshow_nfo = Tvshow::new(&key.id, key.provider.into());
-        block_on(tvshow_nfo.update(&value.lang));
     }
+    // 从网络获取信息
+    block_on(tvshow_nfo.update(&value.lang)).unwrap();
 
     write_nfo(&tvshow_nfo_path, &tvshow_nfo).unwrap();
     tvshow_nfo
@@ -65,7 +65,7 @@ pub fn process(
         path.extension().unwrap().to_str().unwrap()
     ));
 
-    // Add video movement to the pending queue
+    // 添加到待处理列表
     insert(&path, &episode_path);
 
     write_nfo(&episode_nfo_path, &episode_nfo).unwrap();

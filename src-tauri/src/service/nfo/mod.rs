@@ -10,7 +10,7 @@ use std::{
     path::Path,
 };
 
-pub(super) fn download_thumb<P: AsRef<Path>>(path: P, url: &str) -> Result<(), NfoServiceError> {
+fn download_thumb<P: AsRef<Path>>(path: P, url: &str) -> Result<(), NfoServiceError> {
     log::info!("Downloading thumb {:?}", url);
     use tauri::async_runtime::block_on;
     let img = block_on(client::get_bytes(url.to_string(), HeaderMap::new()));
@@ -23,7 +23,7 @@ pub(super) fn download_thumb<P: AsRef<Path>>(path: P, url: &str) -> Result<(), N
     Ok(())
 }
 
-pub(super) fn read_nfo<P, C>(path: P) -> Result<C, NfoServiceError>
+fn read_nfo<P, C>(path: P) -> Result<C, NfoServiceError>
 where
     P: AsRef<Path>,
     C: for<'a> Deserialize<'a>,
@@ -35,7 +35,7 @@ where
     Ok(data)
 }
 
-pub(super) fn write_nfo<P, C>(path: P, data: &C) -> Result<(), NfoServiceError>
+fn write_nfo<P, C>(path: P, data: &C) -> Result<(), NfoServiceError>
 where
     P: AsRef<Path>,
     C: serde::Serialize,

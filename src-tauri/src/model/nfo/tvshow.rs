@@ -94,7 +94,7 @@ impl Nfo for Tvshow {
     }
 }
 impl Tvshow {
-    pub async fn update(&mut self, lang: &str) {
+    pub async fn update(&mut self, lang: &str) -> Result<(), Box<dyn std::error::Error>> {
         use crate::http::tmdb::*;
         if let Some((id, provider)) = self.get_default_id() {
             match provider {
@@ -222,6 +222,7 @@ impl Tvshow {
                 _ => todo!(),
             }
         }
+        Ok(())
     }
 
     fn update_thumb(
@@ -412,7 +413,7 @@ mod tests {
     fn test_update() {
         use tauri::async_runtime::block_on;
         let mut data: Tvshow = Tvshow::new("123249", Provider::Known(ProviderKnown::TMDB));
-        block_on(data.update("zh-CN"));
+        block_on(data.update("zh-CN")).unwrap();
         assert!(data.premiered == Some("2022-01-09".to_string()))
     }
 }

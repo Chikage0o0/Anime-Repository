@@ -6,7 +6,7 @@ use crate::{
 
 use std::fmt::Debug;
 
-fn insert_scribe((key, value): (Key, Value)) -> Result<(), ScribeServiceError> {
+fn insert((key, value): (Key, Value)) -> Result<(), ScribeServiceError> {
     log::info!("Inserting scribe {:?}", key);
     let matcher: Matcher = (key.clone(), value.clone()).try_into()?;
     key.insert(&value)?;
@@ -18,7 +18,7 @@ fn insert_scribe((key, value): (Key, Value)) -> Result<(), ScribeServiceError> {
     Ok(())
 }
 
-fn remove_scribe((key, value): (Key, Value)) -> Result<(), ScribeServiceError> {
+fn remove((key, value): (Key, Value)) -> Result<(), ScribeServiceError> {
     let matcher: Matcher = (key.clone(), value.clone()).try_into()?;
     key.delete()?;
     matcher.delete();
