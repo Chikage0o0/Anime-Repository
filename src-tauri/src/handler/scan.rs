@@ -1,5 +1,5 @@
 use crate::{
-    data::pending_videos::get,
+    data::{pending_videos, unrecognized_videos},
     model::setting::Setting,
     utils::{file, matcher::Matcher},
 };
@@ -44,14 +44,23 @@ fn process<P: AsRef<Path>>(path: P) {
                     let path = &e.path;
                     // 排除非视频文件以及已经加入处理队列的文件
                     (e.kind == DebouncedEventKind::Any
-                        && get(path).is_none()
+                        && pending_videos::get(path).is_none()
+                        && unrecognized_videos::get(path).is_none()
                         && file::is_video(path))
                     .then(|| path)
                 })
-                .filter_map(|path| Matcher::matchers_video(path))
-                .for_each(|f| {
-                    crate::service::scribe::process(f.0, f.1, f.2, f.3)
-                        .unwrap_or_else(|err| log::error!("{:?}", err))
+                // 对视频文件进行匹配
+                .for_each(|path| match Matcher::matchers_video(path) {
+                    Some((key, path, season, episode)) => {
+                        log::info!("Found Scribe video: {:?}", path);
+                        crate::service::nfo::tvshow::process(key, path, season, episode)
+                            .unwrap_or_else(|err| log::error!("{:?}", err))
+                    }
+                    // 未匹配到的视频文件
+                    None => {
+                        log::info!("Found Unrecognized video: {:?}", path);
+                        unrecognized_videos::insert(path, unrecognized_videos::VideoData::None)
+                    }
                 });
         }
     }
