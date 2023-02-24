@@ -275,10 +275,12 @@ impl Tvshow {
                 && thumb.aspect == Some("poster".to_string())
                 && thumb.season != None
         }) {
-            thumbs.insert(
-                path.join(format!("season{:02}-poster.jpg", thumb.season.unwrap())),
-                thumb.value.clone(),
-            );
+            let season_poster = if thumb.season.unwrap() == 0 {
+                path.join("season-specials-poster.jpg")
+            } else {
+                path.join(format!("season{:02}-poster.jpg", thumb.season.unwrap()))
+            };
+            thumbs.insert(season_poster, thumb.value.clone());
         }
 
         //get fanart

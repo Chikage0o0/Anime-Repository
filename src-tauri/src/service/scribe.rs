@@ -117,7 +117,11 @@ pub fn process(
 
     let episode_title = episode_nfo.title.clone();
 
-    let episode_folder_path = tvshow_path.join(format!("Season {}", season));
+    let episode_folder_path = tvshow_path.join(if season == 0 {
+        "Specials".to_string()
+    } else {
+        format!("Season {:02}", season)
+    });
     let episode_nfo_path = episode_folder_path.join(format!(
         "{} - S{:02}E{:02} - {}.nfo",
         &tvshow_title, season, episode, &episode_title
