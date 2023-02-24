@@ -1,10 +1,11 @@
 use crate::{
-    data::pending_videos::{delete_pending_video, get_pending_videos},
+    data::pending_videos::{delete, get_all},
+    model::setting::Setting,
     utils::file,
 };
 
 pub fn process() {
-    let list = get_pending_videos();
+    let list = get_all();
 
     list.iter().for_each(|(src_path, target_path)| {
         if src_path.is_file() && !src_path.is_symlink() {
@@ -15,13 +16,13 @@ pub fn process() {
                 }
             }
             if let Ok(_) = file::move_file(src_path, target_path) {
-                delete_pending_video(src_path.to_path_buf());
+                delete(src_path.to_path_buf());
                 file::create_shortcut(&target_path, &src_path)
                     .unwrap_or_else(|err| log::error!("Create shortcut failed: {:?}", err));
             }
         } else {
             eprintln!("{} not exists", src_path.to_str().unwrap());
-            delete_pending_video(src_path.to_path_buf());
+            delete(src_path.to_path_buf());
         }
     });
 }
@@ -29,7 +30,9 @@ pub fn process() {
 // Run processes at 5 minute intervals
 pub fn run() {
     std::thread::spawn(|| loop {
-        std::thread::sleep(std::time::Duration::from_secs(2));
+        std::thread::sleep(std::time::Duration::from_secs(
+            Setting::get().storage.pending_path_scan_interval,
+        ));
         process();
     });
 }

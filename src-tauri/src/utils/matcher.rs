@@ -76,18 +76,6 @@ impl Matcher {
             return Err(MatcherError::NotFile(file_path.as_ref().to_path_buf()));
         }
 
-        let ext = file_path
-            .as_ref()
-            .extension()
-            .unwrap_or_default()
-            .to_str()
-            .unwrap();
-
-        if !matches!(ext, "mkv" | "mp4" | "webm") {
-            log::warn!("File not video: {}", file_path.as_ref().display());
-            return Err(MatcherError::FileNotVideo(file_path.as_ref().to_path_buf()));
-        }
-
         if self
             .tvshow_regex
             .is_match(file_path.as_ref().to_str().unwrap_or_default())

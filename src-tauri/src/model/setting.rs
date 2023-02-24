@@ -28,6 +28,7 @@ pub enum Theme {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Storage {
     pub pending_path: PathBuf,
+    pub pending_path_scan_interval: u64,
     pub repository_path: PathBuf,
 }
 
@@ -57,6 +58,7 @@ impl Setting {
             },
             storage: Storage {
                 pending_path: download_dir,
+                pending_path_scan_interval: 60,
                 repository_path: video_dir,
             },
             network: Network {

@@ -1,10 +1,12 @@
 use crate::{
-    data::pending_videos::get_pending_video, model::setting::Setting, utils::matcher::Matcher,
+    data::pending_videos::get,
+    model::setting::Setting,
+    utils::{file, matcher::Matcher},
 };
 use notify_debouncer_mini::{new_debouncer, notify::*, DebouncedEventKind};
 use std::{path::Path, thread, time::Duration};
 
-pub fn watch_pending_path() {
+pub fn scan_pending_path() {
     let path = Setting::get().storage.pending_path;
     thread::spawn(move || {
         log::info!("Watching pending path: {:?}", path);
@@ -14,15 +16,20 @@ pub fn watch_pending_path() {
         if !path.is_dir() {
             panic!("Pending path is not a directory");
         }
-        watch(path);
+        process(path);
     });
 }
 
-fn watch<P: AsRef<Path>>(path: P) {
+fn process<P: AsRef<Path>>(path: P) {
     let (tx, rx) = std::sync::mpsc::channel();
 
     //  间隔30秒向通道发送信息
-    let mut debouncer = new_debouncer(Duration::from_secs(2), None, tx).unwrap();
+    let mut debouncer = new_debouncer(
+        Duration::from_secs(Setting::get().storage.pending_path_scan_interval),
+        None,
+        tx,
+    )
+    .unwrap();
 
     debouncer
         .watcher()
@@ -35,10 +42,10 @@ fn watch<P: AsRef<Path>>(path: P) {
             e.iter()
                 .filter_map(|e| {
                     let path = &e.path;
+                    // 排除非视频文件以及已经加入处理队列的文件
                     (e.kind == DebouncedEventKind::Any
-                        && path.is_file()
-                        && !path.is_symlink()
-                        && get_pending_video(path).is_none())
+                        && get(path).is_none()
+                        && file::is_video(path))
                     .then(|| path)
                 })
                 .filter_map(|path| Matcher::matchers_video(path))

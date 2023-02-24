@@ -1,6 +1,6 @@
 use crate::{
     data::{
-        pending_videos::insert_pending_video,
+        pending_videos::insert,
         scribe::{Key, Value},
     },
     http::client,
@@ -8,7 +8,7 @@ use crate::{
         nfo::{episode::Episode, public::Nfo, tvshow::Tvshow},
         setting,
     },
-    utils::{file, matcher::Matcher},
+    utils::matcher::Matcher,
 };
 use quick_xml::se::Serializer;
 use reqwest::header::HeaderMap;
@@ -131,18 +131,9 @@ pub fn process(
         path.extension().unwrap().to_str().unwrap()
     ));
 
-    if let Err(_err) = file::move_file(&path, &episode_path) {
-        insert_pending_video(&path, &episode_path);
-        log::info!(
-            "Failed to move {}, inserting into pending videos",
-            path.display()
-        );
-        // eprintln!("Error: {}", err)
-    } else {
-        file::create_shortcut(&episode_path, &path).unwrap_or_else(|err| {
-            log::error!("Failed to create shortcut: {}", err);
-        });
-    }
+    // Add video movement to the pending queue
+    insert(&path, &episode_path);
+
     write_nfo(&episode_nfo_path, &episode_nfo).unwrap();
     if let Some(thumb) = episode_nfo.get_thumb() {
         download_thumb(
