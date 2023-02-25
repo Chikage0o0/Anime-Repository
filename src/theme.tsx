@@ -1,27 +1,35 @@
-import { theme } from 'antd'
-import { SettingObject } from '@/store/settingStore'
-
-const { defaultAlgorithm, darkAlgorithm } = theme
+import setting, { SettingObject } from '@/store/settingStore'
 
 function autoTheme() {
   const mediaQueryListDark = window.matchMedia('(prefers-color-scheme: dark)')
   if (mediaQueryListDark.matches) {
-    return darkAlgorithm
+    return 'dark'
   } else {
-    return defaultAlgorithm
+    return 'light'
   }
 }
+await setting.init()
+const theme = (setting.setting as SettingObject).ui.theme
+//const theme = 'Dark'
 
-export function getTheme(setting: SettingObject) {
-  const theme = setting.ui.theme
+export function getColorScheme() {
   switch (theme) {
     case 'Auto':
       return autoTheme()
     case 'Light':
-      return defaultAlgorithm
+      return 'light'
     case 'Dark':
-      return darkAlgorithm
+      return 'dark'
     default:
       return autoTheme()
+  }
+}
+
+export function getPrimaryColor() {
+  switch (getColorScheme()) {
+    case 'dark':
+      return 'gray'
+    case 'light':
+      return 'blue'
   }
 }

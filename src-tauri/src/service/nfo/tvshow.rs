@@ -104,7 +104,7 @@ pub enum TvshowNfoServiceError {
     #[error(transparent)]
     NfoCreateError(#[from] NfoServiceError),
     #[error(transparent)]
-    SledError(#[from] crate::data::scribe::ScribeDataError),
+    SledError(#[from] crate::data::subscribe::SubscribeDataError),
     #[error(transparent)]
     NetworkError(#[from] crate::model::nfo::NfoGetError),
 }

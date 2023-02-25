@@ -34,8 +34,8 @@ pub(super) fn process<P: AsRef<Path>>(path: P) {
                 // 对视频文件进行匹配
                 .for_each(|path| match Matcher::matchers_video(path) {
                     Some((key, path, episode)) => {
-                        log::info!("Found Scribe video: {:?}", path);
-                        crate::service::scribe::process(key, path, episode)
+                        log::info!("Found Subscribe video: {:?}", path);
+                        crate::service::subscribe::process(key, path, episode)
                             .unwrap_or_else(|err| log::error!("{:?}", err))
                     }
                     // 未匹配到的视频文件

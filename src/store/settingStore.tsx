@@ -7,6 +7,7 @@ export type SettingObject = {
   network: { proxy: any; use_proxy: boolean }
   storage: {
     pending_path: string
+    pending_path_scan_interval: number
     repository_path: string
   }
 }

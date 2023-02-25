@@ -3,9 +3,8 @@
   "repository": "媒体库",
   "repository.movie": "电影",
   "repository.tv-shows": "电视剧",
-  "subscribe": "订阅列表",
-  "subscribe.rules": "规则",
-  "subscribe.unrecognized": "未识别",
+  "subscribe-rules": "订阅规则",
+  "unrecognized": "未识别",
   "setting": "设置",
   "setting.ui": "界面",
   "setting.ui.lang": "语言",
@@ -25,6 +24,7 @@
   "UI.apply": "应用",
   "UI.reset": "重置",
   "UI.cancel": "取消",
+  "UI.close": "退出",
   "UI.true": "是",
   "UI.false": "否"
 }

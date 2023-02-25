@@ -24,16 +24,16 @@ impl From<Key> for Uniqueid {
 }
 
 impl Key {
-    pub fn get(&self) -> Result<Value, ScribeDataError> {
+    pub fn get(&self) -> Result<Value, SubscribeDataError> {
         let serialized_self = bincode::serialize(self).unwrap();
         if let Some(x) = &DB.get(serialized_self).unwrap() {
             Ok(bincode::deserialize(&x.to_vec()[..]).unwrap())
         } else {
-            Err(ScribeDataError::KeyNotFound(json!(self).to_string()))
+            Err(SubscribeDataError::KeyNotFound(json!(self).to_string()))
         }
     }
 
-    pub fn insert(&self, value: &Value) -> Result<(), ScribeDataError> {
+    pub fn insert(&self, value: &Value) -> Result<(), SubscribeDataError> {
         DB.insert(
             bincode::serialize(self).unwrap(),
             bincode::serialize(&value).unwrap(),
@@ -41,7 +41,7 @@ impl Key {
         Ok(())
     }
 
-    pub fn delete(&self) -> Result<(), ScribeDataError> {
+    pub fn delete(&self) -> Result<(), SubscribeDataError> {
         let serialized_self = bincode::serialize(self).unwrap();
         DB.remove(serialized_self)?;
         Ok(())
@@ -75,7 +75,7 @@ pub fn list() -> Vec<(Key, Value)> {
 }
 
 #[derive(thiserror::Error, Debug)]
-pub enum ScribeDataError {
+pub enum SubscribeDataError {
     #[error("Key `{0}` not found in database")]
     KeyNotFound(String),
     #[error(transparent)]

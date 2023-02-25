@@ -3,9 +3,8 @@
   "repository": "Repository",
   "repository.movie": "Movie",
   "repository.tv-shows": "TV-Shows",
-  "subscribe": "Subscribe",
-  "subscribe.rules": "Rules",
-  "subscribe.unrecognized": "Unrecognized",
+  "subscribe-rules": "Subscribe Rule",
+  "unrecognized": "Unrecognized",
   "setting": "Setting",
   "setting.ui": "UI",
   "setting.ui.lang": "Language",
@@ -25,6 +24,7 @@
   "UI.apply": "Apply",
   "UI.reset": "Reset",
   "UI.cancel": "Cancel",
+  "UI.close": "Close",
   "UI.true": "Yes",
   "UI.false": "No"
 }
