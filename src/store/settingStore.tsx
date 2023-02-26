@@ -23,20 +23,26 @@ function autoTheme() {
 
 class SettingStore {
   setting: SettingObject | Object = {}
+  loading = false
   constructor() {
     makeAutoObservable(this, {
       init: flow,
+      applySetting: flow,
     })
-  }
-  apply = (a: SettingObject) => {
-    this.setting = a
   }
   changeTheme = (theme: string) => {
     this.setting['ui']['theme'] = theme
-  }
-  setSetting = (a: SettingObject) => {
-    invoke('save_setting', { setting: a })
-    this.setting = a
+  };
+  *applySetting(a: SettingObject) {
+    this.loading = true
+    try {
+      yield invoke('save_setting', { setting: a })
+      this.setting = a
+    } catch (e) {
+      throw e
+    } finally {
+      this.loading = false
+    }
   }
 
   get getColorScheme() {

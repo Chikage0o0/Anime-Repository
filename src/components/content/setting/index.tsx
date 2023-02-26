@@ -7,14 +7,15 @@ import {
   useMantineTheme,
 } from '@mantine/core'
 import { useForm } from '@mantine/form'
-import { IconDeviceFloppy } from '@tabler/icons-react'
+import { IconCheck, IconDeviceFloppy, IconX } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
-import { useTranslation } from 'react-i18next'
-import { open } from '@tauri-apps/api/dialog'
 import UI from './ui'
 import Storage from './storage'
 import Network from './network'
 import { SettingObject } from '@/store/settingStore'
+import { showNotification } from '@mantine/notifications'
+import { useTranslation } from 'react-i18next'
+import { flowResult } from 'mobx'
 
 const useStyles = createStyles(() => {
   return {
@@ -33,40 +34,65 @@ function Setting() {
   const store = useStore()
   const form = useForm({
     initialValues: store.settingStore.setting,
+    validate: {
+      network: {
+        proxy: (value: string) => {
+          if (
+            value === '' ||
+            /^(?:http(?:s?)|socks(?:5|5h)):\/\/(?:[A-Za-z0-9]*:[A-Za-z0-9]*@)*(?:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):(?:\d{2,5})$/.test(
+              value
+            )
+          ) {
+            return null
+          } else {
+            return t('setting.network.proxy_error')
+          }
+        },
+      },
+    },
   })
-
-  const selected = async (name: string, default_path: string) => {
-    const res = await open({
-      directory: true,
-      multiple: false,
-      defaultPath: default_path,
-    })
-    if (res != null) form.setFieldValue(name, res)
-  }
 
   return (
     <ScrollArea style={{ height: '100vh', padding: 30 }} type="scroll">
-      <form>
-        <UI form={form} classes={classes} />
-        <Storage form={form} classes={classes} />
-        <Network form={form} classes={classes} />
-        <Affix position={{ bottom: 20, right: 20 }}>
-          <ActionIcon
-            size="xl"
-            radius="xl"
-            variant="filled"
-            color={theme.primaryColor}>
-            <IconDeviceFloppy
-              stroke={1.2}
-              size={34}
-              onClick={() => {
-                console.log(form.values)
-                store.settingStore.setSetting(form.values as SettingObject)
-              }}
-            />
-          </ActionIcon>
-        </Affix>
-      </form>
+      <UI form={form} classes={classes} />
+      <Storage form={form} classes={classes} />
+      <Network form={form} classes={classes} />
+      <Affix position={{ bottom: 20, right: 20 }}>
+        <ActionIcon
+          size="xl"
+          radius="xl"
+          variant="filled"
+          loading={store.settingStore.loading}
+          color={theme.primaryColor}>
+          <IconDeviceFloppy
+            stroke={1.2}
+            size={34}
+            onClick={() => {
+              if (!form.validate().hasErrors) {
+                flowResult(
+                  store.settingStore.applySetting(form.values as SettingObject)
+                )
+                  .then(() => {
+                    showNotification({
+                      icon: <IconCheck />,
+                      title: t('setting.save_success'),
+                      message: 'Have a nice day! ✌️🤩✌️',
+                    })
+                  })
+                  .catch((e) => {
+                    showNotification({
+                      color: 'red',
+                      icon: <IconX />,
+                      autoClose: false,
+                      title: t('setting.save_failed'),
+                      message: e,
+                    })
+                  })
+              }
+            }}
+          />
+        </ActionIcon>
+      </Affix>
     </ScrollArea>
   )
 }

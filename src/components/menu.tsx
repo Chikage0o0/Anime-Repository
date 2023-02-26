@@ -8,6 +8,7 @@ import {
 } from '@tabler/icons-react'
 import { useTranslation } from 'react-i18next'
 import { appWindow } from '@tauri-apps/api/window'
+import { useNavigate } from 'react-router-dom'
 
 const useStyles = createStyles((theme, _params, getRef) => {
   const icon = getRef('icon')
@@ -80,6 +81,7 @@ export function Menu(props: { opened: boolean }) {
   const { t } = useTranslation()
   const { classes, cx } = useStyles()
   const [active, setActive] = useState('subscribe-rules')
+  const navigate = useNavigate()
 
   const links = data.map((item) => (
     <a
@@ -91,6 +93,7 @@ export function Menu(props: { opened: boolean }) {
       onClick={(event) => {
         event.preventDefault()
         setActive(item.label)
+        navigate(item.link)
       }}>
       <item.icon className={classes.linkIcon} stroke={1.5} />
       <span>{t(item.label)}</span>
@@ -116,6 +119,7 @@ export function Menu(props: { opened: boolean }) {
           onClick={(event) => {
             event.preventDefault()
             setActive('setting')
+            navigate('/setting')
           }}>
           <IconSettings className={classes.linkIcon} stroke={1.5} />
           <span>{t('setting')}</span>
