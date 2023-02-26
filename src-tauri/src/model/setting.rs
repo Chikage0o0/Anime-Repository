@@ -15,18 +15,18 @@ pub struct Setting {
     network: Network,
 }
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct UI {
+struct UI {
     lang: String,
     theme: Theme,
 }
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub enum Theme {
+enum Theme {
     Dark,
     Light,
     Auto,
 }
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Storage {
+struct Storage {
     pending_path: PathBuf,
     pending_path_scan_interval: u64,
     repository_path: PathBuf,
@@ -35,8 +35,8 @@ pub struct Storage {
 /// 网络相关配置
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Network {
-    use_proxy: bool,
-    proxy: Option<String>,
+    use_proxy: String,
+    proxy: String,
 }
 lazy_static! {
     static ref CONFIG: Mutex<Setting> = Mutex::new(Setting::get_from_file().unwrap());
@@ -53,7 +53,9 @@ impl Setting {
 
         let setting = Setting {
             ui: UI {
-                lang: get_locale().unwrap_or_else(|| String::from("en-US")),
+                lang: get_locale()
+                    .unwrap_or_else(|| String::from("en-US"))
+                    .replace("-", "_"),
                 theme: Theme::Auto,
             },
             storage: Storage {
@@ -62,8 +64,8 @@ impl Setting {
                 repository_path: video_dir,
             },
             network: Network {
-                use_proxy: false,
-                proxy: None,
+                use_proxy: "false".to_string(),
+                proxy: "".to_string(),
             },
         };
 
@@ -105,8 +107,8 @@ impl Setting {
 
     pub fn get_proxy() -> Option<String> {
         let network = CONFIG.lock().unwrap().network.clone();
-        if network.use_proxy && network.proxy.is_some() {
-            network.proxy
+        if network.use_proxy == "true" && network.proxy.len() > 0 {
+            Some(network.proxy)
         } else {
             None
         }
@@ -161,14 +163,11 @@ mod tests {
     #[test]
     fn test_apply() {
         let mut setting = Setting::get();
-        setting.network.use_proxy = false;
-        setting.network.proxy = Some("http://127.0.0.1:8080".to_string());
+        setting.network.use_proxy = "false".to_string();
+        setting.network.proxy = "http://127.0.0.1:8080".to_string();
         assert!(Setting::apply(setting).is_ok());
 
         let setting = Setting::get();
-        assert_eq!(
-            setting.network.proxy,
-            Some("http://127.0.0.1:8080".to_string())
-        );
+        assert_eq!(setting.network.proxy, "http://127.0.0.1:8080".to_string());
     }
 }

@@ -1,13 +1,23 @@
 // 异步的获取
 import { invoke } from '@tauri-apps/api'
-import { flow, makeAutoObservable } from 'mobx'
+import { flow, flowResult, makeAutoObservable } from 'mobx'
 
 export type SettingObject = {
   ui: { lang: string; theme: string }
-  network: { proxy: any; use_proxy: boolean }
+  network: { proxy: string; use_proxy: string }
   storage: {
     pending_path: string
+    pending_path_scan_interval: number
     repository_path: string
+  }
+}
+
+function autoTheme() {
+  const mediaQueryListDark = window.matchMedia('(prefers-color-scheme: dark)')
+  if (mediaQueryListDark.matches) {
+    return 'dark'
+  } else {
+    return 'light'
   }
 }
 
@@ -23,11 +33,39 @@ class SettingStore {
   }
   changeTheme = (theme: string) => {
     this.setting['ui']['theme'] = theme
-  };
+  }
+  setSetting = (a: SettingObject) => {
+    invoke('save_setting', { setting: a })
+    this.setting = a
+  }
+
+  get getColorScheme() {
+    switch (this.setting['ui']['theme']) {
+      case 'Auto':
+        return autoTheme()
+      case 'Light':
+        return 'light'
+      case 'Dark':
+        return 'dark'
+      default:
+        return autoTheme()
+    }
+  }
+
+  get getPrimaryColor() {
+    switch (this.getColorScheme) {
+      case 'dark':
+        return 'gray'
+      case 'light':
+        return 'blue'
+    }
+  }
+
   *init() {
     const res: SettingObject = yield invoke('get_setting')
-    this.setting = res
+    return res
   }
 }
-const setting = new SettingStore()
-export default setting
+const settingStore = new SettingStore()
+settingStore.setting = await flowResult(settingStore.init())
+export default settingStore

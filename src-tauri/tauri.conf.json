@@ -61,10 +61,13 @@
     "windows": [
       {
         "fullscreen": false,
+        "minHeight": 500,
+        "minWidth": 500,
         "height": 600,
         "resizable": true,
         "title": "Anime-Repository",
-        "width": 1000
+        "width": 1000,
+        "decorations": false
       }
     ]
   }

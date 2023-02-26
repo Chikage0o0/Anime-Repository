@@ -1,98 +1,74 @@
-import { Layout, theme, Space, Button, Anchor, Row, Col, Form } from 'antd'
-import { useTranslation } from 'react-i18next'
-const { Content, Footer } = Layout
 import { useStore } from '@/store'
-import Storage from './storage'
+import {
+  ActionIcon,
+  Affix,
+  createStyles,
+  ScrollArea,
+  useMantineTheme,
+} from '@mantine/core'
+import { useForm } from '@mantine/form'
+import { IconDeviceFloppy } from '@tabler/icons-react'
+import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
+import { open } from '@tauri-apps/api/dialog'
 import UI from './ui'
+import Storage from './storage'
 import Network from './network'
 import { SettingObject } from '@/store/settingStore'
-import { flatten } from 'flat'
-import { invoke } from '@tauri-apps/api'
-import i18n from 'i18next'
+
+const useStyles = createStyles(() => {
+  return {
+    input: {
+      paddingBottom: 18,
+      paddingLeft: 50,
+      paddingRight: 50,
+    },
+  }
+})
 
 function Setting() {
   const { t } = useTranslation()
-  const { settingStore } = useStore()
-  const {
-    token: { colorBgContainer },
-  } = theme.useToken()
+  const theme = useMantineTheme()
+  const { classes } = useStyles()
+  const store = useStore()
+  const form = useForm({
+    initialValues: store.settingStore.setting,
+  })
 
-  const [form] = Form.useForm()
-  const apply = () => {
-    let data = form.getFieldsValue()
-    settingStore.apply(flatten.unflatten(data)!['setting'] as SettingObject)
-    invoke('save_setting', { setting: settingStore.setting })
+  const selected = async (name: string, default_path: string) => {
+    const res = await open({
+      directory: true,
+      multiple: false,
+      defaultPath: default_path,
+    })
+    if (res != null) form.setFieldValue(name, res)
   }
 
   return (
-    <>
-      <Content
-        id="content"
-        style={{
-          background: colorBgContainer,
-          overflowY: 'auto',
-          overflowX: 'hidden',
-        }}>
-        <Row>
-          <Col span={18}>
-            <Form
-              form={form}
-              name="setting"
-              labelCol={{ span: 8 }}
-              wrapperCol={{ span: 12 }}
-              initialValues={{ remember: true }}
-              autoComplete="off">
-              <UI />
-              <Storage />
-              <Network />
-            </Form>
-          </Col>
-          <Col span={6}>
-            <Anchor
-              getContainer={() => document.getElementById('content')!}
-              items={[
-                {
-                  key: 'ui',
-                  href: '#ui',
-                  title: t('setting.ui'),
-                },
-                {
-                  key: 'storage',
-                  href: '#storage',
-                  title: t('setting.storage'),
-                },
-                {
-                  key: 'network',
-                  href: '#network',
-                  title: t('setting.network'),
-                },
-              ]}
+    <ScrollArea style={{ height: '100vh', padding: 30 }} type="scroll">
+      <form>
+        <UI form={form} classes={classes} />
+        <Storage form={form} classes={classes} />
+        <Network form={form} classes={classes} />
+        <Affix position={{ bottom: 20, right: 20 }}>
+          <ActionIcon
+            size="xl"
+            radius="xl"
+            variant="filled"
+            color={theme.primaryColor}>
+            <IconDeviceFloppy
+              stroke={1.2}
+              size={34}
+              onClick={() => {
+                console.log(form.values)
+                store.settingStore.setSetting(form.values as SettingObject)
+              }}
             />
-          </Col>
-        </Row>
-      </Content>
-      <Footer
-        style={{
-          textAlign: 'right',
-          background: colorBgContainer,
-        }}>
-        <Space>
-          <Button
-            onClick={() => {
-              form.resetFields()
-              i18n.changeLanguage(
-                form.getFieldValue('setting.ui.lang').replace(/-/, '_')
-              )
-            }}>
-            {t('UI.cancel')}
-          </Button>
-          <Button type="primary" onClick={apply}>
-            {t('UI.apply')}
-          </Button>
-        </Space>
-      </Footer>
-    </>
+          </ActionIcon>
+        </Affix>
+      </form>
+    </ScrollArea>
   )
 }
 
-export default Setting
+export default observer(Setting)

@@ -1,5 +1,5 @@
 use crate::{
-    data::scribe::{list, Key, Value},
+    data::subscribe::{list, Key, Value},
     model::{nfo::ProviderKnown, setting::Setting},
     utils::file::walk_file,
 };
@@ -156,7 +156,7 @@ impl Matcher {
 #[derive(thiserror::Error, Debug)]
 pub enum MatcherError {
     #[error(transparent)]
-    SledError(#[from] crate::data::scribe::ScribeDataError),
+    SledError(#[from] crate::data::subscribe::SubscribeDataError),
     #[error(transparent)]
     RegexBuildError(#[from] regex::Error),
     #[error(transparent)]
