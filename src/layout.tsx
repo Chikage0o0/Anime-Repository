@@ -1,19 +1,22 @@
 import { useState } from 'react'
 import {
   AppShell,
-  Text,
   MediaQuery,
   Burger,
   useMantineTheme,
   Affix,
 } from '@mantine/core'
-import { Menu } from './components/menu'
+import { Menu } from '@/components/menu'
+import Setting from '@/components/content/setting'
 
 export default function Layout() {
   const theme = useMantineTheme()
   const [opened, setOpened] = useState(false)
   return (
-    <AppShell navbarOffsetBreakpoint="sm" navbar={<Menu opened={opened} />}>
+    <AppShell
+      navbarOffsetBreakpoint="sm"
+      padding={0}
+      navbar={<Menu opened={opened} />}>
       <Affix position={{ top: 20, right: 20 }}>
         <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
           <Burger
@@ -25,7 +28,6 @@ export default function Layout() {
           />
         </MediaQuery>
       </Affix>
-
       {/* 拖拽栏 */}
       <Affix position={{ top: 0, right: 0 }}>
         <div
@@ -41,7 +43,7 @@ export default function Layout() {
           }}
         />
       </Affix>
-      <Text>Resize app to see responsive navbar in action</Text>
+      <Setting />
     </AppShell>
   )
 }

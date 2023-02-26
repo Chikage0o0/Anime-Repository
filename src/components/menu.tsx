@@ -72,7 +72,7 @@ const useStyles = createStyles((theme, _params, getRef) => {
 })
 
 const data = [
-  { link: '/subscribe', label: 'subscribe-rules', icon: IconRss },
+  { link: '/subscribe-rules', label: 'subscribe-rules', icon: IconRss },
   { link: '/unrecognized', label: 'unrecognized', icon: IconFileUnknown },
 ]
 
@@ -108,14 +108,19 @@ export function Menu(props: { opened: boolean }) {
 
       <Navbar.Section className={classes.footer}>
         <a
-          href="#"
-          className={classes.link}
-          onClick={(event) => event.preventDefault()}>
+          href="/setting"
+          className={cx(classes.link, {
+            [classes.linkActive]: 'setting' === active,
+          })}
+          key="setting"
+          onClick={(event) => {
+            event.preventDefault()
+            setActive('setting')
+          }}>
           <IconSettings className={classes.linkIcon} stroke={1.5} />
           <span>{t('setting')}</span>
         </a>
-
-        <a className={classes.link} onClick={() => window.close()}>
+        <a className={classes.link} onClick={() => appWindow.close()}>
           <IconBrowserX className={classes.linkIcon} stroke={1.5} />
           <span>{t('UI.close')}</span>
         </a>

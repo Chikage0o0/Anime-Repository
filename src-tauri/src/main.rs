@@ -13,7 +13,7 @@ mod service;
 mod utils;
 
 #[tauri::command]
-async fn get_setting() -> Setting {
+fn get_setting() -> Setting {
     Setting::get()
 }
 

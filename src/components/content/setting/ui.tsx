@@ -1,59 +1,64 @@
-import { Divider, Form, Select } from 'antd'
-import styles from '@/assets/styles//components/content/setting.module.less'
-import { SettingObject } from '@/store/settingStore'
+import setting from '@/store/settingStore'
 import i18n from 'i18next'
 import { useTranslation } from 'react-i18next'
-import { useStore } from '@/store'
-function UI() {
+import { Divider, NativeSelect } from '@mantine/core'
+import { locales } from '@/locales/locales'
+
+function UI({ form, classes }: { form: any; classes: any }) {
   const { t } = useTranslation()
-  const { settingStore } = useStore()
+  const lang = locales.map((item) => ({
+    value: item,
+    label: t(`setting.ui.lang.${item}`),
+  }))
+
+  const UITheme = [
+    {
+      value: 'Auto',
+      label: t('setting.ui.theme.auto'),
+    },
+    {
+      value: 'Light',
+      label: t('setting.ui.theme.light'),
+    },
+    {
+      value: 'Dark',
+      label: t('setting.ui.theme.dark'),
+    },
+  ]
 
   return (
     <>
-      <div className={styles.dividerDiv} id="ui">
-        <Divider style={{ marginTop: '0px' }}>{t('setting.ui')}</Divider>
-      </div>
-
-      <Form.Item
-        label={t('setting.ui.lang')}
-        name="setting.ui.lang"
-        initialValue={(settingStore.setting as SettingObject).ui.lang}>
-        <Select
-          options={[
-            {
-              value: 'en-US',
-              label: t('setting.ui.lang.en-US'),
-            },
-            {
-              value: 'zh-CN',
-              label: t('setting.ui.lang.zh-CN'),
-            },
-          ]}
-          onChange={(e) => i18n.changeLanguage(e.replace(/-/, '_'))}
-        />
-      </Form.Item>
-
-      <Form.Item
-        label={t('setting.ui.theme')}
-        name="setting.ui.theme"
-        initialValue={(settingStore.setting as SettingObject).ui.theme}>
-        <Select
-          options={[
-            {
-              value: 'Auto',
-              label: t('setting.ui.theme.auto'),
-            },
-            {
-              value: 'Light',
-              label: t('setting.ui.theme.light'),
-            },
-            {
-              value: 'Dark',
-              label: t('setting.ui.theme.dark'),
-            },
-          ]}
-        />
-      </Form.Item>
+      <Divider
+        my="md"
+        label={t('setting.ui')}
+        labelProps={{
+          component: 'p',
+          style: { fontSize: 16, fontWeight: 500 },
+        }}
+        labelPosition="center"
+      />
+      <NativeSelect
+        data={lang}
+        className={classes.input}
+        label={t('setting.ui.lang') + ':'}
+        radius="sm"
+        {...form.getInputProps('ui.lang')}
+        onChange={(event) => {
+          form.setFieldValue('ui.lang', event.currentTarget.value)
+          i18n.changeLanguage(event.currentTarget.value)
+        }}
+      />
+      <NativeSelect
+        className={classes.input}
+        data={UITheme}
+        label={t('setting.ui.theme') + ':'}
+        radius="sm"
+        {...form.getInputProps('ui.theme')}
+        onChange={(event) => {
+          form.setFieldValue('ui.theme', event.currentTarget.value)
+          setting.changeTheme(event.currentTarget.value)
+        }}
+      />
     </>
   )
 }

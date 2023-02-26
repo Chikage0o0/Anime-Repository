@@ -1,24 +1,29 @@
 import { MantineProvider } from '@mantine/core'
-import { getColorScheme, getPrimaryColor } from '@/theme'
 import Layout from '@/layout'
-import setting from './store/settingStore'
-
-setting.init()
+import { observer } from 'mobx-react-lite'
+import { useStore } from '@/store'
 
 function App() {
   // const outlet = useRoutes(routes)
   // const theme = getTheme(setting.setting as SettingObject)
+  const store = useStore()
 
   return (
     <MantineProvider
       withGlobalStyles
       withNormalizeCSS
       theme={{
-        colorScheme: getColorScheme(),
-        primaryColor: getPrimaryColor(),
+        colorScheme: store.settingStore.getColorScheme,
+        primaryColor: store.settingStore.getPrimaryColor,
+        globalStyles: () => ({
+          body: {
+            WebkitUserSelect: 'none',
+            userSelect: 'none',
+          },
+        }),
       }}>
       <Layout />
     </MantineProvider>
   )
 }
-export default App
+export default observer(App)

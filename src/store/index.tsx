@@ -1,11 +1,11 @@
 import React from 'react'
-import setting from './settingStore'
+import settingStore from './settingStore'
 
 class RootStore {
   settingStore
 
   constructor() {
-    this.settingStore = setting
+    this.settingStore = settingStore
   }
 }
 
