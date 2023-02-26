@@ -1,7 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { useStore } from '@/store'
 import { Divider, Radio, TextInput } from '@mantine/core'
-import { ClassNames } from '@emotion/react'
 
 function Network({ form, classes }: { form: any; classes: any }) {
   const { t } = useTranslation()
@@ -33,26 +31,9 @@ function Network({ form, classes }: { form: any; classes: any }) {
       <TextInput
         className={classes.input}
         label={t('setting.network.proxy')}
+        placeholder="socks5://127.0.0.1:1080"
         {...form.getInputProps('network.proxy')}
       />
-      {/*
-      <Form.Item
-        label={t('setting.network.use_proxy')}
-        name="setting.network.use_proxy"
-        initialValue={(settingStore.config as SettingObject).network.use_proxy}>
-        <Radio.Group
-          options={useProxyOptions}
-          optionType="button"
-          buttonStyle="solid"
-        />
-      </Form.Item>
-
-      <Form.Item
-        label={t('setting.network.proxy')}
-        name="setting.network.proxy"
-        initialValue={(settingStore.config as SettingObject).network.proxy}>
-        <Input />
-      </Form.Item> */}
     </>
   )
 }

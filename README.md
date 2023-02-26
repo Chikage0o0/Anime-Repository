@@ -15,7 +15,7 @@
 - 设置
 
 技术栈：
-tauri、vite、react-ts、less、mantine
+tauri、vite、react-ts、mantine
 
 参考文档：
 

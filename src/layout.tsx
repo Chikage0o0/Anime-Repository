@@ -7,7 +7,13 @@ import {
   Affix,
 } from '@mantine/core'
 import { Menu } from '@/components/menu'
-import Setting from '@/components/content/setting'
+import { useRoutes } from 'react-router-dom'
+import routes from './router'
+
+function WrapperRoutes() {
+  let element = useRoutes(routes)
+  return element
+}
 
 export default function Layout() {
   const theme = useMantineTheme()
@@ -43,7 +49,7 @@ export default function Layout() {
           }}
         />
       </Affix>
-      <Setting />
+      <WrapperRoutes />
     </AppShell>
   )
 }

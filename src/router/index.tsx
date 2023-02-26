@@ -1,68 +1,41 @@
-// import { Navigate } from 'react-router-dom'
-// import React, { lazy } from 'react'
-// import Home from '../components/content/home'
-// import styles from '@/assets/styles/components/content/loading.module.less'
-// import { Spin } from 'antd'
-// const Movie = lazy(() => import('../components/content/movie'))
-// const TvShows = lazy(() => import('../components/content/tv-shows'))
-// const Subscribe = lazy(() => import('../components/content/subscribe'))
-// const Setting = lazy(() => import('../components/content/setting'))
-// const Unrecognized = lazy(
-//   () => import('@/components/content/subscribe/unrecognized')
-// )
-// const Rules = lazy(() => import('@/components/content/subscribe/rules'))
+import { Navigate } from 'react-router-dom'
+import React, { lazy } from 'react'
+import SubscribeRules from '@/components/content/subscribe-rules'
+import { Center, Loader } from '@mantine/core'
 
-// const waitLoadingComponent = (component: JSX.Element) => (
-//   <React.Suspense
-//     fallback={
-//       <div className={styles.container}>
-//         <Spin size="large" delay={1000} className={styles.content} />
-//       </div>
-//     }>
-//     {component}
-//   </React.Suspense>
-// )
+const Setting = lazy(() => import('../components/content/setting'))
+const Unrecognized = lazy(() => import('@/components/content/unrecognized'))
 
-// const routes = [
-//   {
-//     path: '/',
-//     element: <Navigate to="/home" />,
-//   },
-//   {
-//     path: '/home',
-//     element: <Home />,
-//   },
-//   {
-//     path: '/movie',
-//     element: waitLoadingComponent(<Movie />),
-//   },
-//   {
-//     path: '/tv-shows',
-//     element: waitLoadingComponent(<TvShows />),
-//   },
-//   {
-//     path: '/subscribe',
-//     element: waitLoadingComponent(<Subscribe />),
-//     children: [
-//       {
-//         index: true,
-//         element: <Navigate to="/subscribe/rules" />,
-//       },
-//       {
-//         path: 'rules',
-//         element: waitLoadingComponent(<Rules />),
-//       },
-//       {
-//         path: 'unrecognized',
-//         element: waitLoadingComponent(<Unrecognized />),
-//       },
-//     ],
-//   },
-//   {
-//     path: '/setting',
-//     element: waitLoadingComponent(<Setting />),
-//   },
-// ]
+const waitLoadingComponent = (component: JSX.Element) => (
+  <React.Suspense
+    fallback={
+      <Center style={{ height: '100vh' }}>
+        <Loader size="xl" />
+      </Center>
+    }>
+    {component}
+  </React.Suspense>
+)
 
-// export default routes
-export {}
+const routes = [
+  {
+    path: '/',
+    element: <Navigate to="/subscribe-rules" />,
+  },
+  {
+    path: '/subscribe-rules',
+    element: <SubscribeRules />,
+  },
+
+  {
+    path: '/unrecognized',
+    element: waitLoadingComponent(<Unrecognized />),
+  },
+
+  {
+    path: '/setting',
+    element: waitLoadingComponent(<Setting />),
+  },
+]
+
+export default routes
