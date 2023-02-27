@@ -9,25 +9,24 @@ import {
 import { Menu } from '@/components/menu'
 import { useRoutes } from 'react-router-dom'
 import routes from './router'
+import { useStore } from './store'
+import { observer } from 'mobx-react-lite'
 
 function WrapperRoutes() {
   let element = useRoutes(routes)
   return element
 }
 
-export default function Layout() {
+function Layout() {
   const theme = useMantineTheme()
-  const [opened, setOpened] = useState(false)
+  const { settingStore } = useStore()
   return (
-    <AppShell
-      navbarOffsetBreakpoint="sm"
-      padding={0}
-      navbar={<Menu opened={opened} />}>
+    <AppShell navbarOffsetBreakpoint="sm" padding={0} navbar={<Menu />}>
       <Affix position={{ top: 20, right: 20 }}>
         <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
           <Burger
-            opened={opened}
-            onClick={() => setOpened((o) => !o)}
+            opened={settingStore.menu_open}
+            onClick={() => settingStore.setMenuOpen(!settingStore.menu_open)}
             size="sm"
             color={theme.colors.gray[6]}
             mr="xl"
@@ -53,3 +52,5 @@ export default function Layout() {
     </AppShell>
   )
 }
+
+export default observer(Layout)

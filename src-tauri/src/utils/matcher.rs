@@ -1,5 +1,5 @@
 use crate::{
-    data::subscribe::{list, Key, Value},
+    data::subscribe_rules::{list, Key, Value},
     model::{nfo::ProviderKnown, setting::Setting},
     utils::file::walk_file,
 };
@@ -143,7 +143,7 @@ impl Matcher {
     pub fn insert(&self) {
         let mut matchers = MATCHERS.lock().unwrap();
         matchers.push(self.clone());
-        log::debug!("Insert matcher: {:?}", self);
+        log::info!("Insert matcher: {:?}", self);
     }
 
     pub fn delete(id: &str, provider: ProviderKnown) {
@@ -156,7 +156,7 @@ impl Matcher {
 #[derive(thiserror::Error, Debug)]
 pub enum MatcherError {
     #[error(transparent)]
-    SledError(#[from] crate::data::subscribe::SubscribeDataError),
+    SledError(#[from] crate::data::subscribe_rules::SubscribeDataError),
     #[error(transparent)]
     RegexBuildError(#[from] regex::Error),
     #[error(transparent)]

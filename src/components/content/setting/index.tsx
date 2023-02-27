@@ -31,9 +31,9 @@ function Setting() {
   const { t } = useTranslation()
   const theme = useMantineTheme()
   const { classes } = useStyles()
-  const store = useStore()
+  const { settingStore } = useStore()
   const form = useForm({
-    initialValues: store.settingStore.setting,
+    initialValues: settingStore.setting,
     validate: {
       network: {
         proxy: (value: string) => {
@@ -57,12 +57,14 @@ function Setting() {
       <UI form={form} classes={classes} />
       <Storage form={form} classes={classes} />
       <Network form={form} classes={classes} />
-      <Affix position={{ bottom: 20, right: 20 }}>
+      <Affix
+        hidden={settingStore.menu_open}
+        position={{ bottom: 20, right: 20 }}>
         <ActionIcon
           size="xl"
           radius="xl"
           variant="filled"
-          loading={store.settingStore.loading}
+          loading={settingStore.loading}
           color={theme.primaryColor}>
           <IconDeviceFloppy
             stroke={1.2}
@@ -70,13 +72,13 @@ function Setting() {
             onClick={() => {
               if (!form.validate().hasErrors) {
                 flowResult(
-                  store.settingStore.applySetting(form.values as SettingObject)
+                  settingStore.applySetting(form.values as SettingObject)
                 )
                   .then(() => {
                     showNotification({
                       icon: <IconCheck />,
                       title: t('setting.save_success'),
-                      message: 'Have a nice day! ✌️🤩✌️',
+                      message: '✌️🙄✌️',
                     })
                   })
                   .catch((e) => {

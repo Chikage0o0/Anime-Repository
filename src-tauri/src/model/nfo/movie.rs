@@ -112,11 +112,16 @@ impl Movie {
                     let data: Value = serde_json::from_str(&json).unwrap();
 
                     if let Some(title) = data.get("title") {
-                        self.title = title.as_str().unwrap().to_string();
+                        if title != &Value::Null {
+                            self.title = title.as_str().unwrap().to_string();
+                        }
                     }
 
                     if let Some(original_title) = data.get("original_title") {
-                        self.original_title = Some(original_title.as_str().unwrap().to_string());
+                        if original_title != &Value::Null {
+                            self.original_title =
+                                Some(original_title.as_str().unwrap().to_string());
+                        }
                     }
 
                     if let Some(imdb_id) = data.get("imdb_id") {
@@ -133,40 +138,46 @@ impl Movie {
 
                     if let Some(vote_average) = data.get("vote_average") {
                         if let Some(vote_count) = data.get("vote_count") {
-                            if let Some(ratings) = &mut self.ratings {
-                                let themoviedb_rating = ratings
-                                    .rating
-                                    .iter_mut()
-                                    .find(|rating| rating.name == "themoviedb");
-                                match themoviedb_rating {
-                                    Some(rating) => {
-                                        rating.value = vote_average.as_f64().unwrap();
-                                        rating.votes = vote_count.as_i64().unwrap();
+                            if vote_average != &Value::Null && vote_count != &Value::Null {
+                                if let Some(ratings) = &mut self.ratings {
+                                    let themoviedb_rating = ratings
+                                        .rating
+                                        .iter_mut()
+                                        .find(|rating| rating.name == "themoviedb");
+                                    match themoviedb_rating {
+                                        Some(rating) => {
+                                            rating.value = vote_average.as_f64().unwrap();
+                                            rating.votes = vote_count.as_i64().unwrap();
+                                        }
+                                        None => ratings.rating.push(Rating {
+                                            name: "themoviedb".to_string(),
+                                            max: 10,
+                                            default: true,
+                                            value: vote_average.as_f64().unwrap(),
+                                            votes: vote_count.as_i64().unwrap(),
+                                        }),
                                     }
-                                    None => ratings.rating.push(Rating {
-                                        name: "themoviedb".to_string(),
-                                        max: 10,
-                                        default: true,
-                                        value: vote_average.as_f64().unwrap(),
-                                        votes: vote_count.as_i64().unwrap(),
-                                    }),
                                 }
                             }
                         }
                     }
 
                     if let Some(overview) = data.get("overview") {
-                        self.plot = Some(overview.as_str().unwrap().to_string());
+                        if overview != &Value::Null {
+                            self.plot = Some(overview.as_str().unwrap().to_string());
+                        }
                     }
 
                     if let Some(poster_path) = data.get("poster_path") {
-                        self.update_thumb(
-                            get_img_url(poster_path.as_str().unwrap()),
-                            Some("poster".to_string()),
-                            None,
-                            None,
-                            None,
-                        );
+                        if poster_path != &Value::Null {
+                            self.update_thumb(
+                                get_img_url(poster_path.as_str().unwrap()),
+                                Some("poster".to_string()),
+                                None,
+                                None,
+                                None,
+                            );
+                        }
                     }
 
                     if let Some(genres) = data.get("genres") {
@@ -179,7 +190,9 @@ impl Movie {
                     }
 
                     if let Some(release_date) = data.get("release_date") {
-                        self.premiered = Some(release_date.as_str().unwrap().to_string());
+                        if release_date != &Value::Null {
+                            self.premiered = Some(release_date.as_str().unwrap().to_string());
+                        }
                     }
 
                     if let Some(production_countries) = data.get("production_countries") {
@@ -201,15 +214,17 @@ impl Movie {
                     }
 
                     if let Some(backdrop_path) = data.get("backdrop_path") {
-                        self.fanart = Some(Fanart {
-                            thumb: vec![Thumb {
-                                aspect: None,
-                                r#type: None,
-                                season: None,
-                                preview: None,
-                                value: get_img_url(backdrop_path.as_str().unwrap()),
-                            }],
-                        });
+                        if backdrop_path != &Value::Null {
+                            self.fanart = Some(Fanart {
+                                thumb: vec![Thumb {
+                                    aspect: None,
+                                    r#type: None,
+                                    season: None,
+                                    preview: None,
+                                    value: get_img_url(backdrop_path.as_str().unwrap()),
+                                }],
+                            });
+                        }
                     }
 
                     if let Some(images) = data.get("images") {

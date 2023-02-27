@@ -101,28 +101,32 @@ impl Episode {
                     self.display_season = Some(season);
 
                     if let Some(name) = data.get("name") {
-                        self.title = name.as_str().unwrap().to_string();
+                        if name != &Value::Null {
+                            self.title = name.as_str().unwrap().to_string();
+                        }
                     }
 
                     if let Some(vote_average) = data.get("vote_average") {
                         if let Some(vote_count) = data.get("vote_count") {
-                            if let Some(ratings) = &mut self.ratings {
-                                let themoviedb_rating = ratings
-                                    .rating
-                                    .iter_mut()
-                                    .find(|rating| rating.name == "themoviedb");
-                                match themoviedb_rating {
-                                    Some(rating) => {
-                                        rating.value = vote_average.as_f64().unwrap();
-                                        rating.votes = vote_count.as_i64().unwrap();
+                            if vote_average != &Value::Null && vote_count != &Value::Null {
+                                if let Some(ratings) = &mut self.ratings {
+                                    let themoviedb_rating = ratings
+                                        .rating
+                                        .iter_mut()
+                                        .find(|rating| rating.name == "themoviedb");
+                                    match themoviedb_rating {
+                                        Some(rating) => {
+                                            rating.value = vote_average.as_f64().unwrap();
+                                            rating.votes = vote_count.as_i64().unwrap();
+                                        }
+                                        None => ratings.rating.push(Rating {
+                                            name: "themoviedb".to_string(),
+                                            max: 10,
+                                            default: true,
+                                            value: vote_average.as_f64().unwrap(),
+                                            votes: vote_count.as_i64().unwrap(),
+                                        }),
                                     }
-                                    None => ratings.rating.push(Rating {
-                                        name: "themoviedb".to_string(),
-                                        max: 10,
-                                        default: true,
-                                        value: vote_average.as_f64().unwrap(),
-                                        votes: vote_count.as_i64().unwrap(),
-                                    }),
                                 }
                             }
                         }
@@ -133,17 +137,21 @@ impl Episode {
                     }
 
                     if let Some(still_path) = data.get("still_path") {
-                        self.update_thumb(
-                            get_img_url(still_path.as_str().unwrap()),
-                            Some("thumb".to_string()),
-                            None,
-                            None,
-                            None,
-                        );
+                        if still_path != &Value::Null {
+                            self.update_thumb(
+                                get_img_url(still_path.as_str().unwrap()),
+                                Some("thumb".to_string()),
+                                None,
+                                None,
+                                None,
+                            );
+                        }
                     }
 
                     if let Some(air_date) = data.get("air_date") {
-                        self.aired = Some(air_date.as_str().unwrap().to_string());
+                        if air_date != &Value::Null {
+                            self.aired = Some(air_date.as_str().unwrap().to_string());
+                        }
                     }
                 }
                 _ => todo!(),

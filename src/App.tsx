@@ -42,7 +42,6 @@ function App() {
             userSelect: 'none',
           },
         }),
-        loader: 'bars',
       }}>
       <BrowserRouter>
         <NotificationsProvider>

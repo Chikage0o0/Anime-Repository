@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 
 lazy_static! {
-    static ref DB: sled::Db = sled::open("config/scribe").unwrap();
+    static ref DB: sled::Db = sled::open("config/subscribe_rules").unwrap();
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Hash)]
@@ -86,10 +86,31 @@ pub enum SubscribeDataError {
 mod test {
 
     use super::*;
+
     #[test]
     fn main() -> sled::Result<()> {
         dbg!(list());
 
+        Ok(())
+    }
+
+    #[test]
+    fn insert() -> Result<(), SubscribeDataError> {
+        let key = Key {
+            id: "tt1234567".to_string(),
+            provider: ProviderKnown::IMDB,
+        };
+        let value = Value {
+            title: "The Big Bang Theory".to_string(),
+            tvshow_regex: "The Big Bang Theory".to_string(),
+            season: 1,
+            episode_offset: 0,
+            episode_position: 0,
+            episode_regex: r"\d+".to_string(),
+            lang: "en_US".to_string(),
+        };
+        key.insert(&value)?;
+        dbg!(list());
         Ok(())
     }
 }

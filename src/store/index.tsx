@@ -1,11 +1,14 @@
 import React from 'react'
 import settingStore from './settingStore'
+import subscribeStore from './subscribeStore'
 
 class RootStore {
   settingStore
+  subscribeStore
 
   constructor() {
     this.settingStore = settingStore
+    this.subscribeStore = subscribeStore
   }
 }
 

@@ -3,8 +3,7 @@
     windows_subsystem = "windows"
 )]
 
-use model::setting::{Setting, SettingError};
-
+mod controller;
 mod data;
 mod handler;
 mod http;
@@ -12,15 +11,7 @@ mod model;
 mod service;
 mod utils;
 
-#[tauri::command]
-fn get_setting() -> Setting {
-    Setting::get()
-}
-
-#[tauri::command]
-fn save_setting(setting: Setting) -> Result<(), SettingError> {
-    Setting::apply(setting)
-}
+use crate::controller::*;
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 fn main() {
@@ -28,7 +19,15 @@ fn main() {
     env_logger::init();
     handler::run();
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![get_setting, save_setting])
+        .invoke_handler(tauri::generate_handler![
+            get_setting,
+            save_setting,
+            get_tvshow_title,
+            get_subscribe_rule,
+            get_subscribe_rules,
+            delete_subscribe_rule,
+            insert_subscribe_rule,
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

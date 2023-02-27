@@ -8,7 +8,7 @@ function UI({ form, classes }: { form: any; classes: any }) {
   const { t } = useTranslation()
   const lang = locales.map((item) => ({
     value: item,
-    label: t(`setting.ui.lang.${item}`),
+    label: t(`lang.${item}`),
   }))
 
   const UITheme = [

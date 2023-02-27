@@ -103,71 +103,87 @@ impl Tvshow {
                     let data: Value = serde_json::from_str(&json).unwrap();
 
                     if let Some(name) = data.get("name") {
-                        self.title = name.as_str().unwrap().to_string();
+                        if name != &Value::Null {
+                            self.title = name.as_str().unwrap().to_string();
+                        }
                     }
 
                     if let Some(original_name) = data.get("original_name") {
-                        self.original_title = Some(original_name.as_str().unwrap().to_string());
+                        if original_name != &Value::Null {
+                            self.original_title = Some(original_name.as_str().unwrap().to_string());
+                        }
                     }
 
                     if let Some(vote_average) = data.get("vote_average") {
                         if let Some(vote_count) = data.get("vote_count") {
-                            if let Some(ratings) = &mut self.ratings {
-                                let themoviedb_rating = ratings
-                                    .rating
-                                    .iter_mut()
-                                    .find(|rating| rating.name == "themoviedb");
-                                match themoviedb_rating {
-                                    Some(rating) => {
-                                        rating.value = vote_average.as_f64().unwrap();
-                                        rating.votes = vote_count.as_i64().unwrap();
+                            if vote_average != &Value::Null && vote_count != &Value::Null {
+                                if let Some(ratings) = &mut self.ratings {
+                                    let themoviedb_rating = ratings
+                                        .rating
+                                        .iter_mut()
+                                        .find(|rating| rating.name == "themoviedb");
+                                    match themoviedb_rating {
+                                        Some(rating) => {
+                                            rating.value = vote_average.as_f64().unwrap();
+                                            rating.votes = vote_count.as_i64().unwrap();
+                                        }
+                                        None => ratings.rating.push(Rating {
+                                            name: "themoviedb".to_string(),
+                                            max: 10,
+                                            default: true,
+                                            value: vote_average.as_f64().unwrap(),
+                                            votes: vote_count.as_i64().unwrap(),
+                                        }),
                                     }
-                                    None => ratings.rating.push(Rating {
-                                        name: "themoviedb".to_string(),
-                                        max: 10,
-                                        default: true,
-                                        value: vote_average.as_f64().unwrap(),
-                                        votes: vote_count.as_i64().unwrap(),
-                                    }),
                                 }
                             }
                         }
                     }
 
                     if let Some(overview) = data.get("overview") {
-                        self.plot = Some(overview.as_str().unwrap().to_string());
+                        if overview != &Value::Null {
+                            self.plot = Some(overview.as_str().unwrap().to_string());
+                        }
                     }
 
                     if let Some(poster_path) = data.get("poster_path") {
-                        self.update_thumb(
-                            get_img_url(poster_path.as_str().unwrap()),
-                            Some("poster".to_string()),
-                            None,
-                            None,
-                            None,
-                        );
+                        if poster_path != &Value::Null {
+                            self.update_thumb(
+                                get_img_url(poster_path.as_str().unwrap()),
+                                Some("poster".to_string()),
+                                None,
+                                None,
+                                None,
+                            );
+                        }
                     }
 
                     if let Some(genres) = data.get("genres") {
-                        self.genre = genres
-                            .as_array()
-                            .unwrap()
-                            .into_iter()
-                            .map(|f| f["name"].as_str().unwrap().to_string())
-                            .collect();
+                        if genres != &Value::Null {
+                            self.genre = genres
+                                .as_array()
+                                .unwrap()
+                                .into_iter()
+                                .map(|f| f["name"].as_str().unwrap().to_string())
+                                .collect();
+                        }
                     }
 
                     if let Some(first_air_date) = data.get("first_air_date") {
-                        self.premiered = Some(first_air_date.as_str().unwrap().to_string());
+                        if first_air_date != &Value::Null {
+                            self.premiered = Some(first_air_date.as_str().unwrap().to_string());
+                        }
                     }
 
                     if let Some(production_companies) = data.get("production_companies") {
-                        self.studio = production_companies
-                            .as_array()
-                            .unwrap()
-                            .into_iter()
-                            .map(|f| f["name"].as_str().unwrap().to_string())
-                            .collect();
+                        if production_companies != &Value::Null {
+                            self.studio = production_companies
+                                .as_array()
+                                .unwrap()
+                                .into_iter()
+                                .map(|f| f["name"].as_str().unwrap().to_string())
+                                .collect();
+                        }
                     }
 
                     if let Some(seasons) = data.get("seasons") {
@@ -177,31 +193,42 @@ impl Tvshow {
                             .into_iter()
                             .map(|f| {
                                 let number = f["season_number"].as_i64().unwrap();
-                                self.update_thumb(
-                                    get_img_url(f["poster_path"].as_str().unwrap()),
-                                    Some("poster".to_string()),
-                                    Some("season".to_string()),
-                                    Some(number),
-                                    None,
-                                );
-                                Namedseason {
-                                    number,
-                                    value: f["name"].as_str().unwrap().to_string(),
+                                if f["poster_path"] != Value::Null {
+                                    self.update_thumb(
+                                        get_img_url(f["poster_path"].as_str().unwrap()),
+                                        Some("poster".to_string()),
+                                        Some("season".to_string()),
+                                        Some(number),
+                                        None,
+                                    );
+                                }
+                                if f["name"] != Value::Null {
+                                    Namedseason {
+                                        number,
+                                        value: f["name"].as_str().unwrap().to_string(),
+                                    }
+                                } else {
+                                    Namedseason {
+                                        number,
+                                        value: format!("Season {}", number),
+                                    }
                                 }
                             })
                             .collect();
                     }
 
                     if let Some(backdrop_path) = data.get("backdrop_path") {
-                        self.fanart = Some(Fanart {
-                            thumb: vec![Thumb {
-                                aspect: None,
-                                r#type: None,
-                                season: None,
-                                preview: None,
-                                value: get_img_url(backdrop_path.as_str().unwrap()),
-                            }],
-                        });
+                        if backdrop_path != &Value::Null {
+                            self.fanart = Some(Fanart {
+                                thumb: vec![Thumb {
+                                    aspect: None,
+                                    r#type: None,
+                                    season: None,
+                                    preview: None,
+                                    value: get_img_url(backdrop_path.as_str().unwrap()),
+                                }],
+                            });
+                        }
                     }
 
                     if let Some(images) = data.get("images") {

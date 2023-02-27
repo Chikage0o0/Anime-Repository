@@ -24,11 +24,15 @@ function autoTheme() {
 class SettingStore {
   setting: SettingObject | Object = {}
   loading = false
+  menu_open = false
   constructor() {
     makeAutoObservable(this, {
       init: flow,
       applySetting: flow,
     })
+  }
+  setMenuOpen = (a: boolean) => {
+    this.menu_open = a
   }
   changeTheme = (theme: string) => {
     this.setting['ui']['theme'] = theme

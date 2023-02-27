@@ -1,5 +1,12 @@
-import { useState } from 'react'
-import { createStyles, Navbar, Group, Code, Space } from '@mantine/core'
+import { useEffect, useState } from 'react'
+import {
+  createStyles,
+  Navbar,
+  Group,
+  Code,
+  Space,
+  Transition,
+} from '@mantine/core'
 import {
   IconSettings,
   IconBrowserX,
@@ -9,6 +16,7 @@ import {
 import { useTranslation } from 'react-i18next'
 import { appWindow } from '@tauri-apps/api/window'
 import { useNavigate } from 'react-router-dom'
+import { useStore } from '@/store'
 
 const useStyles = createStyles((theme, _params, getRef) => {
   const icon = getRef('icon')
@@ -77,12 +85,12 @@ const data = [
   { link: '/unrecognized', label: 'unrecognized', icon: IconFileUnknown },
 ]
 
-export function Menu(props: { opened: boolean }) {
+export function Menu() {
   const { t } = useTranslation()
   const { classes, cx } = useStyles()
   const [active, setActive] = useState('subscribe-rules')
   const navigate = useNavigate()
-
+  const { settingStore } = useStore()
   const links = data.map((item) => (
     <a
       className={cx(classes.link, {
@@ -93,6 +101,7 @@ export function Menu(props: { opened: boolean }) {
       onClick={(event) => {
         event.preventDefault()
         setActive(item.label)
+        settingStore.setMenuOpen(false)
         navigate(item.link)
       }}>
       <item.icon className={classes.linkIcon} stroke={1.5} />
@@ -100,10 +109,24 @@ export function Menu(props: { opened: boolean }) {
     </a>
   ))
 
+  useEffect(() => {
+    let uri = location.pathname
+    if (uri.startsWith('/setting')) {
+      setActive('setting')
+    } else {
+      for (let i = 0; i < data.length; i++) {
+        if (uri.startsWith(data[i]?.link as string)) {
+          setActive(data[i]?.label as string)
+          break
+        }
+      }
+    }
+  }, [])
+
   return (
     <Navbar
       p="md"
-      hidden={!props.opened}
+      hidden={!settingStore.menu_open}
       hiddenBreakpoint="sm"
       width={{ sm: 200, lg: 300 }}
       className={classes.navbar}>
@@ -119,6 +142,7 @@ export function Menu(props: { opened: boolean }) {
           onClick={(event) => {
             event.preventDefault()
             setActive('setting')
+            settingStore.setMenuOpen(false)
             navigate('/setting')
           }}>
           <IconSettings className={classes.linkIcon} stroke={1.5} />
