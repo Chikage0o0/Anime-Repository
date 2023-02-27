@@ -1,7 +1,7 @@
 import setting from '@/store/settingStore'
 import i18n from 'i18next'
 import { useTranslation } from 'react-i18next'
-import { Divider, NativeSelect } from '@mantine/core'
+import { Divider, NativeSelect, Select } from '@mantine/core'
 import { locales } from '@/locales/locales'
 
 function UI({ form, classes }: { form: any; classes: any }) {
@@ -37,26 +37,26 @@ function UI({ form, classes }: { form: any; classes: any }) {
         }}
         labelPosition="center"
       />
-      <NativeSelect
+      <Select
         data={lang}
         className={classes.input}
         label={t('setting.ui.lang') + ':'}
         radius="sm"
         {...form.getInputProps('ui.lang')}
         onChange={(event) => {
-          form.setFieldValue('ui.lang', event.currentTarget.value)
-          i18n.changeLanguage(event.currentTarget.value)
+          form.setFieldValue('ui.lang', event)
+          i18n.changeLanguage(event as string)
         }}
       />
-      <NativeSelect
+      <Select
         className={classes.input}
         data={UITheme}
         label={t('setting.ui.theme') + ':'}
         radius="sm"
         {...form.getInputProps('ui.theme')}
         onChange={(event) => {
-          form.setFieldValue('ui.theme', event.currentTarget.value)
-          setting.changeTheme(event.currentTarget.value)
+          form.setFieldValue('ui.theme', event)
+          setting.changeTheme(event as string)
         }}
       />
     </>
