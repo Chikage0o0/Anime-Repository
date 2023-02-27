@@ -26,6 +26,7 @@ function Storage({ form, classes }: { form: any; classes: any }) {
         labelPosition="center"
       />
       <TextInput
+        autoComplete="off"
         className={classes.input}
         label={t('setting.storage.pending_path')}
         {...form.getInputProps('storage.pending_path')}
@@ -47,6 +48,7 @@ function Storage({ form, classes }: { form: any; classes: any }) {
         {...form.getInputProps('storage.pending_path_scan_interval')}
       />
       <TextInput
+        autoComplete="off"
         className={classes.input}
         label={t('setting.storage.repository_path')}
         {...form.getInputProps('storage.repository_path')}

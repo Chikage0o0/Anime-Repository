@@ -35,6 +35,7 @@ function New({
       <Divider style={{ paddingBottom: 10 }} size="xs" />
       <Group position="center" style={{ paddingBottom: 5 }} grow>
         <TextInput
+          autoComplete="off"
           label={t('subscribe-rules.ID')}
           {...form.getInputProps('id')}
         />
@@ -45,16 +46,19 @@ function New({
         />
       </Group>
       <TextInput
+        autoComplete="off"
         style={{ paddingBottom: 5 }}
         label={t('subscribe-rules.tvshow_regex')}
         {...form.getInputProps('tvshow_regex')}
       />
       <Group position="center" style={{ paddingBottom: 5 }} grow>
         <NumberInput
+          autoComplete="off"
           label={t('subscribe-rules.season')}
           {...form.getInputProps('season')}
         />
         <TextInput
+          autoComplete="off"
           label={t('subscribe-rules.lang')}
           placeholder="zh-CN, en-US, etc"
           {...form.getInputProps('lang')}
@@ -62,22 +66,25 @@ function New({
       </Group>
       <Group position="center" style={{ paddingBottom: 5 }} grow>
         <TextInput
+          autoComplete="off"
           label={t('subscribe-rules.episode_regex')}
           placeholder="\\d+"
           {...form.getInputProps('episode_regex')}
         />
         <NumberInput
+          autoComplete="off"
           label={t('subscribe-rules.episode_position')}
           {...form.getInputProps('episode_position')}
         />
         <NumberInput
+          autoComplete="off"
           label={t('subscribe-rules.episode_offset')}
           {...form.getInputProps('episode_offset')}
         />
       </Group>
       <TextInput
+        autoComplete="off"
         style={{ paddingBottom: 15 }}
-        placeholder={t('UI.optional') as string}
         label={t('subscribe-rules.title')}
         onClick={() => {
           if (form.values.id && form.values.provider && form.values.lang) {
@@ -85,9 +92,19 @@ function New({
               id: form.values.id,
               provider: form.values.provider,
               lang: form.values.lang,
-            }).then((res) => {
-              form.setFieldValue('title', res as string)
             })
+              .then((res) => {
+                form.setFieldValue('title', res as string)
+              })
+              .catch((e) => {
+                showNotification({
+                  color: 'red',
+                  icon: <IconX />,
+                  autoClose: false,
+                  title: t('subscribe-rules.id_invalid'),
+                  message: e,
+                })
+              })
           }
         }}
         {...form.getInputProps('title')}
@@ -100,27 +117,29 @@ function New({
         <Button
           variant="outline"
           color="blue"
-          onClick={() =>
-            flowResult(subscribeStore.addSubscribeRule(form.values))
-              .then(() => {
-                form.reset()
-                setOpened(false)
-                showNotification({
-                  icon: <IconCheck />,
-                  title: t('subscribe_rule.insert_success'),
-                  message: '✌️🙄✌️',
+          onClick={() => {
+            if (!form.validate().hasErrors) {
+              flowResult(subscribeStore.addSubscribeRule(form.values))
+                .then(() => {
+                  form.reset()
+                  setOpened(false)
+                  showNotification({
+                    icon: <IconCheck />,
+                    title: t('subscribe_rules.insert_success'),
+                    message: '✌️🙄✌️',
+                  })
                 })
-              })
-              .catch((e) => {
-                showNotification({
-                  color: 'red',
-                  icon: <IconX />,
-                  autoClose: false,
-                  title: t('subscribe_rule.insert_failed'),
-                  message: e,
+                .catch((e) => {
+                  showNotification({
+                    color: 'red',
+                    icon: <IconX />,
+                    autoClose: false,
+                    title: t('subscribe_rules.insert_failed'),
+                    message: e,
+                  })
                 })
-              })
-          }>
+            }
+          }}>
           {t('UI.submit')}
         </Button>
       </Group>

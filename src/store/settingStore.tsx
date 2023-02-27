@@ -22,7 +22,7 @@ function autoTheme() {
 }
 
 class SettingStore {
-  setting: SettingObject | Object = {}
+  setting: SettingObject = {} as SettingObject
   loading = false
   menu_open = false
   constructor() {

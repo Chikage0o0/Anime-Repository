@@ -38,13 +38,13 @@ function Setting() {
       network: {
         proxy: (value: string) => {
           if (
-            value === '' ||
-            /^(?:http(?:s?)|socks(?:5|5h)):\/\/(?:[A-Za-z0-9]*:[A-Za-z0-9]*@)*(?:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):(?:\d{2,5})$/.test(
-              value
+            !(
+              value === '' ||
+              /^(?:http(?:s?)|socks(?:5|5h)):\/\/(?:[A-Za-z0-9]*:[A-Za-z0-9]*@)*(?:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):(?:\d{2,5})$/.test(
+                value
+              )
             )
           ) {
-            return null
-          } else {
             return t('setting.network.proxy_error')
           }
         },
