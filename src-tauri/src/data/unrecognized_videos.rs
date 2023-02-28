@@ -10,8 +10,8 @@ lazy_static! {
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Hash)]
 /// The type of video that is unrecognized
-/// Movie: (id, provider, lang)
-/// TvShow: (id, provider, lang,title, season, episode)
+/// - Movie: (id, provider, lang)
+/// - TvShow: (id, provider, lang,title, season, episode)
 pub enum VideoData {
     Movie(Option<String>, Option<ProviderKnown>, Option<String>),
     TvShow(
@@ -90,5 +90,6 @@ mod test {
         let list = get_all();
         assert_eq!(list.len(), 1);
         assert!(list[0].0.to_str().unwrap().contains("test.mp4"));
+        DB.flush().unwrap();
     }
 }

@@ -1,14 +1,16 @@
 import React from 'react'
 import settingStore from './settingStore'
-import subscribeStore from './subscribeStore'
-
+import subscribeRulesStore from './subscribeRulesStore'
+import unrecognizedVideosStore from './unrecognizedStore'
 class RootStore {
   settingStore
-  subscribeStore
+  subscribeRulesStore
+  unrecognizedVideosStore
 
   constructor() {
     this.settingStore = settingStore
-    this.subscribeStore = subscribeStore
+    this.subscribeRulesStore = subscribeRulesStore
+    this.unrecognizedVideosStore = unrecognizedVideosStore
   }
 }
 

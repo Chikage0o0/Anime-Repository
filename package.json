@@ -11,11 +11,11 @@
   },
   "dependencies": {
     "@emotion/react": "^11.10.6",
-    "@mantine/core": "^5.10.4",
+    "@mantine/core": "^5.10.5",
     "@mantine/form": "^5.10.5",
-    "@mantine/hooks": "^5.10.4",
+    "@mantine/hooks": "^5.10.5",
     "@mantine/notifications": "^5.10.5",
-    "@tabler/icons-react": "^2.5.0",
+    "@tabler/icons-react": "^2.6.0",
     "@tauri-apps/api": "^1.2.0",
     "i18next": "^22.4.10",
     "mobx": "^6.8.0",
@@ -23,11 +23,11 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-i18next": "^12.2.0",
-    "react-router-dom": "^6.8.1"
+    "react-router-dom": "^6.8.2"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1.2.3",
-    "@types/node": "^18.14.1",
+    "@types/node": "^18.14.2",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
     "@vitejs/plugin-react": "^3.1.0",

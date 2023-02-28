@@ -14,12 +14,13 @@ export type SubscribeObject = {
 }
 
 class SubscribeStore {
-  subscribe_rules: SubscribeObject[] = []
+  data: SubscribeObject[] = []
   menu_open = false
   constructor() {
     makeAutoObservable(this, {
       init: flow,
       addSubscribeRule: flow,
+      delSubscribeRule: flow,
     })
   }
 
@@ -36,7 +37,7 @@ class SubscribeStore {
         episodePosition: a.episode_position,
         episodeOffset: a.episode_offset,
       })
-      this.subscribe_rules = yield this.init()
+      this.data = yield this.init()
     } catch (e) {
       throw e
     }
@@ -45,7 +46,7 @@ class SubscribeStore {
   *delSubscribeRule(id: string, provider: string) {
     try {
       yield invoke('delete_subscribe_rule', { id: id, provider: provider })
-      this.subscribe_rules = yield this.init()
+      this.data = yield this.init()
     } catch (e) {
       throw e
     }
@@ -53,10 +54,9 @@ class SubscribeStore {
 
   *init() {
     const res: SubscribeObject[] = yield invoke('get_subscribe_rules')
-    console.log(res)
     return res
   }
 }
 const subscribeStore = new SubscribeStore()
-subscribeStore.subscribe_rules = await flowResult(subscribeStore.init())
+subscribeStore.data = await flowResult(subscribeStore.init())
 export default subscribeStore

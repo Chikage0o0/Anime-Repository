@@ -1,6 +1,6 @@
-import en_US from './en_US.json'
-import zh_CN from './zh_CN.json'
-import ja_JP from './ja_JP.json'
+import en_US from './enUS.json'
+import zh_CN from './zhCN.json'
+import ja_JP from './jaJP.json'
 
 export const resources = {
   en_US: {

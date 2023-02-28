@@ -14,7 +14,7 @@ import { invoke } from '@tauri-apps/api'
 import { flowResult } from 'mobx'
 import { useTranslation } from 'react-i18next'
 
-function New({
+function EditRule({
   opened,
   setOpened,
   form,
@@ -23,7 +23,7 @@ function New({
   setOpened: any
   form: any
 }) {
-  const { subscribeStore } = useStore()
+  const { subscribeRulesStore: subscribeStore } = useStore()
 
   const { t } = useTranslation()
   return (
@@ -147,4 +147,4 @@ function New({
   )
 }
 
-export default New
+export default EditRule

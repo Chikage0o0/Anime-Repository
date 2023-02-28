@@ -1,10 +1,12 @@
 import { Navigate } from 'react-router-dom'
 import React, { lazy } from 'react'
-import SubscribeRules from '@/components/content/subscribe-rules'
+import SubscribeRules from '@/components/content/subscribeRules'
 import { Center, Loader } from '@mantine/core'
 
 const Setting = lazy(() => import('../components/content/setting'))
-const Unrecognized = lazy(() => import('@/components/content/unrecognized'))
+const Unrecognized = lazy(
+  () => import('@/components/content/unrecognizedVideos')
+)
 
 const waitLoadingComponent = (component: JSX.Element) => (
   <React.Suspense

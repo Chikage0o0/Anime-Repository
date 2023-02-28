@@ -22,7 +22,7 @@ import { flowResult } from 'mobx'
 import { observer } from 'mobx-react-lite'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import New from './new'
+import EditRule from './editRule'
 
 function getLink(provider: string, id: string): string {
   switch (provider) {
@@ -40,7 +40,7 @@ function getLink(provider: string, id: string): string {
 
 function SubscribeRules() {
   const { t } = useTranslation()
-  const { settingStore, subscribeStore } = useStore()
+  const { settingStore, subscribeRulesStore: subscribeStore } = useStore()
   const [opened, setOpened] = useState(false)
   const form = useForm({
     initialValues: {
@@ -105,7 +105,7 @@ function SubscribeRules() {
 
   const theme = useMantineTheme()
 
-  const data = subscribeStore.subscribe_rules.map((item) => (
+  const data = subscribeStore.data.map((item) => (
     <tr key={item.provider + item.id}>
       <td>
         <Group>
@@ -196,7 +196,7 @@ function SubscribeRules() {
           <IconPlus stroke={1.5} size={34} onClick={() => setOpened(true)} />
         </ActionIcon>
       </Affix>
-      <New opened={opened} setOpened={setOpened} form={form} />
+      <EditRule opened={opened} setOpened={setOpened} form={form} />
     </ScrollArea>
   )
 }
