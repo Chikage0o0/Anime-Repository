@@ -41,7 +41,10 @@ pub(super) fn process<P: AsRef<Path>>(path: P) {
                     // 未匹配到的视频文件
                     None => {
                         log::info!("Found Unrecognized video: {:?}", path);
-                        unrecognized_videos::insert(path, unrecognized_videos::VideoData::None)
+                        crate::service::unrecognized_videos::insert(
+                            path,
+                            unrecognized_videos::VideoData::None,
+                        )
                     }
                 });
         }

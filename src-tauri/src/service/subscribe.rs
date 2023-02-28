@@ -15,6 +15,7 @@ pub fn insert((key, value): (Key, Value)) -> Result<(), SubscribeServiceError> {
     key.insert(&value)?;
     for i in matcher.match_all_videos().iter() {
         process(&key, &i.0, i.1)?;
+        crate::service::unrecognized_videos::delete(&i.0);
     }
     matcher.insert();
 
@@ -80,8 +81,23 @@ pub fn process<P: AsRef<Path>>(
         &value.lang,
         value.season,
         episode,
-        path,
-    )?;
+        &path,
+    )
+    .map_err(|e| {
+        crate::service::unrecognized_videos::insert(
+            path,
+            crate::data::unrecognized_videos::VideoData::TvShow(
+                Some(key.id.clone()),
+                Some(key.provider),
+                Some(value.lang),
+                Some(value.title),
+                Some(value.season),
+                Some(episode),
+            ),
+        );
+        SubscribeServiceError::ProcessTvshowInfoError(e)
+    })?;
+
     Ok(())
 }
 

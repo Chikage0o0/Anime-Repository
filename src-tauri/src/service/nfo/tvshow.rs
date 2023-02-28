@@ -41,7 +41,7 @@ pub fn process<P: AsRef<Path>>(
         return Err(TvshowNfoServiceError::NetworkError(e));
     }
 
-    write_nfo(&tvshow_nfo_path, &tvshow_nfo).unwrap();
+    write_nfo(&tvshow_nfo_path, &tvshow_nfo)?;
     tvshow_nfo
         .get_thumb(&tvshow_path)
         .iter()
@@ -83,7 +83,7 @@ pub fn process<P: AsRef<Path>>(
     // 添加到待处理列表
     insert(&path, &episode_path.as_path());
 
-    write_nfo(&episode_nfo_path, &episode_nfo).unwrap();
+    write_nfo(&episode_nfo_path, &episode_nfo)?;
     if let Some(thumb) = episode_nfo.get_thumb() {
         download_thumb(
             episode_folder_path.join(format!(

@@ -46,7 +46,7 @@ pub fn process<P: AsRef<Path>>(
     // 添加到待处理列表
     insert(&path, &movie_path.as_path());
 
-    write_nfo(&movie_nfo_path, &movie_nfo).unwrap();
+    write_nfo(&movie_nfo_path, &movie_nfo)?;
     movie_nfo
         .get_thumb(&movie_folder_path)
         .iter()
