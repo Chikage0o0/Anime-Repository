@@ -3,7 +3,7 @@ import { invoke } from '@tauri-apps/api'
 import { flow, flowResult, makeAutoObservable } from 'mobx'
 
 export type SettingObject = {
-  ui: { lang: string; theme: string }
+  ui: { lang: string; theme: string; primary_color: string }
   network: { proxy: string; use_proxy: string }
   storage: {
     pending_path: string
@@ -36,6 +36,9 @@ class SettingStore {
   }
   changeTheme = (theme: string) => {
     this.setting['ui']['theme'] = theme
+  }
+  changePrimaryColor = (color: string) => {
+    this.setting['ui']['primary_color'] = color
   };
   *applySetting(a: SettingObject) {
     this.loading = true
@@ -63,12 +66,7 @@ class SettingStore {
   }
 
   get getPrimaryColor() {
-    switch (this.getColorScheme) {
-      case 'dark':
-        return 'gray'
-      case 'light':
-        return 'blue'
-    }
+    return this.setting['ui']['primary_color']
   }
 
   *init() {

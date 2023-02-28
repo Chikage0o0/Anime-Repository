@@ -21,8 +21,8 @@ const useStyles = createStyles(() => {
   return {
     input: {
       paddingBottom: 18,
-      paddingLeft: 50,
-      paddingRight: 50,
+      paddingLeft: 20,
+      paddingRight: 20,
     },
   }
 })

@@ -1,15 +1,34 @@
 import setting from '@/store/settingStore'
 import i18n from 'i18next'
 import { useTranslation } from 'react-i18next'
-import { Divider, NativeSelect, Select } from '@mantine/core'
+import {
+  ColorSwatch,
+  Divider,
+  Group,
+  Select,
+  useMantineTheme,
+} from '@mantine/core'
 import { locales } from '@/locales/locales'
+import { useStore } from '@/store'
 
 function UI({ form, classes }: { form: any; classes: any }) {
+  const { settingStore } = useStore()
   const { t } = useTranslation()
   const lang = locales.map((item) => ({
     value: item,
     label: t(`lang.${item}`),
   }))
+  const theme = useMantineTheme()
+  const swatches = Object.keys(theme.colors).map((color) => (
+    <ColorSwatch
+      key={color}
+      color={theme.colors[color][6]}
+      onClick={() => {
+        form.setFieldValue('ui.primary_color', color)
+        settingStore.changePrimaryColor(color)
+      }}
+    />
+  ))
 
   const UITheme = [
     {
@@ -59,6 +78,9 @@ function UI({ form, classes }: { form: any; classes: any }) {
           setting.changeTheme(event as string)
         }}
       />
+      <Group position="center" spacing="xs" className={classes.input}>
+        {swatches}
+      </Group>
     </>
   )
 }

@@ -19,7 +19,7 @@ pub struct Setting {
 struct UI {
     lang: String,
     theme: Theme,
-    color: String,
+    primary_color: String,
 }
 #[derive(Serialize, Deserialize, Debug, Clone)]
 enum Theme {
@@ -74,7 +74,7 @@ impl Setting {
                     .replace("-", "_"),
             )?
             .set_default("ui.theme", "Auto")?
-            .set_default("ui.color", "#3f51b5")?
+            .set_default("ui.primary_color", "gray")?
             .set_default("storage.pending_path", download_dir.to_str())?
             .set_default("storage.pending_path_scan_interval", 60)?
             .set_default("storage.repository_path", video_dir.to_str())?
