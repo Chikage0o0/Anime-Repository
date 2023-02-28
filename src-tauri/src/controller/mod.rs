@@ -8,5 +8,5 @@ pub use subscribe_rules::{
     insert_subscribe_rule,
 };
 pub use unrecognized_videos::{
-    delete_unrecognized_video, get_unrecognized_videos_list, insert_unrecognized_video,
+    delete_unrecognized_video_info, get_unrecognized_videos_list, update_unrecognized_video_info,
 };

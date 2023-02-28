@@ -156,7 +156,7 @@ impl Matcher {
 #[derive(thiserror::Error, Debug)]
 pub enum MatcherError {
     #[error(transparent)]
-    SledError(#[from] crate::data::subscribe_rules::SubscribeDataError),
+    SledError(#[from] crate::data::subscribe_rules::SubscribeRulesDataError),
     #[error(transparent)]
     RegexBuildError(#[from] regex::Error),
     #[error(transparent)]

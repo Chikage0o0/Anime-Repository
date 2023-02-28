@@ -27,7 +27,7 @@ pub(super) fn process<P: AsRef<Path>>(path: P) {
                     // 排除非视频文件以及已经加入处理队列的文件
                     (e.kind == DebouncedEventKind::Any
                         && pending_videos::get(path).is_none()
-                        && unrecognized_videos::get(path).is_none()
+                        && unrecognized_videos::get(path).is_ok()
                         && file::is_video(path))
                     .then(|| path)
                 })
@@ -41,12 +41,18 @@ pub(super) fn process<P: AsRef<Path>>(path: P) {
                     // 未匹配到的视频文件
                     None => {
                         log::info!("Found Unrecognized video: {:?}", path);
-                        crate::service::unrecognized_videos::insert(
+                        if let Err(e) = crate::service::unrecognized_videos::insert(
                             path,
-                            unrecognized_videos::VideoData::None,
-                        )
+                            unrecognized_videos::VideoData::Undefined,
+                        ) {
+                            log::error!(
+                                "Insert {:?} to Unrecognized Video database failed: {:?}",
+                                path,
+                                e
+                            );
+                        }
                     }
-                });
+                })
         }
     }
 }

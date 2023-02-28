@@ -40,6 +40,14 @@ pub fn delete(path: PathBuf) {
     DB.remove(path.to_str().unwrap()).unwrap();
 }
 
+#[derive(thiserror::Error, Debug)]
+pub enum UnrecognizedVideoDataError {
+    #[error("Key `{0}` not found in database")]
+    KeyNotFound(String),
+    #[error(transparent)]
+    SledError(#[from] sled::Error),
+}
+
 #[cfg(test)]
 mod test {
     use super::*;

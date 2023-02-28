@@ -24,16 +24,18 @@ impl From<Key> for Uniqueid {
 }
 
 impl Key {
-    pub fn get(&self) -> Result<Value, SubscribeDataError> {
+    pub fn get(&self) -> Result<Value, SubscribeRulesDataError> {
         let serialized_self = bincode::serialize(self).unwrap();
         if let Some(x) = &DB.get(serialized_self).unwrap() {
             Ok(bincode::deserialize(&x.to_vec()[..]).unwrap())
         } else {
-            Err(SubscribeDataError::KeyNotFound(json!(self).to_string()))
+            Err(SubscribeRulesDataError::KeyNotFound(
+                json!(self).to_string(),
+            ))
         }
     }
 
-    pub fn insert(&self, value: &Value) -> Result<(), SubscribeDataError> {
+    pub fn insert(&self, value: &Value) -> Result<(), SubscribeRulesDataError> {
         DB.insert(
             bincode::serialize(self).unwrap(),
             bincode::serialize(&value).unwrap(),
@@ -41,7 +43,7 @@ impl Key {
         Ok(())
     }
 
-    pub fn delete(&self) -> Result<(), SubscribeDataError> {
+    pub fn delete(&self) -> Result<(), SubscribeRulesDataError> {
         let serialized_self = bincode::serialize(self).unwrap();
         DB.remove(serialized_self)?;
         Ok(())
@@ -75,7 +77,7 @@ pub fn list() -> Vec<(Key, Value)> {
 }
 
 #[derive(thiserror::Error, Debug)]
-pub enum SubscribeDataError {
+pub enum SubscribeRulesDataError {
     #[error("Key `{0}` not found in database")]
     KeyNotFound(String),
     #[error(transparent)]
@@ -95,7 +97,7 @@ mod test {
     }
 
     #[test]
-    fn insert() -> Result<(), SubscribeDataError> {
+    fn insert() -> Result<(), SubscribeRulesDataError> {
         let key = Key {
             id: "tt1234567".to_string(),
             provider: ProviderKnown::IMDB,

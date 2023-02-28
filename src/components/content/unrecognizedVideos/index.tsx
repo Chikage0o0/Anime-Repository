@@ -1,4 +1,5 @@
 import { useStore } from '@/store'
+import { unrecognizedVideoObject } from '@/store/unrecognizedStore'
 import {
   ActionIcon,
   ScrollArea,
@@ -29,7 +30,70 @@ function UnrecognizedVideos() {
   const { t } = useTranslation()
   const { settingStore, unrecognizedVideosStore } = useStore()
   const [opened, setOpened] = useState(false)
-  const form = useForm({})
+  const form = useForm({
+    initialValues: {
+      type: 'movie',
+      path: '',
+      id: '',
+      provider: 'tmdb',
+      lang: 'zh-CN',
+      title: '',
+      season: 1,
+      episode: 1,
+    },
+    validate: {
+      type: (value) => {
+        if (value !== 'movie' && value !== 'tvshow') {
+          return t('unrecognized_videos.video_info.type_required')
+        }
+      },
+      id: (value) => {
+        if (!value) {
+          return t('unrecognized_videos.video_info.id_required')
+        }
+      },
+      provider: (value) => {
+        if (!value) {
+          return t('unrecognized_videos.video_info.provider_required')
+        }
+      },
+      lang: (value) => {
+        if (!/^[a-z]{2}-[A-Z]{2}$/g.test(value)) {
+          return t('unrecognized_videos.video_info.lang_invalid')
+        }
+      },
+      title: (value) => {
+        if (!value && form.values.type === 'tvshow') {
+          return t('unrecognized_videos.video_info.title_required')
+        }
+        if (value === undefined && form.values.type === 'movie') {
+          form.setFieldValue('title', '')
+        }
+      },
+      season: (value) => {
+        if (value < 0 && form.values.type === 'tvshow') {
+          return t('unrecognized_videos.video_info.season_invalid')
+        }
+        if (value === undefined && form.values.type === 'tvshow') {
+          return t('unrecognized_videos.video_info.season_required')
+        }
+        if (value === undefined && form.values.type === 'movie') {
+          form.setFieldValue('season', 1)
+        }
+      },
+      episode: (value) => {
+        if (value < 0 && form.values.type === 'tvshow') {
+          return t('unrecognized_videos.video_info.episode_invalid')
+        }
+        if (value === undefined && form.values.type === 'tvshow') {
+          return t('unrecognized_videos.video_info.episode_required')
+        }
+        if (value === undefined && form.values.type === 'movie') {
+          form.setFieldValue('episode', 1)
+        }
+      },
+    },
+  })
 
   const theme = useMantineTheme()
 
@@ -44,15 +108,16 @@ function UnrecognizedVideos() {
     return path
   }
 
-  const data = unrecognizedVideosStore.data.map((item) => (
-    <tr key={item[0]}>
+  const data = unrecognizedVideosStore.getUnrecognizedVideos.map((item) => (
+    <tr key={item?.path}>
       <td>
-        <Text size="sm">{getRelativePath(item[0])}</Text>
+        <Text size="sm">{getRelativePath(item?.path)}</Text>
       </td>
       <td>
         <Group spacing={0} position="right">
           <ActionIcon
             onClick={() => {
+              form.setValues(item)
               setOpened(true)
               console.log(item)
             }}>
@@ -61,7 +126,7 @@ function UnrecognizedVideos() {
           <ActionIcon
             color="red"
             onClick={() =>
-              flowResult(unrecognizedVideosStore.delUnrecognizedVideo(item[0]))
+              invoke('delete_unrecognized_video_info', { path: item?.path })
                 .then(() => {
                   showNotification({
                     icon: <IconCheck />,

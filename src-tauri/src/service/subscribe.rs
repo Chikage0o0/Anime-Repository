@@ -15,7 +15,7 @@ pub fn insert((key, value): (Key, Value)) -> Result<(), SubscribeServiceError> {
     key.insert(&value)?;
     for i in matcher.match_all_videos().iter() {
         process(&key, &i.0, i.1)?;
-        crate::service::unrecognized_videos::delete(&i.0);
+        crate::service::unrecognized_videos::delete(&i.0)?;
     }
     matcher.insert();
 
@@ -74,7 +74,7 @@ pub fn process<P: AsRef<Path>>(
 ) -> Result<(), SubscribeServiceError> {
     let value = key.get()?;
 
-    tvshow::process(
+    if let Err(e) = tvshow::process(
         &key.id,
         key.provider,
         &value.title,
@@ -82,22 +82,20 @@ pub fn process<P: AsRef<Path>>(
         value.season,
         episode,
         &path,
-    )
-    .map_err(|e| {
+    ) {
         crate::service::unrecognized_videos::insert(
             path,
-            crate::data::unrecognized_videos::VideoData::TvShow(
-                Some(key.id.clone()),
-                Some(key.provider),
-                Some(value.lang),
-                Some(value.title),
-                Some(value.season),
-                Some(episode),
+            crate::data::unrecognized_videos::VideoData::Tvshow(
+                key.id.clone(),
+                key.provider,
+                value.lang,
+                value.title,
+                value.season,
+                episode,
             ),
-        );
-        SubscribeServiceError::ProcessTvshowInfoError(e)
-    })?;
-
+        )?;
+        return Err(SubscribeServiceError::ProcessTvshowInfoError(e));
+    }
     Ok(())
 }
 
@@ -108,9 +106,13 @@ pub enum SubscribeServiceError {
     #[error(transparent)]
     NfoCreateError(#[from] NfoServiceError),
     #[error(transparent)]
-    SledError(#[from] crate::data::subscribe_rules::SubscribeDataError),
+    SledError(#[from] crate::data::subscribe_rules::SubscribeRulesDataError),
     #[error(transparent)]
     ProcessTvshowInfoError(#[from] super::nfo::tvshow::TvshowNfoServiceError),
+    #[error(transparent)]
+    UnrecognizedVideoServiceError(
+        #[from] crate::service::unrecognized_videos::UnrecognizedVideosServiceError,
+    ),
     #[error("`{0}`")]
     NetworkError(String),
 }

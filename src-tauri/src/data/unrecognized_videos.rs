@@ -13,21 +13,14 @@ lazy_static! {
 /// - Movie: (id, provider, lang)
 /// - TvShow: (id, provider, lang,title, season, episode)
 pub enum VideoData {
-    Movie(Option<String>, Option<ProviderKnown>, Option<String>),
-    TvShow(
-        Option<String>,
-        Option<ProviderKnown>,
-        Option<String>,
-        Option<String>,
-        Option<u64>,
-        Option<u64>,
-    ),
-    None,
+    Movie(String, ProviderKnown, String),
+    Tvshow(String, ProviderKnown, String, String, u64, u64),
+    Undefined,
 }
 
 impl VideoData {
     pub fn new() -> Self {
-        Self::None
+        Self::Undefined
     }
 }
 
@@ -47,31 +40,44 @@ pub fn get_all() -> Vec<(PathBuf, VideoData)> {
         .collect::<Vec<(PathBuf, VideoData)>>()
 }
 
-pub fn get<P: AsRef<Path>>(path: P) -> Option<VideoData> {
-    if let Some(value) = DB.get(path.as_ref().to_str().unwrap()).unwrap() {
+pub fn get<P: AsRef<Path>>(path: P) -> Result<VideoData, UnrecognizedVideosDataError> {
+    if let Some(value) = DB.get(path.as_ref().to_str().unwrap())? {
         let path = String::from_utf8(value.to_vec()).unwrap();
-        Some(bincode::deserialize(&value.to_vec()[..]).unwrap())
+        Ok(bincode::deserialize(&value.to_vec()[..]).unwrap())
     } else {
-        None
+        Err(UnrecognizedVideosDataError::KeyNotFound(
+            path.as_ref().to_str().unwrap().to_string(),
+        ))
     }
 }
 
-pub fn insert<P: AsRef<Path>>(path: P, video_data: VideoData) {
+pub fn insert<P: AsRef<Path>>(
+    path: P,
+    video_data: VideoData,
+) -> Result<(), UnrecognizedVideosDataError> {
     DB.insert(
         path.as_ref().to_str().unwrap(),
         bincode::serialize(&video_data).unwrap(),
-    )
-    .unwrap();
+    )?;
+    Ok(())
 }
 
-pub fn delete<P: AsRef<Path>>(path: P) {
-    DB.remove(path.as_ref().to_str().unwrap()).unwrap();
+pub fn delete<P: AsRef<Path>>(path: P) -> Result<(), UnrecognizedVideosDataError> {
+    DB.remove(path.as_ref().to_str().unwrap())?;
+    Ok(())
 }
 
-pub fn delete_all() {
-    DB.clear().unwrap();
+pub fn delete_all() -> Result<(), UnrecognizedVideosDataError> {
+    DB.clear()?;
+    Ok(())
 }
-
+#[derive(thiserror::Error, Debug)]
+pub enum UnrecognizedVideosDataError {
+    #[error("Key `{0}` not found in database")]
+    KeyNotFound(String),
+    #[error(transparent)]
+    SledError(#[from] sled::Error),
+}
 #[cfg(test)]
 mod test {
     use super::*;
@@ -86,7 +92,7 @@ mod test {
         init();
         let path = PathBuf::from("test.mp4");
         let video_data = VideoData::new();
-        insert(path, video_data);
+        insert(path, video_data).unwrap();
         let list = get_all();
         assert_eq!(list.len(), 1);
         assert!(list[0].0.to_str().unwrap().contains("test.mp4"));

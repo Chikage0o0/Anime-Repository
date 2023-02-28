@@ -21,7 +21,13 @@ pub(super) fn process() {
             || !is_video(&path)
             || !path.starts_with(&PENDING_PATH.as_path())
         {
-            delete(&path);
+            if let Err(e) = delete(&path) {
+                log::error!(
+                    "Delete {:?} from Unrecognized Video database failed: {:?}",
+                    path,
+                    e
+                );
+            }
         }
     })
 }

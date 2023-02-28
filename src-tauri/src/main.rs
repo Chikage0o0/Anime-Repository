@@ -28,8 +28,8 @@ fn main() {
             delete_subscribe_rule,
             insert_subscribe_rule,
             get_unrecognized_videos_list,
-            delete_unrecognized_video,
-            insert_unrecognized_video,
+            delete_unrecognized_video_info,
+            update_unrecognized_video_info,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

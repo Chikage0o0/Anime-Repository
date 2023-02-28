@@ -24,7 +24,7 @@ function EditRule({
   setOpened: Dispatch<SetStateAction<boolean>>
   form: any
 }) {
-  const { subscribeRulesStore: subscribeStore } = useStore()
+  const { subscribeRulesStore } = useStore()
 
   const { t } = useTranslation()
   return (
@@ -102,7 +102,7 @@ function EditRule({
                   color: 'red',
                   icon: <IconX />,
                   autoClose: false,
-                  title: t('subscribe_rules.id_invalid'),
+                  title: t('subscribe_rules.title_not_found'),
                   message: e,
                 })
               })
@@ -120,7 +120,7 @@ function EditRule({
           color="blue"
           onClick={() => {
             if (!form.validate().hasErrors) {
-              flowResult(subscribeStore.addSubscribeRule(form.values))
+              flowResult(subscribeRulesStore.addSubscribeRule(form.values))
                 .then(() => {
                   form.reset()
                   setOpened(false)
