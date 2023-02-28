@@ -81,14 +81,18 @@ const useStyles = createStyles((theme, _params, getRef) => {
 })
 
 const data = [
-  { link: '/subscribe-rules', label: 'subscribe-rules', icon: IconRss },
-  { link: '/unrecognized', label: 'unrecognized', icon: IconFileUnknown },
+  { link: '/subscribe_rules', label: 'subscribe_rules', icon: IconRss },
+  {
+    link: '/unrecognized_videos',
+    label: 'unrecognized_videos',
+    icon: IconFileUnknown,
+  },
 ]
 
 export function Menu() {
   const { t } = useTranslation()
   const { classes, cx } = useStyles()
-  const [active, setActive] = useState('subscribe-rules')
+  const [active, setActive] = useState('subscribe_rules')
   const navigate = useNavigate()
   const { settingStore } = useStore()
   const links = data.map((item) => (

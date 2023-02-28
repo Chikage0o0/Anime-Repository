@@ -3,8 +3,8 @@ import React, { lazy } from 'react'
 import SubscribeRules from '@/components/content/subscribeRules'
 import { Center, Loader } from '@mantine/core'
 
-const Setting = lazy(() => import('../components/content/setting'))
-const Unrecognized = lazy(
+const Setting = lazy(() => import('@/components/content/setting'))
+const UnrecognizedVideos = lazy(
   () => import('@/components/content/unrecognizedVideos')
 )
 
@@ -22,16 +22,16 @@ const waitLoadingComponent = (component: JSX.Element) => (
 const routes = [
   {
     path: '/',
-    element: <Navigate to="/subscribe-rules" />,
+    element: <Navigate to="/subscribe_rules" />,
   },
   {
-    path: '/subscribe-rules',
+    path: '/subscribe_rules',
     element: <SubscribeRules />,
   },
 
   {
-    path: '/unrecognized',
-    element: waitLoadingComponent(<Unrecognized />),
+    path: '/unrecognized_videos',
+    element: waitLoadingComponent(<UnrecognizedVideos />),
   },
 
   {

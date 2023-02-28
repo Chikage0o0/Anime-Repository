@@ -57,47 +57,47 @@ function SubscribeRules() {
     validate: {
       title: (value) => {
         if (!value) {
-          return t('subscribe-rules.title_required')
+          return t('subscribe_rules.title_required')
         }
       },
       id: (value) => {
         if (!value) {
-          return t('subscribe-rules.id_required')
+          return t('subscribe_rules.id_required')
         }
       },
       tvshow_regex: (value) => {
         if (!value) {
-          return t('subscribe-rules.tvshow_regex_required')
+          return t('subscribe_rules.tvshow_regex_required')
         }
         try {
           new RegExp(value)
         } catch (e) {
-          return t('subscribe-rules.tvshow_regex_invalid')
+          return t('subscribe_rules.tvshow_regex_invalid')
         }
       },
       season: (value) => {
         if (value < 0) {
-          return t('subscribe-rules.season_invalid')
+          return t('subscribe_rules.season_invalid')
         }
       },
       lang: (value) => {
         if (!/^[a-z]{2}-[A-Z]{2}$/g.test(value)) {
-          return t('subscribe-rules.lang_invalid')
+          return t('subscribe_rules.lang_invalid')
         }
       },
       episode_regex: (value) => {
         if (!value) {
-          return t('subscribe-rules.episode_regex_required')
+          return t('subscribe_rules.episode_regex_required')
         }
         try {
           new RegExp(value)
         } catch (e) {
-          return t('subscribe-rules.episode_regex_invalid')
+          return t('subscribe_rules.episode_regex_invalid')
         }
       },
       episode_position: (value) => {
         if (value < 1) {
-          return t('subscribe-rules.episode_position_invalid')
+          return t('subscribe_rules.episode_position_invalid')
         }
       },
     },
@@ -128,42 +128,37 @@ function SubscribeRules() {
       </td>
       <td>
         <Group spacing={0} position="right">
-          <ActionIcon>
-            <IconPencil
-              size={16}
-              stroke={1.5}
-              onClick={() => {
-                form.setValues(item)
-                setOpened(true)
-              }}
-            />
+          <ActionIcon
+            onClick={() => {
+              form.setValues(item)
+              setOpened(true)
+            }}>
+            <IconPencil size={16} stroke={1.5} />
           </ActionIcon>
-          <ActionIcon color="red">
-            <IconTrash
-              size={16}
-              stroke={1.5}
-              onClick={() =>
-                flowResult(
-                  subscribeStore.delSubscribeRule(item.id, item.provider)
-                )
-                  .then(() => {
-                    showNotification({
-                      icon: <IconCheck />,
-                      title: t('subscribe_rules.delete_success'),
-                      message: '✌️🙄✌️',
-                    })
+          <ActionIcon
+            color="red"
+            onClick={() =>
+              flowResult(
+                subscribeStore.delSubscribeRule(item.id, item.provider)
+              )
+                .then(() => {
+                  showNotification({
+                    icon: <IconCheck />,
+                    title: t('subscribe_rules.delete_success'),
+                    message: '✌️🙄✌️',
                   })
-                  .catch((e) => {
-                    showNotification({
-                      color: 'red',
-                      icon: <IconX />,
-                      autoClose: false,
-                      title: t('subscribe_rules.delete_failed'),
-                      message: e,
-                    })
+                })
+                .catch((e) => {
+                  showNotification({
+                    color: 'red',
+                    icon: <IconX />,
+                    autoClose: false,
+                    title: t('subscribe_rules.delete_failed'),
+                    message: e,
                   })
-              }
-            />
+                })
+            }>
+            <IconTrash size={16} stroke={1.5} />
           </ActionIcon>
         </Group>
       </td>
@@ -175,10 +170,10 @@ function SubscribeRules() {
       <Table verticalSpacing="sm" striped highlightOnHover>
         <thead>
           <tr>
-            <th>{t('subscribe-rules.ID')}</th>
-            <th>{t('subscribe-rules.title')}</th>
-            <th>{t('subscribe-rules.season')}</th>
-            <th>{t('subscribe-rules.lang')}</th>
+            <th>{t('subscribe_rules.ID')}</th>
+            <th>{t('subscribe_rules.title')}</th>
+            <th>{t('subscribe_rules.season')}</th>
+            <th>{t('subscribe_rules.lang')}</th>
             <th style={{ maxWidth: 100 }} />
           </tr>
         </thead>
@@ -192,8 +187,9 @@ function SubscribeRules() {
           size="xl"
           radius="xl"
           variant="filled"
-          color={theme.primaryColor}>
-          <IconPlus stroke={1.5} size={34} onClick={() => setOpened(true)} />
+          color={theme.primaryColor}
+          onClick={() => setOpened(true)}>
+          <IconPlus stroke={1.5} size={34} />
         </ActionIcon>
       </Affix>
       <EditRule opened={opened} setOpened={setOpened} form={form} />

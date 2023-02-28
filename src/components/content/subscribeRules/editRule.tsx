@@ -12,6 +12,7 @@ import { showNotification } from '@mantine/notifications'
 import { IconCheck, IconX } from '@tabler/icons-react'
 import { invoke } from '@tauri-apps/api'
 import { flowResult } from 'mobx'
+import { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 
 function EditRule({
@@ -20,7 +21,7 @@ function EditRule({
   form,
 }: {
   opened: boolean
-  setOpened: any
+  setOpened: Dispatch<SetStateAction<boolean>>
   form: any
 }) {
   const { subscribeRulesStore: subscribeStore } = useStore()
@@ -28,64 +29,64 @@ function EditRule({
   const { t } = useTranslation()
   return (
     <Modal
-      size={500}
+      size="lg"
       opened={opened}
       onClose={() => setOpened(false)}
-      title={t('subscribe-rules')}>
-      <Divider style={{ paddingBottom: 10 }} size="xs" />
-      <Group position="center" style={{ paddingBottom: 5 }} grow>
+      title={t('subscribe_rules')}>
+      <Divider mb="xs" size="xs" />
+      <Group position="center" mb="xs" grow>
         <TextInput
           autoComplete="off"
-          label={t('subscribe-rules.ID')}
+          label={t('subscribe_rules.ID')}
           {...form.getInputProps('id')}
         />
         <Select
-          label={t('subscribe-rules.provider')}
+          label={t('subscribe_rules.provider')}
           data={[{ value: 'tmdb', label: 'TMDB' }]}
           {...form.getInputProps('provider')}
         />
       </Group>
       <TextInput
         autoComplete="off"
-        style={{ paddingBottom: 5 }}
-        label={t('subscribe-rules.tvshow_regex')}
+        mb="xs"
+        label={t('subscribe_rules.tvshow_regex')}
         {...form.getInputProps('tvshow_regex')}
       />
-      <Group position="center" style={{ paddingBottom: 5 }} grow>
+      <Group position="center" mb="xs" grow>
         <NumberInput
           autoComplete="off"
-          label={t('subscribe-rules.season')}
+          label={t('subscribe_rules.season')}
           {...form.getInputProps('season')}
         />
         <TextInput
           autoComplete="off"
-          label={t('subscribe-rules.lang')}
+          label={t('subscribe_rules.lang')}
           placeholder="zh-CN, en-US, etc"
           {...form.getInputProps('lang')}
         />
       </Group>
-      <Group position="center" style={{ paddingBottom: 5 }} grow>
+      <Group position="center" mb="xs" grow>
         <TextInput
           autoComplete="off"
-          label={t('subscribe-rules.episode_regex')}
+          label={t('subscribe_rules.episode_regex')}
           placeholder="\\d+"
           {...form.getInputProps('episode_regex')}
         />
         <NumberInput
           autoComplete="off"
-          label={t('subscribe-rules.episode_position')}
+          label={t('subscribe_rules.episode_position')}
           {...form.getInputProps('episode_position')}
         />
         <NumberInput
           autoComplete="off"
-          label={t('subscribe-rules.episode_offset')}
+          label={t('subscribe_rules.episode_offset')}
           {...form.getInputProps('episode_offset')}
         />
       </Group>
       <TextInput
         autoComplete="off"
-        style={{ paddingBottom: 15 }}
-        label={t('subscribe-rules.title')}
+        mb="xs"
+        label={t('subscribe_rules.title')}
         onClick={() => {
           if (form.values.id && form.values.provider && form.values.lang) {
             invoke('get_tvshow_title', {
@@ -101,7 +102,7 @@ function EditRule({
                   color: 'red',
                   icon: <IconX />,
                   autoClose: false,
-                  title: t('subscribe-rules.id_invalid'),
+                  title: t('subscribe_rules.id_invalid'),
                   message: e,
                 })
               })
@@ -109,7 +110,7 @@ function EditRule({
         }}
         {...form.getInputProps('title')}
       />
-      <Divider style={{ paddingBottom: 15 }} size="xs" />
+      <Divider mb="sm" size="xs" />
       <Group position="center" grow>
         <Button variant="outline" color="red" onClick={() => form.reset()}>
           {t('UI.reset')}

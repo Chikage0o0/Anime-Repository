@@ -65,34 +65,31 @@ function Setting() {
           radius="xl"
           variant="filled"
           loading={settingStore.loading}
-          color={theme.primaryColor}>
-          <IconDeviceFloppy
-            stroke={1.2}
-            size={34}
-            onClick={() => {
-              if (!form.validate().hasErrors) {
-                flowResult(
-                  settingStore.applySetting(form.values as SettingObject)
-                )
-                  .then(() => {
-                    showNotification({
-                      icon: <IconCheck />,
-                      title: t('setting.save_success'),
-                      message: '✌️🙄✌️',
-                    })
+          color={theme.primaryColor}
+          onClick={() => {
+            if (!form.validate().hasErrors) {
+              flowResult(
+                settingStore.applySetting(form.values as SettingObject)
+              )
+                .then(() => {
+                  showNotification({
+                    icon: <IconCheck />,
+                    title: t('setting.save_success'),
+                    message: '✌️🙄✌️',
                   })
-                  .catch((e) => {
-                    showNotification({
-                      color: 'red',
-                      icon: <IconX />,
-                      autoClose: false,
-                      title: t('setting.save_failed'),
-                      message: e,
-                    })
+                })
+                .catch((e) => {
+                  showNotification({
+                    color: 'red',
+                    icon: <IconX />,
+                    autoClose: false,
+                    title: t('setting.save_failed'),
+                    message: e,
                   })
-              }
-            }}
-          />
+                })
+            }
+          }}>
+          <IconDeviceFloppy stroke={1.2} size={34} />
         </ActionIcon>
       </Affix>
     </ScrollArea>
