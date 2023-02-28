@@ -51,7 +51,6 @@ class UnrecognizedVideosStore {
 
   *init() {
     const res: [] = yield invoke('get_unrecognized_videos_list')
-    console.log(res)
     return res
   }
 }

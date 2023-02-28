@@ -1,5 +1,6 @@
 {
   "subscribe_rules": "Subscribe Rule",
+  "subscribe_rules.search_by_id_or_title": "Search by ID or Title",
   "subscribe_rules.title": "Title",
   "subscribe_rules.ID": "ID",
   "subscribe_rules.provider": "Provider",

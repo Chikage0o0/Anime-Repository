@@ -8,6 +8,7 @@ import {
   Text,
   Anchor,
   Group,
+  TextInput,
 } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { showNotification } from '@mantine/notifications'
@@ -15,6 +16,7 @@ import {
   IconCheck,
   IconPencil,
   IconPlus,
+  IconSearch,
   IconTrash,
   IconX,
 } from '@tabler/icons-react'
@@ -42,6 +44,7 @@ function SubscribeRules() {
   const { t } = useTranslation()
   const { settingStore, subscribeRulesStore: subscribeStore } = useStore()
   const [opened, setOpened] = useState(false)
+  const [search, setSearch] = useState('')
   const form = useForm({
     initialValues: {
       title: '',
@@ -105,68 +108,86 @@ function SubscribeRules() {
 
   const theme = useMantineTheme()
 
-  const data = subscribeStore.data.map((item) => (
-    <tr key={item.provider + item.id}>
-      <td>
-        <Group>
-          <Text size="sm">{item.provider.toUpperCase() + ':'}</Text>
-          <Anchor href={getLink(item.provider, item.id)} target="_blank">
-            {item.id}
-          </Anchor>
-        </Group>
-      </td>
-      <td>
-        <Text size="sm" weight={500}>
-          {item.title}
-        </Text>
-      </td>
-      <td>
-        <Text size="sm">{item.season}</Text>
-      </td>
-      <td>
-        <Text size="sm">{item.lang}</Text>
-      </td>
-      <td>
-        <Group spacing={0} position="right">
-          <ActionIcon
-            onClick={() => {
-              form.setValues(item)
-              setOpened(true)
-            }}>
-            <IconPencil size={16} stroke={1.5} />
-          </ActionIcon>
-          <ActionIcon
-            color="red"
-            onClick={() =>
-              flowResult(
-                subscribeStore.delSubscribeRule(item.id, item.provider)
-              )
-                .then(() => {
-                  showNotification({
-                    icon: <IconCheck />,
-                    title: t('subscribe_rules.delete_success'),
-                    message: '✌️🙄✌️',
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = event.currentTarget
+    setSearch(value)
+  }
+
+  const data = subscribeStore.data
+    .filter((item) => {
+      if (search === '') {
+        return true
+      }
+      return item.id.includes(search) || item.title.includes(search)
+    })
+    .map((item) => (
+      <tr key={item.provider + item.id}>
+        <td>
+          <Group>
+            <Text size="sm">{item.provider.toUpperCase() + ':'}</Text>
+            <Anchor href={getLink(item.provider, item.id)} target="_blank">
+              {item.id}
+            </Anchor>
+          </Group>
+        </td>
+        <td>
+          <Text size="sm" weight={500}>
+            {item.title}
+          </Text>
+        </td>
+        <td>
+          <Text size="sm">{item.season}</Text>
+        </td>
+        <td>
+          <Text size="sm">{item.lang}</Text>
+        </td>
+        <td>
+          <Group spacing={0} position="right">
+            <ActionIcon
+              onClick={() => {
+                form.setValues(item)
+                setOpened(true)
+              }}>
+              <IconPencil size={16} stroke={1.5} />
+            </ActionIcon>
+            <ActionIcon
+              color="red"
+              onClick={() =>
+                flowResult(
+                  subscribeStore.delSubscribeRule(item.id, item.provider)
+                )
+                  .then(() => {
+                    showNotification({
+                      icon: <IconCheck />,
+                      title: t('subscribe_rules.delete_success'),
+                      message: '✌️🙄✌️',
+                    })
                   })
-                })
-                .catch((e) => {
-                  showNotification({
-                    color: 'red',
-                    icon: <IconX />,
-                    autoClose: false,
-                    title: t('subscribe_rules.delete_failed'),
-                    message: e,
+                  .catch((e) => {
+                    showNotification({
+                      color: 'red',
+                      icon: <IconX />,
+                      autoClose: false,
+                      title: t('subscribe_rules.delete_failed'),
+                      message: e,
+                    })
                   })
-                })
-            }>
-            <IconTrash size={16} stroke={1.5} />
-          </ActionIcon>
-        </Group>
-      </td>
-    </tr>
-  ))
+              }>
+              <IconTrash size={16} stroke={1.5} />
+            </ActionIcon>
+          </Group>
+        </td>
+      </tr>
+    ))
 
   return (
     <ScrollArea style={{ height: '100vh', padding: 30 }} type="scroll">
+      <TextInput
+        placeholder={t('subscribe_rules.search_by_id_or_title') as string}
+        mb="xs"
+        onChange={handleSearchChange}
+        icon={<IconSearch size={14} stroke={1.5} />}
+      />
       <Table verticalSpacing="sm" striped highlightOnHover>
         <thead>
           <tr>

@@ -15,8 +15,7 @@ import { UseFormReturnType } from '@mantine/form'
 import { showNotification } from '@mantine/notifications'
 import { IconCheck, IconDeviceTv, IconMovie, IconX } from '@tabler/icons-react'
 import { invoke } from '@tauri-apps/api'
-import { flowResult } from 'mobx'
-import { Dispatch, SetStateAction, useState } from 'react'
+import { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 
 function EditVideo({

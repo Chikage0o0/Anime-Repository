@@ -1,28 +1,18 @@
 import { useStore } from '@/store'
-import { unrecognizedVideoObject } from '@/store/unrecognizedStore'
 import {
   ActionIcon,
   ScrollArea,
   Table,
   useMantineTheme,
-  Affix,
   Text,
-  Anchor,
   Group,
 } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { showNotification } from '@mantine/notifications'
-import {
-  IconCheck,
-  IconPencil,
-  IconPlus,
-  IconTrash,
-  IconX,
-} from '@tabler/icons-react'
+import { IconCheck, IconPencil, IconTrash, IconX } from '@tabler/icons-react'
 import { invoke } from '@tauri-apps/api'
-import { flowResult } from 'mobx'
-import { observer } from 'mobx-react-lite'
-import { useEffect, useState } from 'react'
+
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import EditVideo from './editVideo'
 
