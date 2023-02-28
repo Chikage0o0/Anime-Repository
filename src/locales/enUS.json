@@ -25,6 +25,7 @@
   "subscribe_rules.episode_regex_invalid": "Episode Regex Invalid",
   "subscribe_rules.episode_position_invalid": "Episode Position Invalid",
   "unrecognized_videos": "Unrecognized Videos",
+  "unrecognized_videos.search_by_file_name": "Search by File Name",
   "unrecognized_videos.file_name": "File Name",
   "unrecognized_videos.video_info": "Video Info",
   "unrecognized_videos.video_info.ID": "ID",

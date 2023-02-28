@@ -181,26 +181,27 @@ function SubscribeRules() {
     ))
 
   return (
-    <ScrollArea style={{ height: '100vh', padding: 30 }} type="scroll">
+    <div style={{ padding: 30 }}>
       <TextInput
         placeholder={t('subscribe_rules.search_by_id_or_title') as string}
         mb="xs"
         onChange={handleSearchChange}
         icon={<IconSearch size={14} stroke={1.5} />}
       />
-      <Table verticalSpacing="sm" striped highlightOnHover>
-        <thead>
-          <tr>
-            <th>{t('subscribe_rules.ID')}</th>
-            <th>{t('subscribe_rules.title')}</th>
-            <th>{t('subscribe_rules.season')}</th>
-            <th>{t('subscribe_rules.lang')}</th>
-            <th style={{ maxWidth: 100 }} />
-          </tr>
-        </thead>
-        <tbody>{data}</tbody>
-      </Table>
-
+      <ScrollArea style={{ height: 'calc(100vh - 110px)' }} type="scroll">
+        <Table verticalSpacing="sm" striped highlightOnHover>
+          <thead>
+            <tr>
+              <th>{t('subscribe_rules.ID')}</th>
+              <th>{t('subscribe_rules.title')}</th>
+              <th>{t('subscribe_rules.season')}</th>
+              <th>{t('subscribe_rules.lang')}</th>
+              <th style={{ maxWidth: 100 }} />
+            </tr>
+          </thead>
+          <tbody>{data}</tbody>
+        </Table>
+      </ScrollArea>
       <Affix
         hidden={settingStore.menu_open}
         position={{ bottom: 20, right: 20 }}>
@@ -214,7 +215,7 @@ function SubscribeRules() {
         </ActionIcon>
       </Affix>
       <EditRule opened={opened} setOpened={setOpened} form={form} />
-    </ScrollArea>
+    </div>
   )
 }
 

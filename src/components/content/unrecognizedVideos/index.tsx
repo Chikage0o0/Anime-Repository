@@ -6,10 +6,17 @@ import {
   useMantineTheme,
   Text,
   Group,
+  TextInput,
 } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { showNotification } from '@mantine/notifications'
-import { IconCheck, IconPencil, IconTrash, IconX } from '@tabler/icons-react'
+import {
+  IconCheck,
+  IconPencil,
+  IconSearch,
+  IconTrash,
+  IconX,
+} from '@tabler/icons-react'
 import { invoke } from '@tauri-apps/api'
 
 import { useState } from 'react'
@@ -20,6 +27,7 @@ function UnrecognizedVideos() {
   const { t } = useTranslation()
   const { settingStore, unrecognizedVideosStore } = useStore()
   const [opened, setOpened] = useState(false)
+  const [search, setSearch] = useState('')
   const form = useForm({
     initialValues: {
       type: 'movie',
@@ -87,6 +95,11 @@ function UnrecognizedVideos() {
 
   const theme = useMantineTheme()
 
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = event.currentTarget
+    setSearch(value)
+  }
+
   const getRelativePath = (path: string) => {
     const root = settingStore.setting.storage.pending_path
     if (path.startsWith(root)) {
@@ -98,62 +111,77 @@ function UnrecognizedVideos() {
     return path
   }
 
-  const data = unrecognizedVideosStore.getUnrecognizedVideos.map((item) => (
-    <tr key={item?.path}>
-      <td>
-        <Text size="sm">{getRelativePath(item?.path)}</Text>
-      </td>
-      <td>
-        <Group spacing={0} position="right">
-          <ActionIcon
-            onClick={() => {
-              form.setValues(item)
-              setOpened(true)
-              console.log(item)
-            }}>
-            <IconPencil size={16} stroke={1.5} />
-          </ActionIcon>
-          <ActionIcon
-            color="red"
-            onClick={() =>
-              invoke('delete_unrecognized_video_info', { path: item?.path })
-                .then(() => {
-                  showNotification({
-                    icon: <IconCheck />,
-                    title: t('unrecognized_videos.delete_success'),
-                    message: '✌️🙄✌️',
+  const data = unrecognizedVideosStore.getUnrecognizedVideos
+    .filter((item) => {
+      if (search === '') {
+        return true
+      }
+      return getRelativePath(item?.path).includes(search)
+    })
+    .map((item) => (
+      <tr key={item?.path}>
+        <td>
+          <Text size="sm">{getRelativePath(item?.path)}</Text>
+        </td>
+        <td>
+          <Group spacing={0} position="right">
+            <ActionIcon
+              onClick={() => {
+                form.setValues(item)
+                setOpened(true)
+                console.log(item)
+              }}>
+              <IconPencil size={16} stroke={1.5} />
+            </ActionIcon>
+            <ActionIcon
+              color="red"
+              onClick={() =>
+                invoke('delete_unrecognized_video_info', { path: item?.path })
+                  .then(() => {
+                    showNotification({
+                      icon: <IconCheck />,
+                      title: t('unrecognized_videos.delete_success'),
+                      message: '✌️🙄✌️',
+                    })
                   })
-                })
-                .catch((e) => {
-                  showNotification({
-                    color: 'red',
-                    icon: <IconX />,
-                    autoClose: false,
-                    title: t('unrecognized_videos.delete_failed'),
-                    message: e,
+                  .catch((e) => {
+                    showNotification({
+                      color: 'red',
+                      icon: <IconX />,
+                      autoClose: false,
+                      title: t('unrecognized_videos.delete_failed'),
+                      message: e,
+                    })
                   })
-                })
-            }>
-            <IconTrash size={16} stroke={1.5} />
-          </ActionIcon>
-        </Group>
-      </td>
-    </tr>
-  ))
+              }>
+              <IconTrash size={16} stroke={1.5} />
+            </ActionIcon>
+          </Group>
+        </td>
+      </tr>
+    ))
 
   return (
-    <ScrollArea style={{ height: '100vh', padding: 30 }} type="scroll">
-      <Table verticalSpacing="sm" striped highlightOnHover>
-        <thead>
-          <tr>
-            <th>{t('unrecognized_videos.file_name')}</th>
-            <th style={{ maxWidth: 100 }} />
-          </tr>
-        </thead>
-        <tbody>{data}</tbody>
-      </Table>
-      <EditVideo opened={opened} setOpened={setOpened} form={form} />
-    </ScrollArea>
+    <div style={{ padding: 30 }}>
+      <TextInput
+        placeholder={t('unrecognized_videos.search_by_file_name') as string}
+        mb="xs"
+        onChange={handleSearchChange}
+        icon={<IconSearch size={14} stroke={1.5} />}
+      />
+      <ScrollArea style={{ height: 'calc(100vh - 110px)' }} type="scroll">
+        <Table verticalSpacing="sm" striped highlightOnHover>
+          <thead>
+            <tr>
+              <th>{t('unrecognized_videos.file_name')}</th>
+              <th style={{ maxWidth: 100 }} />
+            </tr>
+          </thead>
+          <tbody>{data}</tbody>
+        </Table>
+        <EditVideo opened={opened} setOpened={setOpened} form={form} />
+      </ScrollArea>
+    </div>
   )
 }
 
