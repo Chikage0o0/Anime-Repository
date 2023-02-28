@@ -1,7 +1,8 @@
+use config::Config;
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use std::fs::{self, File};
-use std::io::{ErrorKind, Read, Write};
+use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 use sys_locale::get_locale;
@@ -18,6 +19,7 @@ pub struct Setting {
 struct UI {
     lang: String,
     theme: Theme,
+    color: String,
 }
 #[derive(Serialize, Deserialize, Debug, Clone)]
 enum Theme {
@@ -38,42 +40,11 @@ pub struct Network {
     use_proxy: String,
     proxy: String,
 }
+
 lazy_static! {
-    static ref CONFIG: Mutex<Setting> = Mutex::new(Setting::get_from_file().unwrap());
+    static ref CONFIG: Mutex<Setting> = Mutex::new(Setting::new().unwrap());
 }
 impl Setting {
-    fn new() -> Result<Setting, std::io::Error> {
-        use tauri::api::path::{download_dir, video_dir};
-
-        let mut video_dir = video_dir().unwrap();
-        video_dir.push("AnimeRepository");
-
-        let mut download_dir = download_dir().unwrap();
-        download_dir.push("AnimeRepository");
-
-        let setting = Setting {
-            ui: UI {
-                lang: get_locale()
-                    .unwrap_or_else(|| String::from("en-US"))
-                    .replace("-", "_"),
-                theme: Theme::Auto,
-            },
-            storage: Storage {
-                pending_path: download_dir,
-                pending_path_scan_interval: 60,
-                repository_path: video_dir,
-            },
-            network: Network {
-                use_proxy: "false".to_string(),
-                proxy: "".to_string(),
-            },
-        };
-
-        setting.write_to_file()?;
-        log::info!("Setting init: {:?}", &setting);
-        Ok(setting)
-    }
-
     pub fn write_to_file(&self) -> Result<(), std::io::Error> {
         log::info!("Writing setting to file");
         let path = Path::new(SETTING_PATH);
@@ -87,22 +58,32 @@ impl Setting {
         Ok(())
     }
 
-    fn get_from_file() -> Result<Setting, SettingError> {
-        let f = File::open(SETTING_PATH);
-        let setting = match f {
-            Ok(mut file) => {
-                let mut file_contents = String::new();
-                file.read_to_string(&mut file_contents).unwrap();
-                toml::from_str(&file_contents)?
-            }
-            Err(error) => match error.kind() {
-                ErrorKind::NotFound => Setting::new()
-                    .unwrap_or_else(|e| panic!("Problem creating the setting: {:?}", e)),
-                other_error => panic!("Problem opening the setting: {:?}", other_error),
-            },
-        };
+    fn new() -> Result<Setting, SettingError> {
+        use tauri::api::path::{download_dir, video_dir};
+        let mut video_dir = video_dir().unwrap();
+        video_dir.push("AnimeRepository");
 
-        Ok(setting)
+        let mut download_dir = download_dir().unwrap();
+        download_dir.push("AnimeRepository");
+
+        let s = Config::builder()
+            .set_default(
+                "ui.lang",
+                get_locale()
+                    .unwrap_or_else(|| String::from("en-US"))
+                    .replace("-", "_"),
+            )?
+            .set_default("ui.theme", "Auto")?
+            .set_default("ui.color", "#3f51b5")?
+            .set_default("storage.pending_path", download_dir.to_str())?
+            .set_default("storage.pending_path_scan_interval", 60)?
+            .set_default("storage.repository_path", video_dir.to_str())?
+            .set_default("network.use_proxy", "false")?
+            .set_default("network.proxy", "")?
+            .add_source(config::File::with_name(SETTING_PATH).required(false))
+            .build()?;
+
+        Ok(s.try_deserialize()?)
     }
 
     pub fn get_proxy() -> Option<String> {
@@ -145,6 +126,8 @@ pub enum SettingError {
     DeserializeError(#[from] toml::de::Error),
     #[error(transparent)]
     IOError(#[from] std::io::Error),
+    #[error(transparent)]
+    ConfigError(#[from] config::ConfigError),
 }
 
 impl serde::Serialize for SettingError {
