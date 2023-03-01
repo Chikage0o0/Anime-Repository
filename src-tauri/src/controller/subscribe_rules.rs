@@ -88,5 +88,6 @@ pub async fn insert_subscribe_rule(
             lang,
         },
     ))
+    .await
     .map_err(|e| e.to_string())
 }

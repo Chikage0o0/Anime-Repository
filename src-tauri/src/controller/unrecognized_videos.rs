@@ -29,12 +29,14 @@ pub async fn update_unrecognized_video_info(
 ) -> Result<(), String> {
     if r#type == "movie" {
         crate::service::unrecognized_videos::insert(path, VideoData::Movie(id, provider, lang))
+            .await
             .map_err(|e| e.to_string())?;
     } else if r#type == "tvshow" {
         crate::service::unrecognized_videos::insert(
             path,
             VideoData::Tvshow(id, provider, lang, title, season, episode),
         )
+        .await
         .map_err(|e| e.to_string())?;
     }
     Ok(())

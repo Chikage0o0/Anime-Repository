@@ -10,10 +10,12 @@ use std::{
     path::Path,
 };
 
-fn download_thumb<P: AsRef<Path>>(path: P, url: &str) -> Result<(), NfoServiceError> {
+async fn download_thumb<P: AsRef<Path>>(path: P, url: &str) -> Result<(), NfoServiceError> {
     log::info!("Downloading thumb {:?}", url);
-    use tauri::async_runtime::block_on;
-    let img = match block_on(Setting::get_client().get_bytes(url.to_string(), HeaderMap::new())) {
+    let img = match Setting::get_client()
+        .get_bytes(url.to_string(), HeaderMap::new())
+        .await
+    {
         Ok(res) => match res.1 {
             reqwest::StatusCode::OK => res.0,
             _ => {

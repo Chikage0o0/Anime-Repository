@@ -43,14 +43,6 @@ pub struct Network {
     proxy: String,
 }
 
-impl Drop for Setting {
-    fn drop(&mut self) {
-        if let Err(e) = self.write_to_file() {
-            log::error!("Write setting to file failed: {:?}", e);
-        }
-    }
-}
-
 lazy_static! {
     static ref CONFIG: Mutex<Setting> = Mutex::new(Setting::new().unwrap());
     static ref HTTPCLIENT: Mutex<Client> = Mutex::new(Client::new());
@@ -152,7 +144,7 @@ impl Setting {
         setting.storage.pending_path_last_scan = time;
         setting
             .write_to_file()
-            .unwrap_or(log::error!("Failed to write setting to file"));
+            .unwrap_or_else(|e| log::error!("Failed to write setting to file: {}", e));
     }
 
     pub fn get_client() -> Client {

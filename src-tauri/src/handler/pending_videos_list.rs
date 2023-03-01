@@ -3,7 +3,7 @@ use crate::{
     utils::file,
 };
 
-pub(super) fn process() {
+pub fn process() {
     //log::info!("Pending videos list process");
     let list = get_all();
 

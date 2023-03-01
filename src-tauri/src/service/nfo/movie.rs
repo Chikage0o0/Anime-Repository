@@ -8,7 +8,7 @@ use crate::{
 };
 use std::path::Path;
 
-pub fn process<P: AsRef<Path>>(
+pub async fn process<P: AsRef<Path>>(
     id: &str,
     provider: ProviderKnown,
     lang: &str,
@@ -17,10 +17,8 @@ pub fn process<P: AsRef<Path>>(
     let path = path.as_ref();
     log::info!("Processing {:?}", path);
 
-    use tauri::async_runtime::block_on;
-
     let mut movie_nfo = Movie::new(&id, provider.clone().into());
-    if let Err(e) = block_on(movie_nfo.update(lang)) {
+    if let Err(e) = movie_nfo.update(lang).await {
         log::error!("Get movie nfo error: {:?}", e);
         return Err(MovieNfoServiceError::NetworkError(e));
     }
@@ -47,10 +45,9 @@ pub fn process<P: AsRef<Path>>(
     insert(&path, &movie_path.as_path());
 
     write_nfo(&movie_nfo_path, &movie_nfo)?;
-    movie_nfo
-        .get_thumb(&movie_folder_path)
-        .iter()
-        .for_each(|(path, thumb)| download_thumb(&path, &thumb).unwrap());
+    for (path, thumb) in movie_nfo.get_thumb(&movie_folder_path) {
+        download_thumb(&path, &thumb).await?;
+    }
 
     Ok(())
 }

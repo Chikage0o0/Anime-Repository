@@ -8,8 +8,7 @@ use crate::{
 };
 use std::fmt::Debug;
 
-// TODO: 异步
-pub fn process<P: AsRef<Path>>(
+pub async fn process<P: AsRef<Path>>(
     id: &str,
     provider: ProviderKnown,
     title: &str,
@@ -20,8 +19,6 @@ pub fn process<P: AsRef<Path>>(
 ) -> Result<(), TvshowNfoServiceError> {
     let path = path.as_ref();
     log::info!("Processing {:?}", path);
-
-    use tauri::async_runtime::block_on;
 
     let tvshow_title = title.clone();
     let tvshow_path = setting::Setting::get_repository_path()
@@ -36,20 +33,19 @@ pub fn process<P: AsRef<Path>>(
         tvshow_nfo = Tvshow::new(&id, provider.clone().into());
     }
     // 从网络Tvshow获取信息
-    if let Err(e) = block_on(tvshow_nfo.update(lang)) {
+    if let Err(e) = tvshow_nfo.update(lang).await {
         log::error!("Get {} tvshow nfo error: {:?}", tvshow_title, e);
         return Err(TvshowNfoServiceError::NetworkError(e));
     }
 
     write_nfo(&tvshow_nfo_path, &tvshow_nfo)?;
-    tvshow_nfo
-        .get_thumb(&tvshow_path)
-        .iter()
-        .for_each(|(path, thumb)| download_thumb(&path, &thumb).unwrap());
+    for (path, thumb) in tvshow_nfo.get_thumb(&tvshow_path) {
+        download_thumb(&path, &thumb).await?;
+    }
 
     // 从网络Episode获取信息
     let mut episode_nfo = Episode::new(&id, provider.clone().into());
-    if let Err(e) = block_on(episode_nfo.update(lang, season, episode)) {
+    if let Err(e) = episode_nfo.update(lang, season, episode).await {
         log::error!(
             "Get {} S{:02}E{:02} nfo error: {:?}",
             tvshow_title,
@@ -91,7 +87,8 @@ pub fn process<P: AsRef<Path>>(
                 &tvshow_title, season, episode, &episode_title
             )),
             &thumb,
-        )?;
+        )
+        .await?;
     }
 
     Ok(())

@@ -9,15 +9,15 @@ use std::{fmt::Debug, path::Path};
 
 use super::nfo::{tvshow, NfoServiceError};
 
-pub fn insert((key, value): (Key, Value)) -> Result<(), SubscribeServiceError> {
+pub async fn insert((key, value): (Key, Value)) -> Result<(), SubscribeServiceError> {
     log::info!("Inserting subscribe {:?}{:?}", key, value);
     let matcher: Matcher = (key.clone(), value.clone()).try_into()?;
     key.insert(&value)?;
     matcher.insert();
 
-    std::thread::spawn(move || {
+    tauri::async_runtime::spawn(async move {
         for i in matcher.match_all_videos().iter() {
-            process(&key, &i.0, i.1).unwrap();
+            process(&key, &i.0, i.1).await.unwrap();
             crate::service::unrecognized_videos::delete(&i.0).unwrap();
         }
     });
@@ -71,7 +71,7 @@ pub async fn get_tvshow_title(
     ))
 }
 
-pub fn process<P: AsRef<Path>>(
+pub async fn process<P: AsRef<Path>>(
     key: &Key,
     path: P,
     episode: u64,
@@ -86,11 +86,14 @@ pub fn process<P: AsRef<Path>>(
         value.season,
         episode,
         &path,
-    ) {
+    )
+    .await
+    {
         crate::service::unrecognized_videos::insert(
             path,
             crate::data::unrecognized_videos::VideoData::Undefined,
-        )?;
+        )
+        .await?;
         return Err(SubscribeServiceError::ProcessTvshowInfoError(e));
     }
     Ok(())
