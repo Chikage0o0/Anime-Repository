@@ -13,11 +13,14 @@ pub fn insert((key, value): (Key, Value)) -> Result<(), SubscribeServiceError> {
     log::info!("Inserting subscribe {:?}{:?}", key, value);
     let matcher: Matcher = (key.clone(), value.clone()).try_into()?;
     key.insert(&value)?;
-    for i in matcher.match_all_videos().iter() {
-        process(&key, &i.0, i.1)?;
-        crate::service::unrecognized_videos::delete(&i.0)?;
-    }
     matcher.insert();
+
+    std::thread::spawn(move || {
+        for i in matcher.match_all_videos().iter() {
+            process(&key, &i.0, i.1).unwrap();
+            crate::service::unrecognized_videos::delete(&i.0).unwrap();
+        }
+    });
 
     Ok(())
 }

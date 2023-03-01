@@ -7,7 +7,7 @@
   },
   "package": {
     "productName": "anime-repository",
-    "version": "0.0.0"
+    "version": "0.0.1"
   },
   "tauri": {
     "allowlist": {
@@ -15,8 +15,8 @@
     },
     "bundle": {
       "active": true,
-      "category": "DeveloperTool",
-      "copyright": "",
+      "category": "Video",
+      "copyright": "© 2023 Chikage All Rights Reserved",
       "deb": {
         "depends": []
       },
@@ -29,7 +29,7 @@
         "icons/icon.ico"
       ],
       "identifier": "me.chikage.anime-repository",
-      "longDescription": "",
+      "longDescription": "Automatic as well as manual video file organization is provided based on online databases.",
       "macOS": {
         "entitlements": null,
         "exceptionDomain": "",
@@ -38,14 +38,17 @@
         "signingIdentity": null
       },
       "resources": [],
-      "shortDescription": "",
+      "shortDescription": "Personal media library management tool",
       "targets": "all",
       "windows": {
         "certificateThumbprint": null,
         "digestAlgorithm": "sha256",
         "timestampUrl": "",
         "wix": {
-          "language": "zh-CN"
+          "language": [
+            "zh-CN",
+            "en-US"
+          ]
         },
         "webviewInstallMode": {
           "type": "downloadBootstrapper"
@@ -56,7 +59,12 @@
       "csp": null
     },
     "updater": {
-      "active": false
+      "active": true,
+      "endpoints": [
+        "https://github.com/Chikage0o0/Anime-Repository/releases/download/updater/update.json"
+      ],
+      "dialog": true,
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDNCNUQyRUU3NDFFMjg2OEYKUldTUGh1SkI1eTVkT3pBZzNiUHpHNE50V0ttYS9uNFpNN3lSQWIvckNNdFZYclFrVTdOaGw2czgK"
     },
     "windows": [
       {
@@ -67,8 +75,14 @@
         "resizable": true,
         "title": "Anime-Repository",
         "width": 1000,
-        "decorations": false
+        "decorations": false,
+        "focus": true,
+        "center": true
       }
-    ]
+    ],
+    "systemTray": {
+      "iconPath": "icons/icon.png",
+      "iconAsTemplate": true
+    }
   }
 }

@@ -5,7 +5,12 @@ use std::path::{Path, PathBuf};
 use crate::model::nfo::ProviderKnown;
 
 lazy_static! {
-    static ref DB: sled::Db = sled::open("config/unrecognized_videos").unwrap();
+    static ref DB: sled::Db = sled::open(
+        PathBuf::from(tauri::api::path::config_dir().unwrap())
+            .join("AnimeRepository")
+            .join("unrecognized_videos")
+    )
+    .unwrap();
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Hash)]

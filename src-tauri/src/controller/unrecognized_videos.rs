@@ -17,7 +17,7 @@ pub fn delete_unrecognized_video_info(path: PathBuf) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub fn update_unrecognized_video_info(
+pub async fn update_unrecognized_video_info(
     r#type: String,
     path: PathBuf,
     id: String,

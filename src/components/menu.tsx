@@ -1,17 +1,10 @@
 import { useEffect, useState } from 'react'
-import {
-  createStyles,
-  Navbar,
-  Group,
-  Code,
-  Space,
-  Transition,
-} from '@mantine/core'
+import { createStyles, Navbar } from '@mantine/core'
 import {
   IconSettings,
-  IconBrowserX,
   IconRss,
   IconFileUnknown,
+  IconMinimize,
 } from '@tabler/icons-react'
 import { useTranslation } from 'react-i18next'
 import { appWindow } from '@tauri-apps/api/window'
@@ -152,9 +145,14 @@ export function Menu() {
           <IconSettings className={classes.linkIcon} stroke={1.5} />
           <span>{t('setting')}</span>
         </a>
-        <a className={classes.link} onClick={() => appWindow.close()}>
-          <IconBrowserX className={classes.linkIcon} stroke={1.5} />
-          <span>{t('UI.close')}</span>
+        <a
+          className={classes.link}
+          onClick={() => {
+            appWindow.close()
+            // appWindow.hide()
+          }}>
+          <IconMinimize className={classes.linkIcon} stroke={1.5} />
+          <span>{t('UI.minimize_to_tray')}</span>
         </a>
       </Navbar.Section>
     </Navbar>

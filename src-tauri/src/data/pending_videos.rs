@@ -2,7 +2,12 @@ use lazy_static::lazy_static;
 use std::path::{Path, PathBuf};
 
 lazy_static! {
-    static ref DB: sled::Db = sled::open("config/pending_videos").unwrap();
+    static ref DB: sled::Db = sled::open(
+        PathBuf::from(tauri::api::path::config_dir().unwrap())
+            .join("AnimeRepository")
+            .join("pending_videos")
+    )
+    .unwrap();
 }
 
 pub fn get_all() -> Vec<(PathBuf, PathBuf)> {

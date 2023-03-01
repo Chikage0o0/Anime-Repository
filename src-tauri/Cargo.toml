@@ -3,7 +3,7 @@ name = "anime-repository"
 version = "0.0.0"
 description = "Developed by Chikage"
 authors = ["Chikage <chikage@939.me>"]
-license = ""
+license = "GPL-3.0"
 repository = "https://github.com/Chikage0o0/Anime-Repository"
 edition = "2021"
 rust-version = "1.67.1"
@@ -18,7 +18,7 @@ log = "0.4.17"
 env_logger = "0.10.0"
 serde_json = "1.0.91"
 serde = { version = "1.0.152", features = ["derive"] }
-tauri = { version = "1.2.3", features = ["api-all"] }
+tauri = { version = "1.2.3", features = ["api-all", "system-tray", "updater"] }
 toml = "0.7.2"
 thiserror = "1.0.38"
 sys-locale = "0.2.3"

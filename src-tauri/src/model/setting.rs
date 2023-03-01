@@ -3,11 +3,9 @@ use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use std::fs::{self, File};
 use std::io::Write;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::Mutex;
 use sys_locale::get_locale;
-
-const SETTING_PATH: &str = "config/setting.toml";
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Setting {
@@ -47,7 +45,10 @@ lazy_static! {
 impl Setting {
     pub fn write_to_file(&self) -> Result<(), std::io::Error> {
         log::info!("Writing setting to file");
-        let path = Path::new(SETTING_PATH);
+        let path = PathBuf::from(tauri::api::path::config_dir().unwrap())
+            .join("AnimeRepository")
+            .join("setting.toml");
+
         if let Some(p) = path.parent() {
             fs::create_dir_all(p).unwrap();
         }
@@ -66,6 +67,10 @@ impl Setting {
         let mut download_dir = download_dir().unwrap();
         download_dir.push("AnimeRepository");
 
+        let setting_file = PathBuf::from(tauri::api::path::config_dir().unwrap())
+            .join("AnimeRepository")
+            .join("setting.toml");
+
         let s = Config::builder()
             .set_default(
                 "ui.lang",
@@ -80,7 +85,7 @@ impl Setting {
             .set_default("storage.repository_path", video_dir.to_str())?
             .set_default("network.use_proxy", "false")?
             .set_default("network.proxy", "")?
-            .add_source(config::File::with_name(SETTING_PATH).required(false))
+            .add_source(config::File::with_name(setting_file.to_str().unwrap()).required(false))
             .build()?;
 
         Ok(s.try_deserialize()?)

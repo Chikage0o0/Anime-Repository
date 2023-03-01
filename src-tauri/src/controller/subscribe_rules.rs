@@ -65,7 +65,7 @@ pub fn get_subscribe_rule(id: String, provider: ProviderKnown) -> Result<Subscri
 }
 
 #[tauri::command]
-pub fn insert_subscribe_rule(
+pub async fn insert_subscribe_rule(
     id: String,
     provider: ProviderKnown,
     title: String,

@@ -69,6 +69,7 @@
   "setting.save_failed": "Save Failed",
   "UI.delete_confirm": "Are you sure to delete this item?",
   "UI.close": "Close",
+  "UI.minimize_to_tray": "Minimize to Tray",
   "UI.true": "Yes",
   "UI.false": "No",
   "UI.optional": "Optional",
