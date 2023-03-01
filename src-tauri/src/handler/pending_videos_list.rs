@@ -19,6 +19,17 @@ pub(super) fn process() {
                 delete(src_path.to_path_buf());
                 file::create_shortcut(&target_path, &src_path)
                     .unwrap_or_else(|err| log::error!("Create shortcut failed: {:?}", err));
+                use tauri::api::notification::Notification;
+
+                let context = tauri::generate_context!();
+                Notification::new(&context.config().tauri.bundle.identifier)
+                    .title("Anime-Repository:New file are in!")
+                    .body(format!(
+                        "{}",
+                        target_path.file_name().unwrap().to_str().unwrap()
+                    ))
+                    .show()
+                    .unwrap();
             }
         } else {
             eprintln!("{} not exists", src_path.to_str().unwrap());

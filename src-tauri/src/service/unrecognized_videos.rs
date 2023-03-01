@@ -1,11 +1,11 @@
-use crate::data::unrecognized_videos::VideoData;
+use crate::data::{pending_videos, unrecognized_videos::VideoData};
 use std::path::Path;
 
 pub fn delete<P: AsRef<Path>>(path: P) -> Result<(), UnrecognizedVideosServiceError> {
     let path = path.as_ref();
     crate::data::unrecognized_videos::delete(path.to_str().unwrap())?;
     // 如果存在文件，同时删除文件
-    if path.exists() && path.is_file() {
+    if path.exists() && path.is_file() && pending_videos::get(&path).is_none() {
         std::fs::remove_file(path)?;
     }
     Ok(())

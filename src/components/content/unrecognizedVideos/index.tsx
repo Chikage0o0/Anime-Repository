@@ -37,6 +37,9 @@ function UnrecognizedVideos() {
   const { settingStore, unrecognizedVideosStore } = useStore()
   const [opened, setOpened] = useState(false)
   const [search, setSearch] = useState('')
+  useEffect(() => {
+    unrecognizedVideosStore.update()
+  }, [])
   const form = useForm({
     initialValues: {
       type: 'movie',
