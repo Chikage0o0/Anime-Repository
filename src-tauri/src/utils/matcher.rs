@@ -165,6 +165,4 @@ pub enum MatcherError {
     FileNotMatch(std::path::PathBuf),
     #[error("`{0}` not a file")]
     NotFile(std::path::PathBuf),
-    #[error("`{0}` not a video file")]
-    FileNotVideo(std::path::PathBuf),
 }

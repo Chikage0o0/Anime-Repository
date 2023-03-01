@@ -1,8 +1,7 @@
-#![allow(dead_code)]
-
 use std::time::{SystemTime, UNIX_EPOCH};
 pub mod file;
 pub mod matcher;
+pub mod tauri;
 
 pub fn get_now_time() -> u64 {
     let now = SystemTime::now();

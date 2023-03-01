@@ -46,10 +46,11 @@ pub fn insert(src_path: PathBuf, target_path: PathBuf) {
 fn send_notification(file_name: &str) {
     use tauri::api::notification::Notification;
 
-    let mut title = String::from("Anime-Repository:New file are in!");
-
-    if Setting::get_lang() == "zh_CN" {
-        title = String::from("Anime-Repository:新文件已经入库！");
+    let title;
+    match Setting::get_lang().as_str() {
+        "zh_CN" => title = "Anime-Repository:新视频已经入库！",
+        "ja_JP" => title = "Anime-Repository:新しい動画が追加されました！",
+        _ => title = "Anime-Repository:New video has been added!",
     }
 
     let context = tauri::generate_context!();

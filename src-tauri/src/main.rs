@@ -12,9 +12,7 @@ mod service;
 mod utils;
 
 use crate::controller::*;
-use tauri::{
-    api, CustomMenuItem, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem,
-};
+use tauri::{api, Manager, SystemTray, SystemTrayEvent};
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 
@@ -22,15 +20,8 @@ fn main() {
     std::env::set_var("RUST_LOG", "DEBUG");
     env_logger::init();
 
-    let quit = CustomMenuItem::new("quit".to_string(), "Quit");
-    let open = CustomMenuItem::new("open".to_string(), "Open");
-    let tray_menu = SystemTrayMenu::new()
-        .add_item(open)
-        .add_native_item(SystemTrayMenuItem::Separator)
-        .add_item(quit);
-
     tauri::Builder::default()
-        .system_tray(SystemTray::new().with_menu(tray_menu))
+        .system_tray(SystemTray::new().with_menu(utils::tauri::get_tray_menu()))
         .on_system_tray_event(move |app, event| match event {
             SystemTrayEvent::DoubleClick {
                 position: _,
