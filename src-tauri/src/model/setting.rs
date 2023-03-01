@@ -49,7 +49,7 @@ lazy_static! {
 }
 impl Setting {
     pub fn write_to_file(&self) -> Result<(), std::io::Error> {
-        log::info!("Writing setting to file");
+        log::debug!("Writing setting to file");
         let path = PathBuf::from(tauri::api::path::config_dir().unwrap())
             .join("AnimeRepository")
             .join("setting.toml");

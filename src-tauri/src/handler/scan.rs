@@ -11,7 +11,7 @@ use tauri::async_runtime::block_on;
 
 pub fn process() {
     let path = Setting::get_pending_path();
-    log::info!("Watching pending path: {:?}", &path);
+    log::debug!("Watching pending path: {:?}", &path);
     if !path.exists() {
         std::fs::create_dir_all(&path).expect("Can't create pending path");
     }
