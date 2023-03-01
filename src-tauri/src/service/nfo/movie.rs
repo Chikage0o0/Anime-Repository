@@ -1,6 +1,6 @@
 use super::*;
 use crate::{
-    data::pending_videos::insert,
+    handler::get_handler_tx,
     model::{
         nfo::{movie::Movie, Nfo, ProviderKnown},
         setting,
@@ -41,8 +41,12 @@ pub async fn process<P: AsRef<Path>>(
         path.extension().unwrap().to_str().unwrap()
     ));
 
-    // 添加到待处理列表
-    insert(&path, &movie_path.as_path());
+    get_handler_tx()
+        .send(crate::handler::Command::InsertPendingVideos((
+            path.to_path_buf(),
+            movie_path.clone(),
+        )))
+        .unwrap();
 
     write_nfo(&movie_nfo_path, &movie_nfo)?;
     for (path, thumb) in movie_nfo.get_thumb(&movie_folder_path) {

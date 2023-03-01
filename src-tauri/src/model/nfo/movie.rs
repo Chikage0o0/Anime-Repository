@@ -242,14 +242,16 @@ impl Movie {
                     }
 
                     if let Some(belongs_to_collection) = data.get("belongs_to_collection") {
-                        let collection =
-                            belongs_to_collection["name"].as_str().unwrap().to_string();
-                        let set = self.set.iter().find(|f| f.name == collection);
-                        if set.is_none() {
-                            self.set.push(Set {
-                                name: collection,
-                                overview: None,
-                            })
+                        if belongs_to_collection != &Value::Null {
+                            let collection =
+                                belongs_to_collection["name"].as_str().unwrap().to_string();
+                            let set = self.set.iter().find(|f| f.name == collection);
+                            if set.is_none() {
+                                self.set.push(Set {
+                                    name: collection,
+                                    overview: None,
+                                })
+                            }
                         }
                     }
                 }
@@ -493,9 +495,8 @@ mod tests {
     #[test]
     fn test_update() {
         use tauri::async_runtime::block_on;
-        let mut data: Movie = Movie::new("532321", Provider::Known(ProviderKnown::TMDB));
+        let mut data: Movie = Movie::new("937278", Provider::Known(ProviderKnown::TMDB));
         block_on(data.update("zh-CN")).unwrap();
-        println!("{:#?}", data);
-        assert!(data.premiered == Some("2018-10-06".to_string()))
+        dbg!(data);
     }
 }

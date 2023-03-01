@@ -1,4 +1,4 @@
-use std::thread;
+use std::{path::PathBuf, thread};
 
 use crate::model::setting::Setting;
 
@@ -7,16 +7,17 @@ mod scan;
 mod unrecognized_videos_list;
 
 #[derive(Debug)]
-enum Command {
+pub enum Command {
     Stop,
     ScanPendingList,
     ScanUnrecognizedList,
-    ScanPendingVideos,
+    ScanPendingVideosFolder,
+    InsertPendingVideos((PathBuf, PathBuf)),
 }
 
 lazy_static::lazy_static! {
-    static ref STOP_TX: std::sync::mpsc::SyncSender<Command>= {
-        let (tx, rx) = std::sync::mpsc::sync_channel(0);
+    static ref HANDLER_TX: std::sync::mpsc::SyncSender<Command>= {
+        let (tx, rx) = std::sync::mpsc::sync_channel(100);
         thread::spawn(move || {
             while let Ok(cmd) = rx.recv() {
                 match cmd {
@@ -30,8 +31,11 @@ lazy_static::lazy_static! {
                     Command::ScanUnrecognizedList => {
                         unrecognized_videos_list::process();
                     }
-                    Command::ScanPendingVideos => {
+                    Command::ScanPendingVideosFolder => {
                         scan::process();
+                    }
+                    Command::InsertPendingVideos((src_path, target_path)) => {
+                        pending_videos_list::insert(src_path, target_path);
                     }
                 }
             }
@@ -44,8 +48,8 @@ lazy_static::lazy_static! {
 pub fn run() {
     log::info!("Start background thread");
     thread::spawn(|| loop {
-        let tx = STOP_TX.clone();
-        tx.send(Command::ScanPendingVideos).unwrap();
+        let tx = HANDLER_TX.clone();
+        tx.send(Command::ScanPendingVideosFolder).unwrap();
         tx.send(Command::ScanUnrecognizedList).unwrap();
         tx.send(Command::ScanPendingList).unwrap();
         thread::sleep(std::time::Duration::from_secs(Setting::get_scan_interval()));
@@ -53,5 +57,9 @@ pub fn run() {
 }
 
 pub fn stop() {
-    STOP_TX.send(Command::Stop).unwrap();
+    HANDLER_TX.send(Command::Stop).unwrap();
+}
+
+pub fn get_handler_tx() -> std::sync::mpsc::SyncSender<Command> {
+    HANDLER_TX.clone()
 }

@@ -155,6 +155,10 @@ impl Setting {
         let mut c = HTTPCLIENT.lock().unwrap();
         *c = client;
     }
+
+    pub fn get_lang() -> String {
+        CONFIG.lock().unwrap().ui.lang.clone()
+    }
 }
 
 #[derive(thiserror::Error, Debug)]
