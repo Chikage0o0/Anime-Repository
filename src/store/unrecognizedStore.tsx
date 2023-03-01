@@ -52,6 +52,10 @@ class UnrecognizedVideosStore {
     })
   }
 
+  set_data(data: unrecognizedVideoObject[]) {
+    this.data = data
+  }
+
   *submit(values: unrecognizedVideoObject) {
     try {
       yield invoke('update_unrecognized_video_info', values)

@@ -2,12 +2,20 @@ use std::path::PathBuf;
 
 use crate::{
     data::unrecognized_videos::{get_all, VideoData},
+    handler::get_handler_tx,
     model::nfo::ProviderKnown,
 };
 
 #[tauri::command]
 pub fn get_unrecognized_videos_list() -> Vec<(PathBuf, VideoData)> {
     get_all()
+}
+
+#[tauri::command]
+pub fn refresh_unrecognized_videos_list() -> Result<(), String> {
+    get_handler_tx()
+        .send(crate::handler::Command::ScanPendingVideosFolder)
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]

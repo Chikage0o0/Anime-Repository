@@ -17,7 +17,7 @@ use once_cell::sync::OnceCell;
 use tauri::{api, SystemTray};
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-static APP_HANDLE: OnceCell<tauri::AppHandle> = OnceCell::new();
+pub static APP_HANDLE: OnceCell<tauri::AppHandle> = OnceCell::new();
 
 fn main() {
     std::env::set_var("RUST_LOG", "DEBUG");
@@ -37,10 +37,12 @@ fn main() {
             get_unrecognized_videos_list,
             delete_unrecognized_video_info,
             update_unrecognized_video_info,
+            refresh_unrecognized_videos_list,
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application");
     APP_HANDLE.set(app.handle()).unwrap();
+
     app.run(move |app_handle, event| match event {
         tauri::RunEvent::Ready { .. } => {
             handler::run();

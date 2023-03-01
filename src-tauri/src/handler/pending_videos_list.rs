@@ -7,7 +7,7 @@ use crate::{
 };
 
 pub fn process() {
-    //log::info!("Pending videos list process");
+    log::debug!("Pending videos list process");
     let list = get_all();
 
     list.iter().for_each(|(src_path, target_path)| {

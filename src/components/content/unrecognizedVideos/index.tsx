@@ -23,14 +23,13 @@ import {
   IconX,
 } from '@tabler/icons-react'
 import { invoke } from '@tauri-apps/api'
-import { appWindow } from '@tauri-apps/api/window'
 import { listen } from '@tauri-apps/api/event'
-
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import EditVideo from './editVideo'
 import { flowResult } from 'mobx'
 import { observer } from 'mobx-react-lite'
+import { unrecognizedVideoObject } from '@/store/unrecognizedStore'
 
 function UnrecognizedVideos() {
   const { t } = useTranslation()
@@ -39,6 +38,17 @@ function UnrecognizedVideos() {
   const [search, setSearch] = useState('')
   useEffect(() => {
     unrecognizedVideosStore.update()
+    const unlisten = async () => {
+      await listen<unrecognizedVideoObject[]>(
+        'unrecognized_videos_list',
+        (event) => {
+          unrecognizedVideosStore.set_data(event.payload)
+        }
+      )
+    }
+    return () => {
+      unlisten()
+    }
   }, [])
   const form = useForm({
     initialValues: {
@@ -218,7 +228,7 @@ function UnrecognizedVideos() {
           radius="xl"
           variant="filled"
           color={theme.primaryColor}
-          onClick={() => flowResult(unrecognizedVideosStore.update())}>
+          onClick={() => invoke('refresh_unrecognized_videos_list')}>
           <IconRefresh stroke={1.5} size={34} />
         </ActionIcon>
       </Affix>

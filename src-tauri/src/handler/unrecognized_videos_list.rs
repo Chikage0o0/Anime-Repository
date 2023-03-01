@@ -4,6 +4,7 @@ use crate::{
 };
 
 pub fn process() {
+    log::debug!("Start to process Unrecognized Video database");
     let list = get_all();
 
     list.into_iter().for_each(|(path, _)| {

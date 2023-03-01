@@ -177,11 +177,10 @@ function EditVideo({
           color="blue"
           onClick={() => {
             if (!form.validate().hasErrors) {
+              form.reset()
+              setOpened(false)
               flowResult(unrecognizedVideosStore.submit(form.values))
                 .then(() => {
-                  form.reset()
-                  setOpened(false)
-                  unrecognizedVideosStore.update()
                   showNotification({
                     icon: <IconCheck />,
                     title: t('unrecognized_videos.video_info.submit_success'),
