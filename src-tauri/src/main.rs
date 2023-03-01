@@ -12,77 +12,20 @@ mod service;
 mod utils;
 
 use crate::controller::*;
-use tauri::{api, Manager, SystemTray, SystemTrayEvent};
+use once_cell::sync::OnceCell;
+
+use tauri::{api, SystemTray};
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
+static APP_HANDLE: OnceCell<tauri::AppHandle> = OnceCell::new();
 
 fn main() {
     std::env::set_var("RUST_LOG", "DEBUG");
     env_logger::init();
 
-    tauri::Builder::default()
+    let app = tauri::Builder::default()
         .system_tray(SystemTray::new().with_menu(utils::tauri::get_tray_menu()))
-        .on_system_tray_event(move |app, event| match event {
-            SystemTrayEvent::DoubleClick {
-                position: _,
-                size: _,
-                ..
-            } => {
-                if let Some(window) = app.get_window("main") {
-                    let _ = window.unminimize();
-                    let _ = window.show();
-                    let _ = window.set_focus();
-                    return;
-                }
-
-                tauri::window::WindowBuilder::new(
-                    app,
-                    "main".to_string(),
-                    tauri::WindowUrl::App("index.html".into()),
-                )
-                .title("Anime-Repository")
-                .center()
-                .fullscreen(false)
-                .min_inner_size(600.0, 600.0)
-                .decorations(false)
-                .inner_size(1000.0, 600.0)
-                .resizable(true)
-                .build()
-                .unwrap();
-            }
-            SystemTrayEvent::MenuItemClick { id, .. } => match id.as_str() {
-                "quit" => {
-                    handler::stop();
-                    api::process::kill_children();
-                    app.exit(0);
-                }
-                "open" => {
-                    if let Some(window) = app.get_window("main") {
-                        let _ = window.unminimize();
-                        let _ = window.show();
-                        let _ = window.set_focus();
-                        return;
-                    }
-
-                    tauri::window::WindowBuilder::new(
-                        app,
-                        "main".to_string(),
-                        tauri::WindowUrl::App("index.html".into()),
-                    )
-                    .title("Anime-Repository")
-                    .center()
-                    .fullscreen(false)
-                    .min_inner_size(600.0, 600.0)
-                    .decorations(false)
-                    .inner_size(1000.0, 600.0)
-                    .resizable(true)
-                    .build()
-                    .unwrap();
-                }
-                _ => {}
-            },
-            _ => {}
-        })
+        .on_system_tray_event(utils::tauri::tray_event)
         .invoke_handler(tauri::generate_handler![
             get_setting,
             save_setting,
@@ -96,19 +39,20 @@ fn main() {
             update_unrecognized_video_info,
         ])
         .build(tauri::generate_context!())
-        .expect("error while running tauri application")
-        .run(move |app_handle, event| match event {
-            tauri::RunEvent::Ready { .. } => {
-                handler::run();
-            }
-            tauri::RunEvent::ExitRequested { api, .. } => {
-                api.prevent_exit();
-            }
-            tauri::RunEvent::Exit {} => {
-                handler::stop();
-                api::process::kill_children();
-                app_handle.exit(0);
-            }
-            _ => {}
-        });
+        .expect("error while running tauri application");
+    APP_HANDLE.set(app.handle()).unwrap();
+    app.run(move |app_handle, event| match event {
+        tauri::RunEvent::Ready { .. } => {
+            handler::run();
+        }
+        tauri::RunEvent::ExitRequested { api, .. } => {
+            api.prevent_exit();
+        }
+        tauri::RunEvent::Exit {} => {
+            handler::stop();
+            api::process::kill_children();
+            app_handle.exit(0);
+        }
+        _ => {}
+    });
 }

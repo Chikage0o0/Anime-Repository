@@ -1,17 +1,17 @@
-use lazy_static::lazy_static;
+use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 
 use crate::model::nfo::ProviderKnown;
 
-lazy_static! {
-    static ref DB: sled::Db = sled::open(
+static DB: Lazy<sled::Db> = Lazy::new(|| {
+    sled::open(
         PathBuf::from(tauri::api::path::config_dir().unwrap())
             .join("AnimeRepository")
-            .join("unrecognized_videos")
+            .join("unrecognized_videos"),
     )
-    .unwrap();
-}
+    .unwrap()
+});
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Hash)]
 /// The type of video that is unrecognized

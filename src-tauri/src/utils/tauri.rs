@@ -1,6 +1,7 @@
-use tauri::{CustomMenuItem, SystemTrayMenu, SystemTrayMenuItem};
-
-use crate::model::setting::Setting;
+use crate::{handler, model::setting::Setting};
+use tauri::{
+    api, AppHandle, CustomMenuItem, Manager, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem,
+};
 
 pub fn get_tray_menu() -> SystemTrayMenu {
     let quit_str;
@@ -68,4 +69,68 @@ pub fn get_tray_menu() -> SystemTrayMenu {
         .add_item(open)
         .add_native_item(SystemTrayMenuItem::Separator)
         .add_item(quit)
+}
+
+pub fn tray_event(app: &AppHandle, event: SystemTrayEvent) {
+    match event {
+        SystemTrayEvent::DoubleClick {
+            position: _,
+            size: _,
+            ..
+        } => {
+            if let Some(window) = app.get_window("main") {
+                let _ = window.unminimize();
+                let _ = window.show();
+                let _ = window.set_focus();
+                return;
+            }
+
+            tauri::window::WindowBuilder::new(
+                app,
+                "main".to_string(),
+                tauri::WindowUrl::App("index.html".into()),
+            )
+            .title("Anime-Repository")
+            .center()
+            .fullscreen(false)
+            .min_inner_size(600.0, 600.0)
+            .decorations(false)
+            .inner_size(1000.0, 600.0)
+            .resizable(true)
+            .build()
+            .unwrap();
+        }
+        SystemTrayEvent::MenuItemClick { id, .. } => match id.as_str() {
+            "quit" => {
+                handler::stop();
+                api::process::kill_children();
+                app.exit(0);
+            }
+            "open" => {
+                if let Some(window) = app.get_window("main") {
+                    let _ = window.unminimize();
+                    let _ = window.show();
+                    let _ = window.set_focus();
+                    return;
+                }
+
+                tauri::window::WindowBuilder::new(
+                    app,
+                    "main".to_string(),
+                    tauri::WindowUrl::App("index.html".into()),
+                )
+                .title("Anime-Repository")
+                .center()
+                .fullscreen(false)
+                .min_inner_size(600.0, 600.0)
+                .decorations(false)
+                .inner_size(1000.0, 600.0)
+                .resizable(true)
+                .build()
+                .unwrap();
+            }
+            _ => {}
+        },
+        _ => {}
+    }
 }

@@ -1,18 +1,18 @@
 use std::path::PathBuf;
 
 use crate::model::nfo::{Provider, ProviderKnown, Uniqueid};
-use lazy_static::lazy_static;
+use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
-lazy_static! {
-    static ref DB: sled::Db = sled::open(
+static DB: Lazy<sled::Db> = Lazy::new(|| {
+    sled::open(
         PathBuf::from(tauri::api::path::config_dir().unwrap())
             .join("AnimeRepository")
-            .join("subscribe_rules")
+            .join("subscribe_rules"),
     )
-    .unwrap();
-}
+    .unwrap()
+});
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Hash)]
 pub struct Key {

@@ -1,14 +1,14 @@
-use lazy_static::lazy_static;
+use once_cell::sync::Lazy;
 use std::path::{Path, PathBuf};
 
-lazy_static! {
-    static ref DB: sled::Db = sled::open(
+static DB: Lazy<sled::Db> = Lazy::new(|| {
+    sled::open(
         PathBuf::from(tauri::api::path::config_dir().unwrap())
             .join("AnimeRepository")
-            .join("pending_videos")
+            .join("pending_videos"),
     )
-    .unwrap();
-}
+    .unwrap()
+});
 
 pub fn get_all() -> Vec<(PathBuf, PathBuf)> {
     DB.iter()

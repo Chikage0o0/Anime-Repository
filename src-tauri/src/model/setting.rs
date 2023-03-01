@@ -1,5 +1,5 @@
 use config::Config;
-use lazy_static::lazy_static;
+use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use std::fs::{self, File};
 use std::io::Write;
@@ -43,10 +43,9 @@ pub struct Network {
     proxy: String,
 }
 
-lazy_static! {
-    static ref CONFIG: Mutex<Setting> = Mutex::new(Setting::new().unwrap());
-    static ref HTTPCLIENT: Mutex<Client> = Mutex::new(Client::new());
-}
+static CONFIG: Lazy<Mutex<Setting>> = Lazy::new(|| Mutex::new(Setting::new().unwrap()));
+static HTTP_CLIENT: Lazy<Mutex<Client>> = Lazy::new(|| Mutex::new(Client::new()));
+
 impl Setting {
     pub fn write_to_file(&self) -> Result<(), std::io::Error> {
         log::debug!("Writing setting to file");
@@ -117,7 +116,7 @@ impl Setting {
             *old_setting = setting;
         }
         Self::set_client(Client::new());
-        log::debug!("Now http client is {:?}", HTTPCLIENT.lock().unwrap());
+        log::debug!("Now http client is {:?}", HTTP_CLIENT.lock().unwrap());
         log::info!("Setting applied");
 
         Ok(())
@@ -148,11 +147,11 @@ impl Setting {
     }
 
     pub fn get_client() -> Client {
-        HTTPCLIENT.lock().unwrap().clone()
+        HTTP_CLIENT.lock().unwrap().clone()
     }
 
     fn set_client(client: Client) {
-        let mut c = HTTPCLIENT.lock().unwrap();
+        let mut c = HTTP_CLIENT.lock().unwrap();
         *c = client;
     }
 

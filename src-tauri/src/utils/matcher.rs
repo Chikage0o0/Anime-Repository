@@ -3,14 +3,12 @@ use crate::{
     model::{nfo::ProviderKnown, setting::Setting},
     utils::file::walk_file,
 };
-use lazy_static::lazy_static;
+use once_cell::sync::Lazy;
 use regex::Regex;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
-lazy_static! {
-    static ref MATCHERS: Mutex<Vec<Matcher>> = Mutex::new(Matcher::get_all());
-}
+static MATCHERS: Lazy<Mutex<Vec<Matcher>>> = Lazy::new(|| Mutex::new(Matcher::get_all()));
 
 #[derive(Clone, Debug)]
 pub struct Matcher {

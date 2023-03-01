@@ -22,7 +22,6 @@ tauri = { version = "1.2.3", features = ["api-all", "system-tray", "updater"] }
 toml = "0.7.2"
 thiserror = "1.0.38"
 sys-locale = "0.2.3"
-lazy_static = "1.4.0"
 reqwest = { version = "0.11.13", features = ["socks"] }
 quick-xml = { version = "0.27.1", features = ["serialize", "overlapped-lists"] }
 serde_with = "2.2.0"
@@ -33,6 +32,7 @@ regex = "1.7.1"
 bincode = "1.3.3"
 walkdir = "2.3.2"
 config = { version = "0.13.3", features = ["toml"] }
+once_cell = "1.17.1"
 
 [features]
 # by default Tauri runs in production mode
