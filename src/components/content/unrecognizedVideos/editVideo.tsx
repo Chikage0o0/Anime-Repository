@@ -13,7 +13,13 @@ import {
 } from '@mantine/core'
 import { UseFormReturnType } from '@mantine/form'
 import { showNotification } from '@mantine/notifications'
-import { IconCheck, IconDeviceTv, IconMovie, IconX } from '@tabler/icons-react'
+import {
+  IconCheck,
+  IconDeviceTv,
+  IconMovie,
+  IconSearch,
+  IconX,
+} from '@tabler/icons-react'
 import { invoke } from '@tauri-apps/api'
 import { flow, flowResult } from 'mobx'
 import { Dispatch, SetStateAction } from 'react'
@@ -70,6 +76,36 @@ function EditVideo({
           autoComplete="off"
           label={t('unrecognized_videos.video_info.ID')}
           {...form.getInputProps('id')}
+          rightSection={
+            <IconSearch
+              size={14}
+              onClick={() => {
+                let provider = form.values.provider
+                let id = form.values.id
+                if (provider === 'tmdb') {
+                  if (form.values.type === 'movie') {
+                    if (id !== '') {
+                      window.open(
+                        'https://www.themoviedb.org/movie/' + id,
+                        '_blank'
+                      )
+                    } else
+                      window.open(
+                        'https://www.themoviedb.org/search/movie?query=',
+                        '_blank'
+                      )
+                  } else if (id !== '') {
+                    window.open('https://www.themoviedb.org/tv/' + id, '_blank')
+                  } else
+                    window.open(
+                      'https://www.themoviedb.org/search/tv?query=' +
+                        form.values.title,
+                      '_blank'
+                    )
+                }
+              }}
+            />
+          }
         />
         <Select
           label={t('unrecognized_videos.video_info.provider')}
