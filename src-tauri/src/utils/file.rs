@@ -46,10 +46,14 @@ pub fn create_shortcut<P: AsRef<Path>>(src: P, target: P) -> Result<(), std::io:
 
 pub fn is_video<P: AsRef<Path>>(path: P) -> bool {
     let path = path.as_ref();
+    if !path.is_file() || path.is_symlink() {
+        return false;
+    }
     let ext = path.extension().unwrap_or_default().to_str().unwrap();
-    let is_video = match ext {
+
+    let is_video = match ext.to_lowercase().as_ref() {
         "mp4" | "mkv" | "avi" | "flv" | "wmv" | "mov" | "mpg" | "mpeg" | "m4v" | "webm" => true,
         _ => false,
     };
-    is_video && path.is_file() && !path.is_symlink()
+    is_video
 }

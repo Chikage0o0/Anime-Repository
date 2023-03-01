@@ -19,6 +19,9 @@ class UnrecognizedVideosStore {
   constructor() {
     makeAutoObservable(this, {
       init: flow,
+      submit: flow,
+      delete: flow,
+      update: flow,
     })
   }
 
@@ -47,6 +50,28 @@ class UnrecognizedVideosStore {
         return { type: 'movie', path: a[0] }
       }
     })
+  }
+
+  *submit(values: unrecognizedVideoObject) {
+    try {
+      yield invoke('update_unrecognized_video_info', values)
+      this.data = yield this.init()
+    } catch (e) {
+      throw e
+    }
+  }
+
+  *delete(path: string) {
+    try {
+      yield invoke('delete_unrecognized_video_info', { path: path })
+      this.data = yield this.init()
+    } catch (e) {
+      throw e
+    }
+  }
+
+  *update() {
+    this.data = yield this.init()
   }
 
   *init() {

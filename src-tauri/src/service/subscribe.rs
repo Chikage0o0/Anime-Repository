@@ -85,14 +85,7 @@ pub fn process<P: AsRef<Path>>(
     ) {
         crate::service::unrecognized_videos::insert(
             path,
-            crate::data::unrecognized_videos::VideoData::Tvshow(
-                key.id.clone(),
-                key.provider,
-                value.lang,
-                value.title,
-                value.season,
-                episode,
-            ),
+            crate::data::unrecognized_videos::VideoData::Undefined,
         )?;
         return Err(SubscribeServiceError::ProcessTvshowInfoError(e));
     }

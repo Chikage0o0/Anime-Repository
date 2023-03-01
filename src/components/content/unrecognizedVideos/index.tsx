@@ -7,21 +7,27 @@ import {
   Text,
   Group,
   TextInput,
+  Affix,
 } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { showNotification } from '@mantine/notifications'
 import {
   IconCheck,
   IconPencil,
+  IconRefresh,
   IconSearch,
   IconTrash,
   IconX,
 } from '@tabler/icons-react'
 import { invoke } from '@tauri-apps/api'
+import { appWindow } from '@tauri-apps/api/window'
+import { listen } from '@tauri-apps/api/event'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import EditVideo from './editVideo'
+import { flowResult } from 'mobx'
+import { observer } from 'mobx-react-lite'
 
 function UnrecognizedVideos() {
   const { t } = useTranslation()
@@ -136,7 +142,7 @@ function UnrecognizedVideos() {
             <ActionIcon
               color="red"
               onClick={() =>
-                invoke('delete_unrecognized_video_info', { path: item?.path })
+                flowResult(unrecognizedVideosStore.delete(item?.path))
                   .then(() => {
                     showNotification({
                       icon: <IconCheck />,
@@ -179,10 +185,22 @@ function UnrecognizedVideos() {
           </thead>
           <tbody>{data}</tbody>
         </Table>
-        <EditVideo opened={opened} setOpened={setOpened} form={form} />
       </ScrollArea>
+      <EditVideo opened={opened} setOpened={setOpened} form={form} />
+      <Affix
+        hidden={settingStore.menu_open}
+        position={{ bottom: 20, right: 20 }}>
+        <ActionIcon
+          size="xl"
+          radius="xl"
+          variant="filled"
+          color={theme.primaryColor}
+          onClick={() => flowResult(unrecognizedVideosStore.update())}>
+          <IconRefresh stroke={1.5} size={34} />
+        </ActionIcon>
+      </Affix>
     </div>
   )
 }
 
-export default UnrecognizedVideos
+export default observer(UnrecognizedVideos)

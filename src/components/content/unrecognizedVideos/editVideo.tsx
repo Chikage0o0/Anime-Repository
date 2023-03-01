@@ -15,6 +15,7 @@ import { UseFormReturnType } from '@mantine/form'
 import { showNotification } from '@mantine/notifications'
 import { IconCheck, IconDeviceTv, IconMovie, IconX } from '@tabler/icons-react'
 import { invoke } from '@tauri-apps/api'
+import { flow, flowResult } from 'mobx'
 import { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -27,7 +28,7 @@ function EditVideo({
   setOpened: Dispatch<SetStateAction<boolean>>
   form: UseFormReturnType<any, any>
 }) {
-  const {} = useStore()
+  const { unrecognizedVideosStore } = useStore()
 
   const { t } = useTranslation()
   return (
@@ -140,10 +141,11 @@ function EditVideo({
           color="blue"
           onClick={() => {
             if (!form.validate().hasErrors) {
-              invoke('update_unrecognized_video_info', form.values)
+              flowResult(unrecognizedVideosStore.submit(form.values))
                 .then(() => {
                   form.reset()
                   setOpened(false)
+                  unrecognizedVideosStore.update()
                   showNotification({
                     icon: <IconCheck />,
                     title: t('unrecognized_videos.video_info.submit_success'),

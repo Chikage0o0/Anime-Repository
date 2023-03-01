@@ -1,5 +1,8 @@
 use crate::{
-    data::{pending_videos, unrecognized_videos},
+    data::{
+        pending_videos,
+        unrecognized_videos::{self, UnrecognizedVideosDataError},
+    },
     model::setting::Setting,
     utils::{file, matcher::Matcher},
 };
@@ -27,7 +30,10 @@ pub(super) fn process<P: AsRef<Path>>(path: P) {
                     // 排除非视频文件以及已经加入处理队列的文件
                     (e.kind == DebouncedEventKind::Any
                         && pending_videos::get(path).is_none()
-                        && unrecognized_videos::get(path).is_ok()
+                        && matches!(
+                            unrecognized_videos::get(path),
+                            Err(UnrecognizedVideosDataError::KeyNotFound(_))
+                        )
                         && file::is_video(path))
                     .then(|| path)
                 })
