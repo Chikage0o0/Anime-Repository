@@ -1,6 +1,6 @@
 use crate::{
     data::subscribe_rules::{Key, Value},
-    http::tmdb,
+    http::tmdb::TMDBClient,
     model::nfo::ProviderKnown,
     utils::matcher::Matcher,
 };
@@ -39,7 +39,8 @@ pub async fn get_tvshow_title(
 ) -> Result<String, SubscribeServiceError> {
     match provider {
         ProviderKnown::TMDB => {
-            let response = tmdb::get_tvshow_info(id, lang)
+            let response = TMDBClient::default()
+                .get_tvshow_info(id, lang)
                 .await
                 .map_err(|e| SubscribeServiceError::NetworkError(e.to_string()))?;
             match response.1 {

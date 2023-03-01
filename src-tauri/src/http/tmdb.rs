@@ -1,8 +1,12 @@
 use reqwest::{header::HeaderMap, StatusCode};
-use std::future::Future;
+use std::ops::Deref;
 
-use super::client;
+use crate::model::setting;
 const KEY:&str="Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJhNmI3YjFiOWQwNjk2MGZlYmQ0NzcwYzU3MTkyYjQ4MyIsInN1YiI6IjYzYjcwOWMwZjQ0ZjI3MDBiZGRlNWE5MyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.vTPT0JlthLSrd6ZhJYKa84HoL7wFm9K1q6xetWfp458";
+
+pub struct TMDBClient {
+    client: super::client::Client,
+}
 
 fn get_header() -> HeaderMap {
     let mut headers = HeaderMap::new();
@@ -14,55 +18,81 @@ fn get_header() -> HeaderMap {
     headers
 }
 
-pub fn get_movie_info(
-    id: &str,
-    lang: &str,
-) -> impl Future<Output = reqwest::Result<(String, StatusCode)>> {
-    let url = format!("https://api.themoviedb.org/3/movie/{}?language={}&append_to_response=images,credits&include_image_language={}",id,lang,&lang[0..2]);
-    client::get_string(url, get_header())
+impl Deref for TMDBClient {
+    type Target = super::client::Client;
+
+    fn deref(&self) -> &Self::Target {
+        &self.client
+    }
 }
 
-pub fn get_tvshow_info(
-    id: &str,
-    lang: &str,
-) -> impl Future<Output = reqwest::Result<(String, StatusCode)>> {
-    let url = format!("https://api.themoviedb.org/3/tv/{}?language={}&append_to_response=images,aggregate_credits&include_image_language={}",id,lang,&lang[0..2]);
-    client::get_string(url, get_header())
+impl Default for TMDBClient {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
-pub fn get_tv_episode_info(
-    id: &str,
-    season: u64,
-    episode: u64,
-    lang: &str,
-) -> impl Future<Output = reqwest::Result<(String, StatusCode)>> {
-    let url = format!(
-        "https://api.themoviedb.org/3/tv/{}/season/{}/episode/{}?language={}",
-        id, season, episode, lang
-    );
-    client::get_string(url, get_header())
-}
+impl TMDBClient {
+    pub fn new() -> Self {
+        Self {
+            client: setting::Setting::get_client(),
+        }
+    }
+    pub async fn get_movie_info(
+        &self,
+        id: &str,
+        lang: &str,
+    ) -> reqwest::Result<(String, StatusCode)> {
+        let url = format!("https://api.themoviedb.org/3/movie/{}?language={}&append_to_response=images,credits&include_image_language={}",id,lang,&lang[0..2]);
+        self.get_string(url, get_header()).await
+    }
 
-pub fn search_movie(
-    key: &str,
-    lang: &str,
-    page: u64,
-) -> impl Future<Output = reqwest::Result<(String, StatusCode)>> {
-    let url = format!(
-        "https://api.themoviedb.org/3/search/movie?query={}&language={}&page={}&include_adult=true",
-        key, lang, page
-    );
-    client::get_string(url, get_header())
-}
+    pub async fn get_tvshow_info(
+        &self,
+        id: &str,
+        lang: &str,
+    ) -> reqwest::Result<(String, StatusCode)> {
+        let url = format!("https://api.themoviedb.org/3/tv/{}?language={}&append_to_response=images,aggregate_credits&include_image_language={}",id,lang,&lang[0..2]);
+        self.get_string(url, get_header()).await
+    }
 
-pub fn search_tvshows(
-    key: &str,
-    lang: &str,
-    page: u64,
-) -> impl Future<Output = reqwest::Result<(String, StatusCode)>> {
-    let url = format!(
-        "https://api.themoviedb.org/3/search/tv?query={}&language={}&page={}&include_adult=true",
-        key, lang, page
-    );
-    client::get_string(url, get_header())
+    pub async fn get_tv_episode_info(
+        &self,
+        id: &str,
+        season: u64,
+        episode: u64,
+        lang: &str,
+    ) -> reqwest::Result<(String, StatusCode)> {
+        let url = format!(
+            "https://api.themoviedb.org/3/tv/{}/season/{}/episode/{}?language={}",
+            id, season, episode, lang
+        );
+        self.get_string(url, get_header()).await
+    }
+
+    pub async fn search_movie(
+        &self,
+        key: &str,
+        lang: &str,
+        page: u64,
+    ) -> reqwest::Result<(String, StatusCode)> {
+        let url = format!(
+            "https://api.themoviedb.org/3/search/movie?query={}&language={}&page={}&include_adult=true",
+            key, lang, page
+        );
+        self.get_string(url, get_header()).await
+    }
+
+    pub async fn search_tvshows(
+        &self,
+        key: &str,
+        lang: &str,
+        page: u64,
+    ) -> reqwest::Result<(String, StatusCode)> {
+        let url = format!(
+            "https://api.themoviedb.org/3/search/tv?query={}&language={}&page={}&include_adult=true",
+            key, lang, page
+        );
+        self.get_string(url, get_header()).await
+    }
 }

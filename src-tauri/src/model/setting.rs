@@ -7,6 +7,9 @@ use std::path::PathBuf;
 use std::sync::Mutex;
 use sys_locale::get_locale;
 
+use crate::http::client::Client;
+use crate::utils;
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Setting {
     ui: UI,
@@ -29,6 +32,7 @@ enum Theme {
 struct Storage {
     pending_path: PathBuf,
     pending_path_scan_interval: u64,
+    pending_path_last_scan: u64,
     repository_path: PathBuf,
 }
 
@@ -39,8 +43,17 @@ pub struct Network {
     proxy: String,
 }
 
+impl Drop for Setting {
+    fn drop(&mut self) {
+        if let Err(e) = self.write_to_file() {
+            log::error!("Write setting to file failed: {:?}", e);
+        }
+    }
+}
+
 lazy_static! {
     static ref CONFIG: Mutex<Setting> = Mutex::new(Setting::new().unwrap());
+    static ref HTTPCLIENT: Mutex<Client> = Mutex::new(Client::new());
 }
 impl Setting {
     pub fn write_to_file(&self) -> Result<(), std::io::Error> {
@@ -85,6 +98,7 @@ impl Setting {
             .set_default("storage.repository_path", video_dir.to_str())?
             .set_default("network.use_proxy", "false")?
             .set_default("network.proxy", "")?
+            .set_default("storage.pending_path_last_scan", utils::get_now_time())?
             .add_source(config::File::with_name(setting_file.to_str().unwrap()).required(false))
             .build()?;
 
@@ -105,10 +119,15 @@ impl Setting {
     }
 
     pub fn apply(setting: Setting) -> Result<(), SettingError> {
-        let mut old_setting = CONFIG.lock().unwrap();
-        setting.write_to_file()?;
-        *old_setting = setting;
+        {
+            let mut old_setting = CONFIG.lock().unwrap();
+            setting.write_to_file()?;
+            *old_setting = setting;
+        }
+        Self::set_client(Client::new());
+        log::debug!("Now http client is {:?}", HTTPCLIENT.lock().unwrap());
         log::info!("Setting applied");
+
         Ok(())
     }
 
@@ -122,6 +141,27 @@ impl Setting {
 
     pub fn get_repository_path() -> PathBuf {
         CONFIG.lock().unwrap().storage.repository_path.clone()
+    }
+
+    pub fn get_last_scan() -> u64 {
+        CONFIG.lock().unwrap().storage.pending_path_last_scan
+    }
+
+    pub fn set_last_scan(time: u64) {
+        let mut setting = CONFIG.lock().unwrap();
+        setting.storage.pending_path_last_scan = time;
+        setting
+            .write_to_file()
+            .unwrap_or(log::error!("Failed to write setting to file"));
+    }
+
+    pub fn get_client() -> Client {
+        HTTPCLIENT.lock().unwrap().clone()
+    }
+
+    fn set_client(client: Client) {
+        let mut c = HTTPCLIENT.lock().unwrap();
+        *c = client;
     }
 }
 

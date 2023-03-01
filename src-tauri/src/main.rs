@@ -11,16 +11,18 @@ mod model;
 mod service;
 mod utils;
 
+use model::setting;
 use tauri::{
-    CustomMenuItem, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem,
+    api, CustomMenuItem, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem,
 };
 
 use crate::controller::*;
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 fn main() {
-    std::env::set_var("RUST_LOG", "INFO");
+    std::env::set_var("RUST_LOG", "DEBUG");
     env_logger::init();
+
     handler::run();
     let quit = CustomMenuItem::new("quit".to_string(), "Quit");
     let open = CustomMenuItem::new("open".to_string(), "Open");
@@ -61,9 +63,7 @@ fn main() {
             }
             SystemTrayEvent::MenuItemClick { id, .. } => match id.as_str() {
                 "quit" => {
-                    if let Some(window) = app.get_window("main") {
-                        let _ = window.close();
-                    }
+                    api::process::kill_children();
                     app.exit(0)
                 }
                 "open" => {
@@ -107,9 +107,13 @@ fn main() {
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application")
-        .run(|_app_handle, event| match event {
+        .run(|app_handle, event| match event {
             tauri::RunEvent::ExitRequested { api, .. } => {
                 api.prevent_exit();
+            }
+            tauri::RunEvent::Exit {} => {
+                api::process::kill_children();
+                app_handle.exit(0);
             }
             _ => {}
         });

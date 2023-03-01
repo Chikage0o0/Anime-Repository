@@ -4,10 +4,13 @@ use crate::{
         unrecognized_videos::{self, UnrecognizedVideosDataError},
     },
     model::setting::Setting,
-    utils::{file, matcher::Matcher},
+    utils::{self, file, matcher::Matcher},
 };
 use notify_debouncer_mini::{new_debouncer, notify::*, DebouncedEventKind};
-use std::{path::Path, time::Duration};
+use std::{
+    path::Path,
+    time::{Duration, UNIX_EPOCH},
+};
 
 pub(super) fn process<P: AsRef<Path>>(path: P) {
     let (tx, rx) = std::sync::mpsc::channel();
@@ -58,7 +61,8 @@ pub(super) fn process<P: AsRef<Path>>(path: P) {
                             );
                         }
                     }
-                })
+                });
+            Setting::set_last_scan(utils::get_now_time());
         }
     }
 }
@@ -73,7 +77,9 @@ pub fn boot_scan<P: AsRef<Path>>(path: P) {
                 && matches!(
                     unrecognized_videos::get(&path),
                     Err(UnrecognizedVideosDataError::KeyNotFound(_))
-                ))
+                )
+                // 排除上次扫描之前的文件
+                && path.metadata().unwrap().modified().unwrap().duration_since(UNIX_EPOCH).unwrap().as_secs() > Setting::get_last_scan())
             .then(|| path)
         })
         // 对视频文件进行匹配
@@ -97,5 +103,6 @@ pub fn boot_scan<P: AsRef<Path>>(path: P) {
                     );
                 }
             }
-        })
+        });
+    Setting::set_last_scan(utils::get_now_time());
 }

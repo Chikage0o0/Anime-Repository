@@ -94,7 +94,11 @@ impl Episode {
             match provider {
                 Provider::Known(ProviderKnown::TMDB) => {
                     log::info!("Get {:?} episode {}x{} from TMDB", id, season, episode);
-                    let json = get_json(get_tv_episode_info(id, season, episode, lang).await?)?;
+                    let json = get_json(
+                        TMDBClient::default()
+                            .get_tv_episode_info(id, season, episode, lang)
+                            .await?,
+                    )?;
                     let data: Value = serde_json::from_str(&json).unwrap();
 
                     self.display_episode = Some(episode);

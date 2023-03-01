@@ -1,34 +1,69 @@
 use crate::model::setting::Setting;
-use lazy_static::lazy_static;
 use reqwest::{header::HeaderMap, Result, StatusCode};
 
-lazy_static! {
-    static ref HTTP_CLIENT: reqwest::Client = new_client();
+#[derive(Debug, Clone)]
+pub struct Client {
+    client: reqwest::Client,
 }
 
-fn new_client() -> reqwest::Client {
-    let mut builder = reqwest::ClientBuilder::new();
-    if let Some(proxy) = Setting::get_proxy() {
-        if let Ok(proxy) = reqwest::Proxy::all(proxy) {
-            builder = builder.proxy(proxy);
-        } else {
-            //TODO: 向前端发送错误
-            todo!()
+impl Default for Client {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Client {
+    pub fn new() -> Self {
+        let mut builder = reqwest::ClientBuilder::new();
+        if let Some(proxy) = Setting::get_proxy() {
+            if let Ok(proxy) = reqwest::Proxy::all(proxy) {
+                builder = builder.proxy(proxy);
+            } else {
+                todo!()
+            }
+        }
+        Self {
+            client: builder.build().unwrap(),
         }
     }
-    builder.build().unwrap()
-}
 
-pub async fn get_string(url: String, headers: HeaderMap) -> Result<(String, StatusCode)> {
-    let res = HTTP_CLIENT.get(&url).headers(headers).send().await?;
-    let status = res.status();
-    let text = res.text().await?;
-    Ok((text, status))
-}
+    pub async fn get_string(
+        &self,
+        url: String,
+        headers: HeaderMap,
+    ) -> Result<(String, StatusCode)> {
+        let res = self.client.get(&url).headers(headers).send().await?;
+        let status = res.status();
+        let text = res.text().await?;
+        Ok((text, status))
+    }
 
-pub async fn get_bytes(url: String, headers: HeaderMap) -> Result<(Vec<u8>, StatusCode)> {
-    let res = HTTP_CLIENT.get(&url).headers(headers).send().await?;
-    let status = res.status();
-    let bytes = res.bytes().await?;
-    Ok((bytes.to_vec(), status))
+    pub async fn get_bytes(
+        &self,
+        url: String,
+        headers: HeaderMap,
+    ) -> Result<(Vec<u8>, StatusCode)> {
+        let res = self.client.get(&url).headers(headers).send().await?;
+        let status = res.status();
+        let bytes = res.bytes().await?;
+        Ok((bytes.to_vec(), status))
+    }
+
+    pub async fn post_string(
+        &self,
+        url: String,
+        headers: HeaderMap,
+        body: String,
+    ) -> Result<(String, StatusCode)> {
+        let res = self
+            .client
+            .post(&url)
+            .headers(headers)
+            .body(body)
+            .send()
+            .await?;
+        let status = res.status();
+        let text = res.text().await?;
+        Ok((text, status))
+    }
 }

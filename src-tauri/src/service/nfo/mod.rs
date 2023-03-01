@@ -1,7 +1,6 @@
 pub mod movie;
 pub mod tvshow;
-
-use crate::http::client;
+use crate::model::setting::Setting;
 use quick_xml::se::Serializer;
 use reqwest::{header::HeaderMap, StatusCode};
 use serde::Deserialize;
@@ -14,7 +13,7 @@ use std::{
 fn download_thumb<P: AsRef<Path>>(path: P, url: &str) -> Result<(), NfoServiceError> {
     log::info!("Downloading thumb {:?}", url);
     use tauri::async_runtime::block_on;
-    let img = match block_on(client::get_bytes(url.to_string(), HeaderMap::new())) {
+    let img = match block_on(Setting::get_client().get_bytes(url.to_string(), HeaderMap::new())) {
         Ok(res) => match res.1 {
             reqwest::StatusCode::OK => res.0,
             _ => {

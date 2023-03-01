@@ -108,7 +108,7 @@ impl Movie {
             match provider {
                 Provider::Known(ProviderKnown::TMDB) => {
                     log::info!("Get movie with id: {} from TMDB", id);
-                    let json = get_json(get_movie_info(id, lang).await?)?;
+                    let json = get_json(TMDBClient::default().get_movie_info(id, lang).await?)?;
                     let data: Value = serde_json::from_str(&json).unwrap();
 
                     if let Some(title) = data.get("title") {
