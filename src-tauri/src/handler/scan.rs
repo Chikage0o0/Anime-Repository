@@ -62,3 +62,40 @@ pub(super) fn process<P: AsRef<Path>>(path: P) {
         }
     }
 }
+
+pub fn boot_scan<P: AsRef<Path>>(path: P) {
+    file::walk_file(path.as_ref())
+        .iter()
+        .filter_map(|path| {
+            // 排除非视频文件以及已经加入处理队列的文件
+            (file::is_video(&path)
+                && pending_videos::get(&path).is_none()
+                && matches!(
+                    unrecognized_videos::get(&path),
+                    Err(UnrecognizedVideosDataError::KeyNotFound(_))
+                ))
+            .then(|| path)
+        })
+        // 对视频文件进行匹配
+        .for_each(|path| match Matcher::matchers_video(&path) {
+            Some((key, path, episode)) => {
+                log::info!("Found Subscribe video: {:?}", path);
+                crate::service::subscribe::process(&key, path, episode)
+                    .unwrap_or_else(|err| log::error!("{:?}", err))
+            }
+            // 未匹配到的视频文件
+            None => {
+                log::info!("Found Unrecognized video: {:?}", path);
+                if let Err(e) = crate::service::unrecognized_videos::insert(
+                    path,
+                    unrecognized_videos::VideoData::Undefined,
+                ) {
+                    log::error!(
+                        "Insert {:?} to Unrecognized Video database failed: {:?}",
+                        path,
+                        e
+                    );
+                }
+            }
+        })
+}

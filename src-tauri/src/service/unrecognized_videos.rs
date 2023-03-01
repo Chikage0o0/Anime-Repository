@@ -2,8 +2,12 @@ use crate::data::unrecognized_videos::VideoData;
 use std::path::Path;
 
 pub fn delete<P: AsRef<Path>>(path: P) -> Result<(), UnrecognizedVideosServiceError> {
-    let path = path.as_ref().to_str().unwrap();
-    crate::data::unrecognized_videos::delete(path)?;
+    let path = path.as_ref();
+    crate::data::unrecognized_videos::delete(path.to_str().unwrap())?;
+    // 如果存在文件，同时删除文件
+    if path.exists() && path.is_file() {
+        std::fs::remove_file(path)?;
+    }
     Ok(())
 }
 
@@ -39,4 +43,6 @@ pub enum UnrecognizedVideosServiceError {
     TvshowNfoCreateError(#[from] crate::service::nfo::tvshow::TvshowNfoServiceError),
     #[error(transparent)]
     MovieNfoCreateError(#[from] crate::service::nfo::movie::MovieNfoServiceError),
+    #[error(transparent)]
+    IoError(#[from] std::io::Error),
 }

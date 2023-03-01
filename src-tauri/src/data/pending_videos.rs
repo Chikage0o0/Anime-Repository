@@ -42,8 +42,6 @@ pub fn delete(path: PathBuf) {
 
 #[derive(thiserror::Error, Debug)]
 pub enum UnrecognizedVideoDataError {
-    #[error("Key `{0}` not found in database")]
-    KeyNotFound(String),
     #[error(transparent)]
     SledError(#[from] sled::Error),
 }

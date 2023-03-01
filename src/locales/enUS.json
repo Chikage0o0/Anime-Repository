@@ -67,6 +67,7 @@
   "setting.network.proxy_error": "Proxy Link Format Error",
   "setting.save_success": "Save Success",
   "setting.save_failed": "Save Failed",
+  "UI.delete_confirm": "Are you sure to delete this item?",
   "UI.close": "Close",
   "UI.true": "Yes",
   "UI.false": "No",

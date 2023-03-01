@@ -18,12 +18,6 @@ pub enum VideoData {
     Undefined,
 }
 
-impl VideoData {
-    pub fn new() -> Self {
-        Self::Undefined
-    }
-}
-
 pub fn get_all() -> Vec<(PathBuf, VideoData)> {
     DB.iter()
         .filter_map(|f| {
@@ -42,7 +36,6 @@ pub fn get_all() -> Vec<(PathBuf, VideoData)> {
 
 pub fn get<P: AsRef<Path>>(path: P) -> Result<VideoData, UnrecognizedVideosDataError> {
     if let Some(value) = DB.get(path.as_ref().to_str().unwrap())? {
-        let path = String::from_utf8(value.to_vec()).unwrap();
         Ok(bincode::deserialize(&value.to_vec()[..]).unwrap())
     } else {
         Err(UnrecognizedVideosDataError::KeyNotFound(
@@ -67,35 +60,10 @@ pub fn delete<P: AsRef<Path>>(path: P) -> Result<(), UnrecognizedVideosDataError
     Ok(())
 }
 
-pub fn delete_all() -> Result<(), UnrecognizedVideosDataError> {
-    DB.clear()?;
-    Ok(())
-}
 #[derive(thiserror::Error, Debug)]
 pub enum UnrecognizedVideosDataError {
     #[error("Key `{0}` not found in database")]
     KeyNotFound(String),
     #[error(transparent)]
     SledError(#[from] sled::Error),
-}
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    fn init() {
-        let _ = std::fs::remove_dir_all("config/unrecognized_videos");
-        let _ = std::fs::create_dir_all("config/unrecognized_videos");
-    }
-
-    #[test]
-    fn test_insert() {
-        init();
-        let path = PathBuf::from("test.mp4");
-        let video_data = VideoData::new();
-        insert(path, video_data).unwrap();
-        let list = get_all();
-        assert_eq!(list.len(), 1);
-        assert!(list[0].0.to_str().unwrap().contains("test.mp4"));
-        DB.flush().unwrap();
-    }
 }

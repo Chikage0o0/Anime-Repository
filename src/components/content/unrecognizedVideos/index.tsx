@@ -8,6 +8,9 @@ import {
   Group,
   TextInput,
   Affix,
+  Popover,
+  Button,
+  Center,
 } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { showNotification } from '@mantine/notifications'
@@ -139,29 +142,46 @@ function UnrecognizedVideos() {
               }}>
               <IconPencil size={16} stroke={1.5} />
             </ActionIcon>
-            <ActionIcon
-              color="red"
-              onClick={() =>
-                flowResult(unrecognizedVideosStore.delete(item?.path))
-                  .then(() => {
-                    showNotification({
-                      icon: <IconCheck />,
-                      title: t('unrecognized_videos.delete_success'),
-                      message: '✌️🙄✌️',
-                    })
-                  })
-                  .catch((e) => {
-                    showNotification({
-                      color: 'red',
-                      icon: <IconX />,
-                      autoClose: false,
-                      title: t('unrecognized_videos.delete_failed'),
-                      message: e,
-                    })
-                  })
-              }>
-              <IconTrash size={16} stroke={1.5} />
-            </ActionIcon>
+            <Popover width={200} position="bottom" withArrow shadow="md">
+              <Popover.Target>
+                <ActionIcon color="red">
+                  <IconTrash size={16} stroke={1.5} />
+                </ActionIcon>
+              </Popover.Target>
+              <Popover.Dropdown>
+                <Text size="sm">{t('UI.delete_confirm')}</Text>
+                <Center>
+                  <Button
+                    variant="outline"
+                    color="red"
+                    radius="xs"
+                    size="xs"
+                    mt="xs"
+                    onClick={() =>
+                      flowResult(unrecognizedVideosStore.delete(item?.path))
+                        .then(() => {
+                          showNotification({
+                            icon: <IconCheck />,
+                            title: t('unrecognized_videos.delete_success'),
+                            message: '✌️🙄✌️',
+                          })
+                        })
+                        .catch((e) => {
+                          showNotification({
+                            color: 'red',
+                            icon: <IconX />,
+                            autoClose: false,
+                            title: t('unrecognized_videos.delete_failed'),
+                            message: e,
+                          })
+                        })
+                    }
+                    compact>
+                    {t('UI.true')}
+                  </Button>
+                </Center>
+              </Popover.Dropdown>
+            </Popover>
           </Group>
         </td>
       </tr>
