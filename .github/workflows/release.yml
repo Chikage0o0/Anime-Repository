@@ -30,7 +30,7 @@ jobs:
             const { data } = await github.rest.repos.createRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              tag_name: `app-v${process.env.PACKAGE_VERSION}`,
+              tag_name: `v${process.env.PACKAGE_VERSION}`,
               name: `Anime Repository v${process.env.PACKAGE_VERSION}`,
               body: 'Take a look at the assets to download and install this app.',
               draft: true,
@@ -94,7 +94,7 @@ jobs:
             })
 
   release-update:
-    needs: release
+    needs: [create-release,build-tauri,publish-release]
     runs-on: ubuntu-latest
     if: |
       startsWith(github.repository, 'Chikage0o0') &&
@@ -121,4 +121,4 @@ jobs:
       - name: Release updater file
         run: yarn run updater
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
