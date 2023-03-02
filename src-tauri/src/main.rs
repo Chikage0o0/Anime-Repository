@@ -14,13 +14,12 @@ mod utils;
 use crate::controller::*;
 use once_cell::sync::OnceCell;
 
-use tauri::{api, SystemTray};
+use tauri::SystemTray;
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 pub static APP_HANDLE: OnceCell<tauri::AppHandle> = OnceCell::new();
 
 fn main() {
-    std::env::set_var("RUST_LOG", "DEBUG");
     env_logger::init();
 
     let app = tauri::Builder::default()
@@ -52,7 +51,6 @@ fn main() {
         }
         tauri::RunEvent::Exit {} => {
             handler::stop();
-            api::process::kill_children();
             app_handle.exit(0);
         }
         _ => {}

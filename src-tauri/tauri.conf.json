@@ -11,7 +11,22 @@
   },
   "tauri": {
     "allowlist": {
-      "all": true
+      "all": false,
+      "dialog": {
+        "open": true
+      },
+      "window": {
+        "all": true
+      },
+      "notification": {
+        "all": true
+      },
+      "globalShortcut": {
+        "all": true
+      },
+      "path": {
+        "all": true
+      }
     },
     "bundle": {
       "active": true,
@@ -64,7 +79,7 @@
         "https://github.com/Chikage0o0/Anime-Repository/releases/download/updater/update.json"
       ],
       "dialog": true,
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDNCNUQyRUU3NDFFMjg2OEYKUldTUGh1SkI1eTVkT3pBZzNiUHpHNE50V0ttYS9uNFpNN3lSQWIvckNNdFZYclFrVTdOaGw2czgK"
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEYyMjEwM0Q0NTQ0NzMxMjQKUldRa01VZFUxQU1oOHR5VEs2Tlc5SFRDZHo4bjU3czg4dzdWSzdXckUzZ3pkdHlsemcrcWFBMlEK"
     },
     "windows": [
       {

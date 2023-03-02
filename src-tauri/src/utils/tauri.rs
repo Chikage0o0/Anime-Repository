@@ -1,6 +1,6 @@
 use crate::{handler, model::setting::Setting};
 use tauri::{
-    api, AppHandle, CustomMenuItem, Manager, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem,
+    AppHandle, CustomMenuItem, Manager, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem,
 };
 
 pub fn get_tray_menu() -> SystemTrayMenu {
@@ -103,7 +103,6 @@ pub fn tray_event(app: &AppHandle, event: SystemTrayEvent) {
         SystemTrayEvent::MenuItemClick { id, .. } => match id.as_str() {
             "quit" => {
                 handler::stop();
-                api::process::kill_children();
                 app.exit(0);
             }
             "open" => {
