@@ -6,7 +6,7 @@
     "distDir": "../dist"
   },
   "package": {
-    "productName": "anime-repository",
+    "productName": "Anime-Repository",
     "version": "0.0.1"
   },
   "tauri": {

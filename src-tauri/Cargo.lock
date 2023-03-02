@@ -53,8 +53,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "anime-repository"
-version = "0.0.0"
+name = "anime_repository"
+version = "0.0.1"
 dependencies = [
  "bincode",
  "chrono",
