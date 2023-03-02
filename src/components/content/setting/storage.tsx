@@ -57,7 +57,7 @@ function Storage({ form, classes }: { form: any; classes: any }) {
             stroke={1}
             onClick={() =>
               selected(
-                'storage.pending_path',
+                'storage.repository_path',
                 form.values['storage']['repository_path']
               )
             }
