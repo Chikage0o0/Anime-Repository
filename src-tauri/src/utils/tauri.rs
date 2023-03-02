@@ -142,5 +142,6 @@ pub fn send_event(window: &str, event: &str, data: impl serde::Serialize + Clone
 }
 
 pub fn exit_app() {
+    log::info!("exit app");
     crate::APP_HANDLE.get().unwrap().exit(0);
 }

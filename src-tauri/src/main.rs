@@ -11,39 +11,29 @@ mod model;
 mod service;
 mod utils;
 
-use std::path::PathBuf;
-
 use crate::controller::*;
-
 use once_cell::sync::OnceCell;
-
+use std::path::PathBuf;
 use tauri::SystemTray;
 
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 pub static APP_HANDLE: OnceCell<tauri::AppHandle> = OnceCell::new();
 
 fn init_log() {
     use log::LevelFilter;
-    use log4rs::append::file::FileAppender;
-    use log4rs::config::{Appender, Config, Logger};
+    use log4rs::append::console::ConsoleAppender;
+    use log4rs::append::rolling_file::{
+        policy::compound::{
+            roll::fixed_window::FixedWindowRoller, trigger::size::SizeTrigger, CompoundPolicy,
+        },
+        RollingFileAppender,
+    };
+    use log4rs::config::{Appender, Config, Logger, Root};
     use log4rs::encode::pattern::PatternEncoder;
-    use log4rs::{append::console::ConsoleAppender, config::Root};
-
-    let file = FileAppender::builder()
-        .encoder(Box::new(PatternEncoder::new(
-            "[Anime-Repository] [{d(%Y-%m-%d %H:%M:%S)}] [{l}] {t} - {m}{n}",
-        )))
-        .build(
-            PathBuf::from(tauri::api::path::config_dir().unwrap())
-                .join("AnimeRepository")
-                .join("log.txt"),
-        )
-        .unwrap();
 
     let config = if cfg!(debug_assertions) {
         let stdout = ConsoleAppender::builder()
             .encoder(Box::new(PatternEncoder::new(
-                "[Anime-Repository] [{d(%Y-%m-%d %H:%M:%S)}] [{h({l})}] {t} - {m}{n}",
+                "{d(%Y-%m-%d %H:%M:%S)} | {({h({l})}):5.5} | {t}:{L} - {m}{n}",
             )))
             .build();
         Config::builder()
@@ -57,6 +47,27 @@ fn init_log() {
             .build(Root::builder().appender("stdout").build(LevelFilter::Debug))
             .unwrap()
     } else {
+        let log_path = PathBuf::from(tauri::api::path::config_dir().unwrap())
+            .join("AnimeRepository")
+            .join("log");
+
+        let window_size = 3; // log0, log1, log2
+        let fixed_window_roller = FixedWindowRoller::builder()
+            .build(log_path.join("old-{}.log").to_str().unwrap(), window_size)
+            .unwrap();
+
+        let size_limit = 5 * 1024; // 5KB as max log file size to roll
+        let size_trigger = SizeTrigger::new(size_limit);
+        let compound_policy =
+            CompoundPolicy::new(Box::new(size_trigger), Box::new(fixed_window_roller));
+
+        let file = RollingFileAppender::builder()
+            .encoder(Box::new(PatternEncoder::new(
+                "{d(%Y-%m-%d %H:%M:%S)} | {({l}):5.5} | {t} - {m}{n}",
+            )))
+            .build(log_path.join("latest.log"), Box::new(compound_policy))
+            .unwrap();
+
         Config::builder()
             .appender(Appender::builder().build("file", Box::new(file)))
             .logger(
@@ -74,6 +85,8 @@ fn init_log() {
 
 fn main() {
     init_log();
+
+    log::info!("start app");
 
     let app = tauri::Builder::default()
         .system_tray(SystemTray::new().with_menu(utils::tauri::get_tray_menu()))
