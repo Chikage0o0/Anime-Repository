@@ -11,7 +11,10 @@ mod model;
 mod service;
 mod utils;
 
+use std::path::PathBuf;
+
 use crate::controller::*;
+
 use once_cell::sync::OnceCell;
 
 use tauri::SystemTray;
@@ -19,8 +22,58 @@ use tauri::SystemTray;
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 pub static APP_HANDLE: OnceCell<tauri::AppHandle> = OnceCell::new();
 
+fn init_log() {
+    use log::LevelFilter;
+    use log4rs::append::file::FileAppender;
+    use log4rs::config::{Appender, Config, Logger};
+    use log4rs::encode::pattern::PatternEncoder;
+    use log4rs::{append::console::ConsoleAppender, config::Root};
+
+    let file = FileAppender::builder()
+        .encoder(Box::new(PatternEncoder::new(
+            "[Anime-Repository] [{d(%Y-%m-%d %H:%M:%S)}] [{l}] {t} - {m}{n}",
+        )))
+        .build(
+            PathBuf::from(tauri::api::path::config_dir().unwrap())
+                .join("AnimeRepository")
+                .join("log.txt"),
+        )
+        .unwrap();
+
+    let config = if cfg!(debug_assertions) {
+        let stdout = ConsoleAppender::builder()
+            .encoder(Box::new(PatternEncoder::new(
+                "[Anime-Repository] [{d(%Y-%m-%d %H:%M:%S)}] [{h({l})}] {t} - {m}{n}",
+            )))
+            .build();
+        Config::builder()
+            .appender(Appender::builder().build("stdout", Box::new(stdout)))
+            .logger(
+                Logger::builder()
+                    .appender("stdout")
+                    .additive(false)
+                    .build("app", LevelFilter::Debug),
+            )
+            .build(Root::builder().appender("stdout").build(LevelFilter::Debug))
+            .unwrap()
+    } else {
+        Config::builder()
+            .appender(Appender::builder().build("file", Box::new(file)))
+            .logger(
+                Logger::builder()
+                    .appender("file")
+                    .additive(false)
+                    .build("app", LevelFilter::Info),
+            )
+            .build(Root::builder().appender("file").build(LevelFilter::Info))
+            .unwrap()
+    };
+
+    let _ = log4rs::init_config(config).unwrap();
+}
+
 fn main() {
-    env_logger::init();
+    init_log();
 
     let app = tauri::Builder::default()
         .system_tray(SystemTray::new().with_menu(utils::tauri::get_tray_menu()))
