@@ -1,4 +1,4 @@
-# Anime-Repository
+# Anime Repository
 
 功能需求：
 

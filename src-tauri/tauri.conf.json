@@ -6,7 +6,7 @@
     "distDir": "../dist"
   },
   "package": {
-    "productName": "Anime-Repository",
+    "productName": "Anime Repository",
     "version": "0.0.2"
   },
   "tauri": {
@@ -76,7 +76,7 @@
     "updater": {
       "active": true,
       "endpoints": [
-        "https://github.com/Chikage0o0/Anime-Repository/releases/download/updater/update.json"
+        "https://github.com/Chikage0o0/Anime Repository/releases/download/updater/update.json"
       ],
       "dialog": true,
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEYyMjEwM0Q0NTQ0NzMxMjQKUldRa01VZFUxQU1oOHR5VEs2Tlc5SFRDZHo4bjU3czg4dzdWSzdXckUzZ3pkdHlsemcrcWFBMlEK"
@@ -88,7 +88,7 @@
         "minWidth": 600,
         "height": 600,
         "resizable": true,
-        "title": "Anime-Repository",
+        "title": "Anime Repository",
         "width": 1000,
         "decorations": false,
         "focus": true,

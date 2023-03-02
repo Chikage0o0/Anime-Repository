@@ -48,9 +48,9 @@ fn send_notification(file_name: &str) {
 
     let title;
     match Setting::get_lang().as_str() {
-        "zh_CN" => title = "Anime-Repository:新视频已经入库！",
-        "ja_JP" => title = "Anime-Repository:新しい動画が追加されました！",
-        _ => title = "Anime-Repository:New video has been added!",
+        "zh_CN" => title = "Anime Repository: 新视频已经入库！",
+        "ja_JP" => title = "Anime Repository: 新しい動画が追加されました！",
+        _ => title = "Anime Repository: New video has been added!",
     }
 
     let context = tauri::generate_context!();

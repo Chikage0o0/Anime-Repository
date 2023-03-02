@@ -90,7 +90,7 @@ pub fn tray_event(app: &AppHandle, event: SystemTrayEvent) {
                 "main".to_string(),
                 tauri::WindowUrl::App("index.html".into()),
             )
-            .title("Anime-Repository")
+            .title("Anime Repository")
             .center()
             .fullscreen(false)
             .min_inner_size(600.0, 600.0)
@@ -117,7 +117,7 @@ pub fn tray_event(app: &AppHandle, event: SystemTrayEvent) {
                     "main".to_string(),
                     tauri::WindowUrl::App("index.html".into()),
                 )
-                .title("Anime-Repository")
+                .title("Anime Repository")
                 .center()
                 .fullscreen(false)
                 .min_inner_size(600.0, 600.0)
