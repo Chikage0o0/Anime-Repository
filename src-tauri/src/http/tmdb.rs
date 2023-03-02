@@ -2,7 +2,7 @@ use reqwest::{header::HeaderMap, StatusCode};
 use std::ops::Deref;
 
 use super::client::Client;
-const KEY:&str="Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJhNmI3YjFiOWQwNjk2MGZlYmQ0NzcwYzU3MTkyYjQ4MyIsInN1YiI6IjYzYjcwOWMwZjQ0ZjI3MDBiZGRlNWE5MyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.vTPT0JlthLSrd6ZhJYKa84HoL7wFm9K1q6xetWfp458";
+const KEY: &str = env!("TMDB_KEY");
 
 pub struct TMDBClient {
     client: super::client::Client,

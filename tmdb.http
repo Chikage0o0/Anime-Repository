@@ -1,10 +1,8 @@
-@key=eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJhNmI3YjFiOWQwNjk2MGZlYmQ0NzcwYzU3MTkyYjQ4MyIsInN1YiI6IjYzYjcwOWMwZjQ0ZjI3MDBiZGRlNWE5MyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.vTPT0JlthLSrd6ZhJYKa84HoL7wFm9K1q6xetWfp458
-//使用插件REST Client测试
-
+@key={{TMDB_KEY}}
 //电影 API
 GET https://api.themoviedb.org/3/movie/532321?language=zh-CN&append_to_response=images,credits&include_image_language=zh,null
 Content-Type: application/json;charset=utf-8
-Authorization: Bearer {{key}}
+Authorization: {{key}}
 
 //poster_path poster
 //backdrop_path fanart
@@ -15,13 +13,13 @@ Authorization: Bearer {{key}}
 //TV API
 GET https://api.themoviedb.org/3/tv/123249?language=zh-CN&append_to_response=images,aggregate_credits&include_image_language=zh
 Content-Type: application/json;charset=utf-8
-Authorization: Bearer {{key}}
+Authorization: {{key}}
 ###
 
 //TV episode API
 GET https://api.themoviedb.org/3/tv/63322/season/1/episode/1?language=zh-CN
 Content-Type: application/json;charset=utf-8
-Authorization: Bearer {{key}}
+Authorization: {{key}}
 
 ###
 //图片API
@@ -32,9 +30,9 @@ GET https://image.tmdb.org/t/p/original/mkq9bJNJS9PPCQKpCMycOyiXXPK.jpg
 //搜索电影
 GET https://api.themoviedb.org/3/search/movie?language=zh-CN&query=少女与战车&page=1&include_adult=true
 Content-Type: application/json;charset=utf-8
-Authorization: Bearer {{key}}
+Authorization: {{key}}
 ###
 //搜索TV
 GET https://api.themoviedb.org/3/search/tv?language=zh-CN&query=少女与战车&page=1&include_adult=true
 Content-Type: application/json;charset=utf-8
-Authorization: Bearer {{key}}
+Authorization: {{key}}
