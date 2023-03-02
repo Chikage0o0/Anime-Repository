@@ -1,6 +1,6 @@
 pub mod movie;
 pub mod tvshow;
-use crate::model::setting::Setting;
+use crate::http::client::Client;
 use quick_xml::se::Serializer;
 use reqwest::{header::HeaderMap, StatusCode};
 use serde::Deserialize;
@@ -12,7 +12,7 @@ use std::{
 
 async fn download_thumb<P: AsRef<Path>>(path: P, url: &str) -> Result<(), NfoServiceError> {
     log::info!("Downloading thumb {:?}", url);
-    let img = match Setting::get_client()
+    let img = match Client::get()
         .get_bytes(url.to_string(), HeaderMap::new())
         .await
     {

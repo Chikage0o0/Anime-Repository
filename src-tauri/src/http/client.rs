@@ -1,10 +1,15 @@
+use std::sync::Mutex;
+
 use crate::model::setting::Setting;
+use once_cell::sync::Lazy;
 use reqwest::{header::HeaderMap, Result, StatusCode};
 
 #[derive(Debug, Clone)]
 pub struct Client {
     client: reqwest::Client,
 }
+
+static HTTP_CLIENT: Lazy<Mutex<Client>> = Lazy::new(|| Mutex::new(Client::new()));
 
 impl Default for Client {
     fn default() -> Self {
@@ -13,7 +18,7 @@ impl Default for Client {
 }
 
 impl Client {
-    pub fn new() -> Self {
+    fn new() -> Self {
         let mut builder = reqwest::ClientBuilder::new();
         if let Some(proxy) = Setting::get_proxy() {
             if let Ok(proxy) = reqwest::Proxy::all(proxy) {
@@ -25,6 +30,16 @@ impl Client {
         Self {
             client: builder.build().unwrap(),
         }
+    }
+
+    pub fn get() -> Self {
+        HTTP_CLIENT.lock().unwrap().clone()
+    }
+
+    pub fn rebuild() {
+        let mut c = HTTP_CLIENT.lock().unwrap();
+        *c = Client::new();
+        log::info!("HTTP client set {:?}", &*c);
     }
 
     pub async fn get_string(

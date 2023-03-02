@@ -1,6 +1,6 @@
-import en_US from './enUS.json'
-import zh_CN from './zhCN.json'
-import ja_JP from './jaJP.json'
+import en_US from "./enUS.json";
+import ja_JP from "./jaJP.json";
+import zh_CN from "./zhCN.json";
 
 export const resources = {
   en_US: {
@@ -12,6 +12,6 @@ export const resources = {
   ja_JP: {
     translation: ja_JP,
   },
-}
+};
 
-export const locales = ['zh_CN', 'en_US', 'ja_JP']
+export const locales = ["zh_CN", "en_US", "ja_JP"];

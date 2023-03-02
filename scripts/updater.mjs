@@ -1,5 +1,5 @@
+import { context, getOctokit } from "@actions/github"
 import fetch from "node-fetch"
-import { getOctokit, context } from "@actions/github"
 import { resolveUpdateLog } from "./updatelog.mjs"
 
 const UPDATE_TAG_NAME = "updater"

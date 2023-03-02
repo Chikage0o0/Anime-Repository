@@ -17,15 +17,7 @@ tauri-build = { version = "1.2", features = [] }
 log = "^0.4.17"
 serde_json = "^1.0.93"
 serde = { version = "^1.0.152", features = ["derive"] }
-tauri = { version = "^1.2.4", features = [
-    "dialog-open",
-    "global-shortcut-all",
-    "notification-all",
-    "path-all",
-    "system-tray",
-    "updater",
-    "window-all",
-] }
+tauri = { version = "^1.2.4", features = ["dialog-open", "global-shortcut-all", "notification-all", "path-all", "system-tray", "updater", "window-all"] }
 toml = "^0.7.2"
 thiserror = "^1.0.38"
 sys-locale = "^0.2.3"
@@ -46,6 +38,9 @@ log4rs = { version = "^1.2.0", features = [
     "console_appender",
     "file_appender",
 ] }
+window-shadows = "^0.2.1"
+auto-launch = "^0.4.0"
+tokio = { version = "^1.26.0", features = ["time"] }
 
 [features]
 # by default Tauri runs in production mode

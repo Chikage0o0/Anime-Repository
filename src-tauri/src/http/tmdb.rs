@@ -1,7 +1,7 @@
 use reqwest::{header::HeaderMap, StatusCode};
 use std::ops::Deref;
 
-use crate::model::setting;
+use super::client::Client;
 const KEY:&str="Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJhNmI3YjFiOWQwNjk2MGZlYmQ0NzcwYzU3MTkyYjQ4MyIsInN1YiI6IjYzYjcwOWMwZjQ0ZjI3MDBiZGRlNWE5MyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.vTPT0JlthLSrd6ZhJYKa84HoL7wFm9K1q6xetWfp458";
 
 pub struct TMDBClient {
@@ -35,7 +35,7 @@ impl Default for TMDBClient {
 impl TMDBClient {
     pub fn new() -> Self {
         Self {
-            client: setting::Setting::get_client(),
+            client: Client::get(),
         }
     }
     pub async fn get_movie_info(

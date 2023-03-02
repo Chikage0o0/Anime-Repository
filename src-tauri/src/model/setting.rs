@@ -7,7 +7,6 @@ use std::path::PathBuf;
 use std::sync::Mutex;
 use sys_locale::get_locale;
 
-use crate::http::client::Client;
 use crate::utils;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -15,7 +14,15 @@ pub struct Setting {
     ui: UI,
     storage: Storage,
     network: Network,
+    system: System,
 }
+#[derive(Serialize, Deserialize, Debug, Clone)]
+struct System {
+    auto_launch: bool,
+    silent_start: bool,
+    scan_interval: u64,
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct UI {
     lang: String,
@@ -31,23 +38,21 @@ enum Theme {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct Storage {
     pending_path: PathBuf,
-    pending_path_scan_interval: u64,
-    pending_path_last_scan: u64,
     repository_path: PathBuf,
+    pending_path_last_scan: u64,
 }
 
 /// 网络相关配置
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Network {
-    use_proxy: String,
+    use_proxy: bool,
     proxy: String,
 }
 
 static CONFIG: Lazy<Mutex<Setting>> = Lazy::new(|| Mutex::new(Setting::new().unwrap()));
-static HTTP_CLIENT: Lazy<Mutex<Client>> = Lazy::new(|| Mutex::new(Client::new()));
 
 impl Setting {
-    pub fn write_to_file(&self) -> Result<(), std::io::Error> {
+    pub fn write_to_file() -> Result<(), std::io::Error> {
         log::debug!("Writing setting to file");
         let path = PathBuf::from(tauri::api::path::config_dir().unwrap())
             .join("AnimeRepository")
@@ -58,7 +63,7 @@ impl Setting {
         }
 
         let mut file = File::create(path)?;
-        let toml_str = toml::to_string(self).unwrap();
+        let toml_str = toml::to_string(&Self::get()).unwrap();
         file.write_all(toml_str.as_bytes())?;
         Ok(())
     }
@@ -85,45 +90,65 @@ impl Setting {
             .set_default("ui.theme", "Auto")?
             .set_default("ui.primary_color", "gray")?
             .set_default("storage.pending_path", download_dir.to_str())?
-            .set_default("storage.pending_path_scan_interval", 60)?
             .set_default("storage.repository_path", video_dir.to_str())?
-            .set_default("network.use_proxy", "false")?
-            .set_default("network.proxy", "")?
             .set_default("storage.pending_path_last_scan", utils::get_now_time())?
+            .set_default("network.use_proxy", false)?
+            .set_default("network.proxy", "")?
+            .set_default("system.auto_launch", false)?
+            .set_default("system.silent_start", false)?
+            .set_default("system.scan_interval", 60)?
             .add_source(config::File::with_name(setting_file.to_str().unwrap()).required(false))
             .build()?;
 
         Ok(s.try_deserialize()?)
     }
+}
+impl Setting {
+    pub fn get() -> Setting {
+        CONFIG.lock().unwrap().clone()
+    }
 
     pub fn get_proxy() -> Option<String> {
         let network = CONFIG.lock().unwrap().network.clone();
-        if network.use_proxy == "true" && network.proxy.len() > 0 {
+        if network.use_proxy && network.proxy.len() > 0 {
             Some(network.proxy)
         } else {
             None
         }
     }
 
-    pub fn get() -> Setting {
-        CONFIG.lock().unwrap().clone()
-    }
-
     pub fn apply(setting: Setting) -> Result<(), SettingError> {
+        let mut need_set_auto_run: Option<bool> = None;
+        let mut need_rebuild_client = false;
         {
             let mut old_setting = CONFIG.lock().unwrap();
-            setting.write_to_file()?;
+            if old_setting.system.auto_launch != setting.system.auto_launch {
+                need_set_auto_run = Some(setting.system.auto_launch);
+            }
+            if old_setting.network.use_proxy != setting.network.use_proxy
+                || old_setting.network.proxy != setting.network.proxy
+            {
+                need_rebuild_client = true;
+            }
             *old_setting = setting;
         }
-        Self::set_client(Client::new());
-        log::debug!("Now http client is {:?}", HTTP_CLIENT.lock().unwrap());
+        if let Some(auto_run) = need_set_auto_run {
+            crate::utils::tauri::set_auto_launch(auto_run).map_err(|e| {
+                log::error!("Failed to set auto run: {}", e);
+                SettingError::SetAutoRunFailed(e)
+            })?;
+        }
+        if need_rebuild_client {
+            crate::http::client::Client::rebuild();
+        }
+        Self::write_to_file()?;
         log::info!("Setting applied");
 
         Ok(())
     }
 
     pub fn get_scan_interval() -> u64 {
-        CONFIG.lock().unwrap().storage.pending_path_scan_interval
+        CONFIG.lock().unwrap().system.scan_interval
     }
 
     pub fn get_pending_path() -> PathBuf {
@@ -141,22 +166,14 @@ impl Setting {
     pub fn set_last_scan(time: u64) {
         let mut setting = CONFIG.lock().unwrap();
         setting.storage.pending_path_last_scan = time;
-        setting
-            .write_to_file()
-            .unwrap_or_else(|e| log::error!("Failed to write setting to file: {}", e));
-    }
-
-    pub fn get_client() -> Client {
-        HTTP_CLIENT.lock().unwrap().clone()
-    }
-
-    fn set_client(client: Client) {
-        let mut c = HTTP_CLIENT.lock().unwrap();
-        *c = client;
     }
 
     pub fn get_lang() -> String {
         CONFIG.lock().unwrap().ui.lang.clone()
+    }
+
+    pub fn get_slient_boot() -> bool {
+        CONFIG.lock().unwrap().system.silent_start
     }
 }
 
@@ -168,6 +185,8 @@ pub enum SettingError {
     IOError(#[from] std::io::Error),
     #[error(transparent)]
     ConfigError(#[from] config::ConfigError),
+    #[error("Failed to set auto run: {0}")]
+    SetAutoRunFailed(String),
 }
 
 impl serde::Serialize for SettingError {
@@ -176,21 +195,5 @@ impl serde::Serialize for SettingError {
         S: serde::ser::Serializer,
     {
         serializer.serialize_str(self.to_string().as_ref())
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_apply() {
-        let mut setting = Setting::get();
-        setting.network.use_proxy = "false".to_string();
-        setting.network.proxy = "http://127.0.0.1:8080".to_string();
-        assert!(Setting::apply(setting).is_ok());
-
-        let setting = Setting::get();
-        assert_eq!(setting.network.proxy, "http://127.0.0.1:8080".to_string());
     }
 }

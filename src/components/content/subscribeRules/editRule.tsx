@@ -1,139 +1,142 @@
-import { useStore } from '@/store'
+import { useStore } from "@/store";
 import {
-  Modal,
   Button,
-  Group,
-  TextInput,
-  Select,
   Divider,
+  Group,
+  Modal,
   NumberInput,
-  ActionIcon,
-} from '@mantine/core'
-import { showNotification } from '@mantine/notifications'
-import { IconCheck, IconSearch, IconServer, IconX } from '@tabler/icons-react'
-import { invoke } from '@tauri-apps/api'
-import { flowResult } from 'mobx'
-import { Dispatch, SetStateAction } from 'react'
-import { useTranslation } from 'react-i18next'
+  Select,
+  TextInput,
+} from "@mantine/core";
+import { notifications } from "@mantine/notifications";
+import { IconCheck, IconSearch, IconX } from "@tabler/icons-react";
+import { invoke } from "@tauri-apps/api";
+import { flowResult } from "mobx";
+import { Dispatch, SetStateAction } from "react";
+import { useTranslation } from "react-i18next";
 
 function EditRule({
   opened,
   setOpened,
   form,
 }: {
-  opened: boolean
-  setOpened: Dispatch<SetStateAction<boolean>>
-  form: any
+  opened: boolean;
+  setOpened: Dispatch<SetStateAction<boolean>>;
+  form: any;
 }) {
-  const { subscribeRulesStore } = useStore()
+  const { subscribeRulesStore } = useStore();
 
-  const { t } = useTranslation()
+  const { t } = useTranslation();
   return (
     <Modal
       size="lg"
       opened={opened}
       onClose={() => setOpened(false)}
-      title={t('subscribe_rules')}>
+      title={t("subscribe_rules")}
+    >
       <Divider mb="xs" size="xs" />
       <Group position="center" mb="xs" grow>
         <TextInput
           autoComplete="off"
-          label={t('subscribe_rules.ID')}
-          {...form.getInputProps('id')}
+          label={t("subscribe_rules.ID")}
+          {...form.getInputProps("id")}
           rightSection={
             <IconSearch
               size={14}
               onClick={() => {
-                let provider = form.values.provider
-                let id = form.values.id
-                if (provider === 'tmdb') {
-                  if (id !== '') {
-                    window.open('https://www.themoviedb.org/tv/' + id, '_blank')
+                let provider = form.values.provider;
+                let id = form.values.id;
+                if (provider === "tmdb") {
+                  if (id !== "") {
+                    window.open(
+                      "https://www.themoviedb.org/tv/" + id,
+                      "_blank"
+                    );
                   } else
                     window.open(
-                      'https://www.themoviedb.org/search/tv?query=' +
+                      "https://www.themoviedb.org/search/tv?query=" +
                         form.values.title,
-                      '_blank'
-                    )
+                      "_blank"
+                    );
                 }
               }}
             />
           }
         />
         <Select
-          label={t('subscribe_rules.provider')}
-          data={[{ value: 'tmdb', label: 'TMDB' }]}
-          {...form.getInputProps('provider')}
+          label={t("subscribe_rules.provider")}
+          data={[{ value: "tmdb", label: "TMDB" }]}
+          {...form.getInputProps("provider")}
         />
       </Group>
       <TextInput
         autoComplete="off"
         mb="xs"
-        label={t('subscribe_rules.tvshow_regex')}
-        {...form.getInputProps('tvshow_regex')}
+        label={t("subscribe_rules.tvshow_regex")}
+        {...form.getInputProps("tvshow_regex")}
       />
       <Group position="center" mb="xs" grow>
         <NumberInput
           autoComplete="off"
-          label={t('subscribe_rules.season')}
-          {...form.getInputProps('season')}
+          label={t("subscribe_rules.season")}
+          {...form.getInputProps("season")}
         />
         <TextInput
           autoComplete="off"
-          label={t('subscribe_rules.lang')}
+          label={t("subscribe_rules.lang")}
           placeholder="zh-CN, en-US, etc"
-          {...form.getInputProps('lang')}
+          {...form.getInputProps("lang")}
         />
       </Group>
       <Group position="center" mb="xs" grow>
         <TextInput
           autoComplete="off"
-          label={t('subscribe_rules.episode_regex')}
+          label={t("subscribe_rules.episode_regex")}
           placeholder="\\d+"
-          {...form.getInputProps('episode_regex')}
+          {...form.getInputProps("episode_regex")}
         />
         <NumberInput
           autoComplete="off"
-          label={t('subscribe_rules.episode_position')}
-          {...form.getInputProps('episode_position')}
+          label={t("subscribe_rules.episode_position")}
+          {...form.getInputProps("episode_position")}
         />
         <NumberInput
           autoComplete="off"
-          label={t('subscribe_rules.episode_offset')}
-          {...form.getInputProps('episode_offset')}
+          label={t("subscribe_rules.episode_offset")}
+          {...form.getInputProps("episode_offset")}
         />
       </Group>
       <TextInput
         autoComplete="off"
         mb="xs"
-        label={t('subscribe_rules.title')}
+        label={t("subscribe_rules.title")}
         onClick={() => {
           if (form.values.id && form.values.provider && form.values.lang) {
-            invoke('get_tvshow_title', {
+            invoke("get_tvshow_title", {
               id: form.values.id,
               provider: form.values.provider,
               lang: form.values.lang,
             })
               .then((res) => {
-                form.setFieldValue('title', res as string)
+                form.setFieldValue("title", res as string);
               })
               .catch((e) => {
-                showNotification({
-                  color: 'red',
+                notifications.show({
+                  color: "red",
                   icon: <IconX />,
                   autoClose: false,
-                  title: t('subscribe_rules.title_not_found'),
+                  title: t("subscribe_rules.title_not_found"),
                   message: e,
-                })
-              })
+                });
+              });
           }
         }}
-        {...form.getInputProps('title')}
+        {...form.getInputProps("title")}
       />
       <Divider mb="sm" size="xs" />
       <Group position="center" grow>
         <Button variant="outline" color="red" onClick={() => form.reset()}>
-          {t('UI.reset')}
+          {t("UI.reset")}
         </Button>
         <Button
           variant="outline"
@@ -142,30 +145,31 @@ function EditRule({
             if (!form.validate().hasErrors) {
               flowResult(subscribeRulesStore.addSubscribeRule(form.values))
                 .then(() => {
-                  form.reset()
-                  setOpened(false)
-                  showNotification({
+                  form.reset();
+                  setOpened(false);
+                  notifications.show({
                     icon: <IconCheck />,
-                    title: t('subscribe_rules.insert_success'),
-                    message: '✌️🙄✌️',
-                  })
+                    title: t("subscribe_rules.insert_success"),
+                    message: "✌️🙄✌️",
+                  });
                 })
                 .catch((e) => {
-                  showNotification({
-                    color: 'red',
+                  notifications.show({
+                    color: "red",
                     icon: <IconX />,
                     autoClose: false,
-                    title: t('subscribe_rules.insert_failed'),
+                    title: t("subscribe_rules.insert_failed"),
                     message: e,
-                  })
-                })
+                  });
+                });
             }
-          }}>
-          {t('UI.submit')}
+          }}
+        >
+          {t("UI.submit")}
         </Button>
       </Group>
     </Modal>
-  )
+  );
 }
 
-export default EditRule
+export default EditRule;

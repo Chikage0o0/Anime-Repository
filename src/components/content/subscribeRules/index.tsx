@@ -1,20 +1,20 @@
-import { useStore } from '@/store'
+import { useStore } from "@/store";
 import {
   ActionIcon,
-  ScrollArea,
-  Table,
-  useMantineTheme,
   Affix,
-  Text,
   Anchor,
-  Group,
-  TextInput,
   Button,
   Center,
+  Group,
   Popover,
-} from '@mantine/core'
-import { useForm } from '@mantine/form'
-import { showNotification } from '@mantine/notifications'
+  ScrollArea,
+  Table,
+  Text,
+  TextInput,
+  useMantineTheme,
+} from "@mantine/core";
+import { useForm } from "@mantine/form";
+import { notifications } from "@mantine/notifications";
 import {
   IconCheck,
   IconPencil,
@@ -22,113 +22,117 @@ import {
   IconSearch,
   IconTrash,
   IconX,
-} from '@tabler/icons-react'
-import { flowResult } from 'mobx'
-import { observer } from 'mobx-react-lite'
-import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import EditRule from './editRule'
+} from "@tabler/icons-react";
+import { flowResult } from "mobx";
+import { observer } from "mobx-react-lite";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import EditRule from "./editRule";
 
 function getLink(provider: string, id: string): string {
   switch (provider) {
-    case 'imdb': {
-      return `https://www.imdb.com/title/${id}`
+    case "imdb": {
+      return `https://www.imdb.com/title/${id}`;
     }
-    case 'tmdb': {
-      return `https://www.themoviedb.org/tv/${id}`
+    case "tmdb": {
+      return `https://www.themoviedb.org/tv/${id}`;
     }
     default: {
-      return ''
+      return "";
     }
   }
 }
 
 function SubscribeRules() {
-  const { t } = useTranslation()
-  const { settingStore, subscribeRulesStore: subscribeStore } = useStore()
-  const [opened, setOpened] = useState(false)
-  const [search, setSearch] = useState('')
+  const { t } = useTranslation();
+  const { settingStore, subscribeRulesStore: subscribeStore } = useStore();
+  const [opened, setOpened] = useState(false);
+  const [search, setSearch] = useState("");
   const form = useForm({
     initialValues: {
-      title: '',
-      id: '',
-      provider: 'tmdb',
-      tvshow_regex: '',
+      title: "",
+      id: "",
+      provider: "tmdb",
+      tvshow_regex: "",
       season: 1,
-      lang: settingStore.setting.ui.lang.replace('_', '-'),
-      episode_regex: '\\d+',
+      lang: settingStore.setting.ui.lang.replace("_", "-"),
+      episode_regex: "\\d+",
       episode_position: 1,
       episode_offset: 0,
     },
     validate: {
       title: (value) => {
         if (!value) {
-          return t('subscribe_rules.title_required')
+          return t("subscribe_rules.title_required");
         }
       },
       id: (value) => {
         if (!value) {
-          return t('subscribe_rules.id_required')
+          return t("subscribe_rules.id_required");
         }
       },
       tvshow_regex: (value) => {
         if (!value) {
-          return t('subscribe_rules.tvshow_regex_required')
+          return t("subscribe_rules.tvshow_regex_required");
         }
         try {
-          new RegExp(value)
+          new RegExp(value);
         } catch (e) {
-          return t('subscribe_rules.tvshow_regex_invalid')
+          return t("subscribe_rules.tvshow_regex_invalid");
         }
       },
       season: (value) => {
         if (value < 0) {
-          return t('subscribe_rules.season_invalid')
+          return t("subscribe_rules.season_invalid");
         }
       },
       lang: (value) => {
         if (!/^[a-z]{2}-[A-Z]{2}$/g.test(value)) {
-          return t('subscribe_rules.lang_invalid')
+          return t("subscribe_rules.lang_invalid");
         }
       },
       episode_regex: (value) => {
         if (!value) {
-          return t('subscribe_rules.episode_regex_required')
+          return t("subscribe_rules.episode_regex_required");
         }
         try {
-          new RegExp(value)
+          new RegExp(value);
         } catch (e) {
-          return t('subscribe_rules.episode_regex_invalid')
+          return t("subscribe_rules.episode_regex_invalid");
         }
       },
       episode_position: (value) => {
         if (value < 1) {
-          return t('subscribe_rules.episode_position_invalid')
+          return t("subscribe_rules.episode_position_invalid");
         }
       },
     },
-  })
+  });
 
-  const theme = useMantineTheme()
+  const theme = useMantineTheme();
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { value } = event.currentTarget
-    setSearch(value)
-  }
+    const { value } = event.currentTarget;
+    setSearch(value);
+  };
 
   const data = subscribeStore.data
     .filter((item) => {
-      if (search === '') {
-        return true
+      if (search === "") {
+        return true;
       }
-      return item.id.includes(search) || item.title.includes(search)
+      return item.id.includes(search) || item.title.includes(search);
     })
     .map((item) => (
       <tr key={item.provider + item.id}>
         <td>
           <Group>
-            <Text size="sm">{item.provider.toUpperCase() + ':'}</Text>
-            <Anchor href={getLink(item.provider, item.id)} target="_blank">
+            <Text size="sm">{item.provider.toUpperCase() + ":"}</Text>
+            <Anchor
+              onClick={() =>
+                window.open(getLink(item.provider, item.id), "_blank")
+              }
+            >
               {item.id}
             </Anchor>
           </Group>
@@ -148,9 +152,10 @@ function SubscribeRules() {
           <Group spacing={0} position="right">
             <ActionIcon
               onClick={() => {
-                form.setValues(item)
-                setOpened(true)
-              }}>
+                form.setValues(item);
+                setOpened(true);
+              }}
+            >
               <IconPencil size={16} stroke={1.5} />
             </ActionIcon>
             <Popover width={200} position="bottom" withArrow shadow="md">
@@ -160,7 +165,7 @@ function SubscribeRules() {
                 </ActionIcon>
               </Popover.Target>
               <Popover.Dropdown>
-                <Text size="sm">{t('UI.delete_confirm')}</Text>
+                <Text size="sm">{t("UI.delete_confirm")}</Text>
                 <Center>
                   <Button
                     variant="outline"
@@ -173,24 +178,25 @@ function SubscribeRules() {
                         subscribeStore.delSubscribeRule(item.id, item.provider)
                       )
                         .then(() => {
-                          showNotification({
+                          notifications.show({
                             icon: <IconCheck />,
-                            title: t('subscribe_rules.delete_success'),
-                            message: '✌️🙄✌️',
-                          })
+                            title: t("subscribe_rules.delete_success"),
+                            message: "✌️🙄✌️",
+                          });
                         })
                         .catch((e) => {
-                          showNotification({
-                            color: 'red',
+                          notifications.show({
+                            color: "red",
                             icon: <IconX />,
                             autoClose: false,
-                            title: t('subscribe_rules.delete_failed'),
+                            title: t("subscribe_rules.delete_failed"),
                             message: e,
-                          })
+                          });
                         })
                     }
-                    compact>
-                    {t('UI.true')}
+                    compact
+                  >
+                    {t("UI.true")}
                   </Button>
                 </Center>
               </Popover.Dropdown>
@@ -198,24 +204,24 @@ function SubscribeRules() {
           </Group>
         </td>
       </tr>
-    ))
+    ));
 
   return (
     <div style={{ padding: 30 }}>
       <TextInput
-        placeholder={t('subscribe_rules.search_by_id_or_title') as string}
+        placeholder={t("subscribe_rules.search_by_id_or_title") as string}
         mb="xs"
         onChange={handleSearchChange}
         icon={<IconSearch size={14} stroke={1.5} />}
       />
-      <ScrollArea style={{ height: 'calc(100vh - 110px)' }} type="scroll">
+      <ScrollArea style={{ height: "calc(100vh - 110px)" }} type="scroll">
         <Table verticalSpacing="sm" striped highlightOnHover>
           <thead>
             <tr>
-              <th>{t('subscribe_rules.ID')}</th>
-              <th>{t('subscribe_rules.title')}</th>
-              <th>{t('subscribe_rules.season')}</th>
-              <th>{t('subscribe_rules.lang')}</th>
+              <th>{t("subscribe_rules.ID")}</th>
+              <th>{t("subscribe_rules.title")}</th>
+              <th>{t("subscribe_rules.season")}</th>
+              <th>{t("subscribe_rules.lang")}</th>
               <th style={{ maxWidth: 100 }} />
             </tr>
           </thead>
@@ -224,19 +230,21 @@ function SubscribeRules() {
       </ScrollArea>
       <Affix
         hidden={settingStore.menu_open}
-        position={{ bottom: 20, right: 20 }}>
+        position={{ bottom: 20, right: 20 }}
+      >
         <ActionIcon
           size="xl"
           radius="xl"
           variant="filled"
           color={theme.primaryColor}
-          onClick={() => setOpened(true)}>
+          onClick={() => setOpened(true)}
+        >
           <IconPlus stroke={1.5} size={34} />
         </ActionIcon>
       </Affix>
       <EditRule opened={opened} setOpened={setOpened} form={form} />
     </div>
-  )
+  );
 }
 
-export default observer(SubscribeRules)
+export default observer(SubscribeRules);
