@@ -38,13 +38,13 @@ async function resolveUpdater () {
         pub_date: new Date().toISOString(),
         platforms: {
             win64: { signature: "", url: "" }, // compatible with older formats
-            linux: { signature: "", url: "" }, // compatible with older formats
-            darwin: { signature: "", url: "" }, // compatible with older formats
-            "darwin-aarch64": { signature: "", url: "" },
-            "darwin-intel": { signature: "", url: "" },
-            "linux-x86_64": { signature: "", url: "" },
+            // linux: { signature: "", url: "" }, // compatible with older formats
+            // darwin: { signature: "", url: "" }, // compatible with older formats
+            // "darwin-aarch64": { signature: "", url: "" },
+            // "darwin-intel": { signature: "", url: "" },
+            // "linux-x86_64": { signature: "", url: "" },
             "windows-x86_64": { signature: "", url: "" },
-            "windows-i686": { signature: "", url: "" }, // no supported
+            // "windows-i686": { signature: "", url: "" }, // no supported
         },
     }
 
@@ -63,39 +63,39 @@ async function resolveUpdater () {
             updateData.platforms["windows-x86_64"].signature = sig
         }
 
-        // darwin url (intel)
-        if (name.endsWith(".app.tar.gz") && !name.includes("aarch")) {
-            updateData.platforms.darwin.url = browser_download_url
-            updateData.platforms["darwin-intel"].url = browser_download_url
-        }
-        // darwin signature (intel)
-        if (name.endsWith(".app.tar.gz.sig") && !name.includes("aarch")) {
-            const sig = await getSignature(browser_download_url)
-            updateData.platforms.darwin.signature = sig
-            updateData.platforms["darwin-intel"].signature = sig
-        }
+        // // darwin url (intel)
+        // if (name.endsWith(".app.tar.gz") && !name.includes("aarch")) {
+        //     updateData.platforms.darwin.url = browser_download_url
+        //     updateData.platforms["darwin-intel"].url = browser_download_url
+        // }
+        // // darwin signature (intel)
+        // if (name.endsWith(".app.tar.gz.sig") && !name.includes("aarch")) {
+        //     const sig = await getSignature(browser_download_url)
+        //     updateData.platforms.darwin.signature = sig
+        //     updateData.platforms["darwin-intel"].signature = sig
+        // }
 
-        // darwin url (aarch)
-        if (name.endsWith("aarch64.app.tar.gz")) {
-            updateData.platforms["darwin-aarch64"].url = browser_download_url
-        }
-        // darwin signature (aarch)
-        if (name.endsWith("aarch64.app.tar.gz.sig")) {
-            const sig = await getSignature(browser_download_url)
-            updateData.platforms["darwin-aarch64"].signature = sig
-        }
+        // // darwin url (aarch)
+        // if (name.endsWith("aarch64.app.tar.gz")) {
+        //     updateData.platforms["darwin-aarch64"].url = browser_download_url
+        // }
+        // // darwin signature (aarch)
+        // if (name.endsWith("aarch64.app.tar.gz.sig")) {
+        //     const sig = await getSignature(browser_download_url)
+        //     updateData.platforms["darwin-aarch64"].signature = sig
+        // }
 
-        // linux url
-        if (name.endsWith(".AppImage.tar.gz")) {
-            updateData.platforms.linux.url = browser_download_url
-            updateData.platforms["linux-x86_64"].url = browser_download_url
-        }
-        // linux signature
-        if (name.endsWith(".AppImage.tar.gz.sig")) {
-            const sig = await getSignature(browser_download_url)
-            updateData.platforms.linux.signature = sig
-            updateData.platforms["linux-x86_64"].signature = sig
-        }
+        // // linux url
+        // if (name.endsWith(".AppImage.tar.gz")) {
+        //     updateData.platforms.linux.url = browser_download_url
+        //     updateData.platforms["linux-x86_64"].url = browser_download_url
+        // }
+        // // linux signature
+        // if (name.endsWith(".AppImage.tar.gz.sig")) {
+        //     const sig = await getSignature(browser_download_url)
+        //     updateData.platforms.linux.signature = sig
+        //     updateData.platforms["linux-x86_64"].signature = sig
+        // }
     })
 
     await Promise.allSettled(promises)
@@ -117,8 +117,7 @@ async function resolveUpdater () {
     Object.entries(updateDataNew.platforms).forEach(([key, value]) => {
         if (value.url) {
             updateDataNew.platforms[key].url = value.url.replace(
-                "https://github.com/",
-                "https://hub.fastgit.xyz/"
+                "https://github.com/"
             )
         } else {
             console.log(`[Error]: updateDataNew.platforms.${key} is null`)
