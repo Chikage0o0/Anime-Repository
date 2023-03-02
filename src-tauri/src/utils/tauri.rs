@@ -102,8 +102,7 @@ pub fn tray_event(app: &AppHandle, event: SystemTrayEvent) {
         }
         SystemTrayEvent::MenuItemClick { id, .. } => match id.as_str() {
             "quit" => {
-                handler::stop();
-                app.exit(0);
+                handler::stop(|| exit_app());
             }
             "open" => {
                 if let Some(window) = app.get_window("main") {
@@ -140,4 +139,8 @@ pub fn send_event(window: &str, event: &str, data: impl serde::Serialize + Clone
             let _ = window.emit(event, data);
         }
     }
+}
+
+pub fn exit_app() {
+    crate::APP_HANDLE.get().unwrap().exit(0);
 }

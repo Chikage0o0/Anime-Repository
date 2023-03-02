@@ -6,9 +6,8 @@ mod pending_videos_list;
 mod scan;
 mod unrecognized_videos_list;
 
-#[derive(Debug)]
 pub enum Command {
-    Stop,
+    Stop(Box<dyn FnOnce() -> () + Send>),
     ScanPendingList,
     ScanUnrecognizedList,
     ScanPendingVideosFolder,
@@ -20,8 +19,9 @@ static HANDLER_TX: Lazy<std::sync::mpsc::SyncSender<Command>> = Lazy::new(|| {
     thread::spawn(move || {
         while let Ok(cmd) = rx.recv() {
             match cmd {
-                Command::Stop => {
+                Command::Stop(stop) => {
                     log::info!("Stop background thread");
+                    stop();
                     break;
                 }
                 Command::ScanPendingList => {
@@ -53,8 +53,8 @@ pub fn run() {
     });
 }
 
-pub fn stop() {
-    HANDLER_TX.send(Command::Stop).unwrap();
+pub fn stop(stop: impl FnOnce() -> () + Send + 'static) {
+    HANDLER_TX.send(Command::Stop(Box::new(stop))).unwrap();
 }
 
 pub fn get_handler_tx() -> std::sync::mpsc::SyncSender<Command> {

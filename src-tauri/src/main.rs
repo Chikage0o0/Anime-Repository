@@ -42,7 +42,7 @@ fn main() {
         .expect("error while running tauri application");
     APP_HANDLE.set(app.handle()).unwrap();
 
-    app.run(move |app_handle, event| match event {
+    app.run(move |_app_handle, event| match event {
         tauri::RunEvent::Ready { .. } => {
             handler::run();
         }
@@ -50,8 +50,7 @@ fn main() {
             api.prevent_exit();
         }
         tauri::RunEvent::Exit {} => {
-            handler::stop();
-            app_handle.exit(0);
+            handler::stop(|| utils::tauri::exit_app());
         }
         _ => {}
     });
