@@ -148,8 +148,8 @@ export function Menu() {
         <a
           className={classes.link}
           onClick={() => {
+            appWindow.hide();
             appWindow.close();
-            // appWindow.hide()
           }}
         >
           <IconMinimize className={classes.linkIcon} stroke={1.5} />
