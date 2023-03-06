@@ -175,6 +175,14 @@ impl Setting {
         }
     }
 
+    pub fn get_default_lang() -> String {
+        CONFIG.lock().unwrap().scraper.default_lang.clone()
+    }
+
+    pub fn get_default_provider() -> ProviderKnown {
+        CONFIG.lock().unwrap().scraper.default_provider.clone()
+    }
+
     pub fn get_last_scan() -> u64 {
         CONFIG.lock().unwrap().storage.pending_path_last_scan
     }

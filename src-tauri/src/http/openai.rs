@@ -40,13 +40,13 @@ impl Default for OPENAIClient {
 }
 
 impl OPENAIClient {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             client: Client::get(),
         }
     }
 
-    pub async fn get_completion(&self, filename: &str) -> reqwest::Result<(String, StatusCode)> {
+    pub async fn match_file(&self, filename: &str) -> reqwest::Result<(String, StatusCode)> {
         let url = "https://api.openai.com/v1/chat/completions".to_string();
 
         let body = json!({
@@ -59,30 +59,5 @@ impl OPENAIClient {
           "temperature": 0.1
         });
         self.post_string(url, get_header(), body.to_string()).await
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use tauri::async_runtime::block_on;
-
-    use super::*;
-    #[test]
-    fn test_get_completion() {
-        let client = OPENAIClient::new();
-        let prompt = "[Ohys-Raws] Ooyuki Umi no Kaina - 08 (AT-X 1280x720 x264 AAC).mp4";
-        let result = block_on(client.get_completion(prompt));
-        assert!(result.is_ok());
-        let (body, status) = result.unwrap();
-        dbg!(status);
-        let response = serde_json::from_str::<serde_json::Value>(&body).unwrap();
-        let s = response.get("choices").unwrap().as_array().unwrap()[0]
-            .get("message")
-            .unwrap()
-            .get("content")
-            .unwrap()
-            .as_str()
-            .unwrap();
-        dbg!(serde_json::from_str::<serde_json::Value>(s).unwrap());
     }
 }

@@ -1,6 +1,8 @@
 use std::time::{SystemTime, UNIX_EPOCH};
 pub mod file;
 pub mod matcher;
+pub mod openai;
+pub mod search;
 pub mod tauri;
 
 pub fn get_now_time() -> u64 {

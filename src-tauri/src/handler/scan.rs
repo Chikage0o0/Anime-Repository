@@ -41,6 +41,11 @@ pub fn process() {
             }
             // 未匹配到的视频文件
             None => {
+                let result=  block_on(utils::openai::process(&path));
+                if result.is_ok() {
+                    log::info!("Use OpenAI match the file: {:?}", path);
+                    return;
+                }
                 log::info!("Found Unrecognized video: {:?}", path);
                 if let Err(e) = block_on(crate::service::unrecognized_videos::insert(
                     path,
