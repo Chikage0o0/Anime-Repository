@@ -88,7 +88,7 @@ impl From<ProviderKnown> for Provider {
     }
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
 #[serde(untagged)]
 pub enum Provider {
     Known(ProviderKnown),
@@ -107,9 +107,9 @@ pub trait Nfo {
     fn new(id: &str, provider: Provider) -> Self;
 
     /// 根据NFO获取指定提供商的ID
-    fn get_id(&self, provider: Provider) -> Option<&String>;
+    fn get_id(&self, provider: Provider) -> Option<String>;
     /// 根据NFO获取默认的ID
-    fn get_default_id(&self) -> Option<(&String, &Provider)>;
+    fn get_default_id(&self) -> Option<(String, Provider)>;
     fn read_from_file() -> Self;
 }
 

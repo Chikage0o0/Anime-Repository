@@ -57,20 +57,20 @@ impl Nfo for Episode {
         }
     }
 
-    fn get_id(&self, provider: Provider) -> Option<&String> {
+    fn get_id(&self, provider: Provider) -> Option<String> {
         self.unique_id.iter().find_map(|i| {
             if i.r#type == provider {
-                Some(&i.value)
+                Some(i.value.clone())
             } else {
                 None
             }
         })
     }
 
-    fn get_default_id(&self) -> Option<(&String, &Provider)> {
+    fn get_default_id(&self) -> Option<(String, Provider)> {
         self.unique_id.iter().find_map(|i| {
             if i.default == true {
-                Some((&i.value, &i.r#type))
+                Some((i.value.clone(), i.r#type.clone()))
             } else {
                 None
             }
@@ -88,6 +88,7 @@ impl Episode {
         lang: &str,
         season: u64,
         episode: u64,
+        fallback_lang: &str,
     ) -> Result<(), NfoGetError> {
         use crate::http::tmdb::*;
         if let Some((id, provider)) = self.get_default_id() {
@@ -96,16 +97,45 @@ impl Episode {
                     log::info!("Get {:?} episode {}x{} from TMDB", id, season, episode);
                     let json = get_json(
                         TMDBClient::default()
-                            .get_tv_episode_info(id, season, episode, lang)
+                            .get_tv_episode_info(&id, season, episode, lang)
                             .await?,
                     )?;
                     let data: Value = serde_json::from_str(&json)?;
+
+                    // Fall back to origin_language if no data is found
+                    let mut data_fallback: Value = Value::Null;
+
+                    if fallback_lang != lang {
+                        data_fallback = serde_json::from_str(&get_json(
+                            TMDBClient::default()
+                                .get_tv_episode_info(&id.clone(), season, episode, &fallback_lang)
+                                .await?,
+                        )?)?;
+                    }
 
                     self.display_episode = Some(episode);
                     self.display_season = Some(season);
 
                     if let Some(name) = data.get("name").and_then(|f| f.as_str()) {
                         self.title = name.to_string();
+                    }
+
+                    // Fall back to origin_language if no data is found
+                    if let Some(overview) = data.get("overview").and_then(|f| f.as_str()) {
+                        if overview != "" {
+                            self.plot = Some(overview.to_string());
+                        } else {
+                            if let Some(overview) =
+                                data_fallback.get("overview").and_then(|f| f.as_str())
+                            {
+                                self.plot = Some(overview.to_string());
+                                self.title = data_fallback
+                                    .get("name")
+                                    .and_then(|f| f.as_str())
+                                    .unwrap_or("Unknown")
+                                    .to_string();
+                            }
+                        }
                     }
 
                     if let Some(vote_average) = data.get("vote_average").and_then(|f| f.as_f64()) {
@@ -140,10 +170,6 @@ impl Episode {
                                 })
                             }
                         }
-                    }
-
-                    if let Some(overview) = data.get("overview").and_then(|f| f.as_str()) {
-                        self.plot = Some(overview.to_string());
                     }
 
                     if let Some(still_path) = data.get("still_path").and_then(|f| f.as_str()) {
@@ -366,14 +392,14 @@ mod tests {
     #[test]
     fn test_get_episode_info() {
         let data: Episode = quick_xml::de::from_str(NFO).unwrap();
-        assert!(data.get_id(Provider::Known(ProviderKnown::TMDB)) == Some(&"1168864".to_string()));
+        assert!(data.get_id(Provider::Known(ProviderKnown::TMDB)) == Some("1168864".to_string()));
     }
 
     #[test]
     fn test_update() {
         use tauri::async_runtime::block_on;
         let mut data = Episode::new("63322", Provider::Known(ProviderKnown::TMDB));
-        block_on(data.update("zh-CN", 1, 1)).unwrap();
+        block_on(data.update("zh-CN", 1, 1, "jp")).unwrap();
         assert!(data.aired == Some("2012-01-06".to_string()));
     }
 }

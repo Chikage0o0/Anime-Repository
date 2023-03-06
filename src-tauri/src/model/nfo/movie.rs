@@ -77,20 +77,20 @@ impl Nfo for Movie {
         }
     }
 
-    fn get_id(&self, provider: Provider) -> Option<&String> {
+    fn get_id(&self, provider: Provider) -> Option<String> {
         self.unique_id.iter().find_map(|i| {
             if i.r#type == provider {
-                Some(&i.value)
+                Some(i.value.clone())
             } else {
                 None
             }
         })
     }
 
-    fn get_default_id(&self) -> Option<(&String, &Provider)> {
+    fn get_default_id(&self) -> Option<(String, Provider)> {
         self.unique_id.iter().find_map(|i| {
             if i.default == true {
-                Some((&i.value, &i.r#type))
+                Some((i.value.clone(), i.r#type.clone()))
             } else {
                 None
             }
@@ -108,8 +108,22 @@ impl Movie {
             match provider {
                 Provider::Known(ProviderKnown::TMDB) => {
                     log::info!("Get movie with id: {} from TMDB", id);
-                    let json = get_json(TMDBClient::default().get_movie_info(id, lang).await?)?;
+                    let json = get_json(TMDBClient::default().get_movie_info(&id, lang).await?)?;
                     let data: Value = serde_json::from_str(&json)?;
+
+                    // Fall back to origin_language if no data is found
+                    let mut data_fallback: Value = Value::Null;
+                    if let Some(fall_back_lang) =
+                        data.get("original_language").and_then(|f| f.as_str())
+                    {
+                        if fall_back_lang != lang {
+                            data_fallback = serde_json::from_str(&get_json(
+                                TMDBClient::default()
+                                    .get_tvshow_info(&id.clone(), &fall_back_lang)
+                                    .await?,
+                            )?)?;
+                        }
+                    }
 
                     if let Some(title) = data.get("title").and_then(|f| f.as_str()) {
                         self.title = title.to_string();
@@ -167,8 +181,17 @@ impl Movie {
                         }
                     }
 
+                    // Fall back to origin_language if no data is found
                     if let Some(overview) = data.get("overview").and_then(|f| f.as_str()) {
-                        self.plot = Some(overview.to_string());
+                        if overview != "" {
+                            self.plot = Some(overview.to_string());
+                        } else {
+                            if let Some(overview) =
+                                data_fallback.get("overview").and_then(|f| f.as_str())
+                            {
+                                self.plot = Some(overview.to_string());
+                            }
+                        }
                     }
 
                     if let Some(poster_path) = data.get("poster_path").and_then(|f| f.as_str()) {
@@ -237,23 +260,31 @@ impl Movie {
                         }
                     }
 
-                    if let Some(images) = data.get("images") {
-                        if let Some(logos) = images.get("logos") {
-                            if let Some(logo) = logos
-                                .as_array()
-                                .and_then(|f| f.first())
-                                .and_then(|f| f.get("file_path"))
-                                .and_then(|f| f.as_str())
-                            {
-                                self.update_thumb(
-                                    get_img_url(logo),
-                                    Some("clearlogo".to_string()),
-                                    None,
-                                    None,
-                                    None,
-                                );
-                            }
-                        }
+                    let mut set_logo = |logo_data: &Value| {
+                        if let Some(logo) = logo_data.get("file_path").and_then(|f| f.as_str()) {
+                            self.update_thumb(
+                                get_img_url(logo),
+                                Some("clearlogo".to_string()),
+                                None,
+                                None,
+                                None,
+                            );
+                        };
+                    };
+                    if let Some(logos) = data
+                        .get("images")
+                        .and_then(|f| f.get("logos"))
+                        .and_then(|f| f.as_array())
+                        .and_then(|f| f.first())
+                    {
+                        set_logo(logos);
+                    } else if let Some(logos) = data_fallback
+                        .get("images")
+                        .and_then(|f| f.get("logos"))
+                        .and_then(|f| f.as_array())
+                        .and_then(|f| f.first())
+                    {
+                        set_logo(logos);
                     }
 
                     if let Some(belongs_to_collection) = data
@@ -309,7 +340,7 @@ impl Movie {
         if let Some(clearlogo) = self
             .thumb
             .iter()
-            .find(|thumb| thumb.r#type == Some("clearlogo".to_string()))
+            .find(|thumb| thumb.aspect == Some("clearlogo".to_string()))
         {
             thumbs.insert(path.join("clearlogo.png"), clearlogo.value.clone());
         }
@@ -508,7 +539,7 @@ mod tests {
     #[test]
     fn test_get_movie_info() {
         let data: Movie = quick_xml::de::from_str(NFO).unwrap();
-        assert!(data.get_id(Provider::Known(ProviderKnown::TMDB)) == Some(&"532321".to_string()));
+        assert!(data.get_id(Provider::Known(ProviderKnown::TMDB)) == Some("532321".to_string()));
     }
 
     #[test]

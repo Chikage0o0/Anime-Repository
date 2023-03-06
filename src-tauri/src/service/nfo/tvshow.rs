@@ -45,7 +45,10 @@ pub async fn process<P: AsRef<Path>>(
 
     // 从网络Episode获取信息
     let mut episode_nfo = Episode::new(&id, provider.clone().into());
-    if let Err(e) = episode_nfo.update(lang, season, episode).await {
+    if let Err(e) = episode_nfo
+        .update(lang, season, episode, &tvshow_nfo.get_fallback_lang())
+        .await
+    {
         log::error!(
             "Get {} S{:02}E{:02} nfo error: {:?}",
             tvshow_title,
