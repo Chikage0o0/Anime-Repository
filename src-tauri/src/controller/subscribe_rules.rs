@@ -45,18 +45,6 @@ pub fn delete_subscribe_rule(id: String, provider: ProviderKnown) -> Result<(), 
     subscribe::remove(Key { id, provider }).map_err(|e| e.to_string())
 }
 
-// USE TMDB API TO GET TVSHOW TITLE
-#[tauri::command]
-pub async fn get_tvshow_title(
-    id: &str,
-    provider: ProviderKnown,
-    lang: &str,
-) -> Result<String, String> {
-    subscribe::get_tvshow_title(id, provider, lang)
-        .await
-        .map_err(|e| e.to_string())
-}
-
 #[tauri::command]
 pub fn get_subscribe_rule(id: String, provider: ProviderKnown) -> Result<SubscribeRule, String> {
     let key = Key { id, provider };

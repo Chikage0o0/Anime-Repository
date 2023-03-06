@@ -29,7 +29,7 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             get_setting,
             save_setting,
-            get_tvshow_title,
+            get_title,
             get_subscribe_rule,
             get_subscribe_rules,
             delete_subscribe_rule,

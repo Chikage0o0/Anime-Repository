@@ -6,6 +6,7 @@ import {
   Group,
   Modal,
   NumberInput,
+  Popover,
   SegmentedControl,
   Select,
   Text,
@@ -22,7 +23,7 @@ import {
 } from "@tabler/icons-react";
 import { invoke } from "@tauri-apps/api";
 import { flowResult } from "mobx";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 function EditVideo({
@@ -42,6 +43,7 @@ function EditVideo({
       size="lg"
       opened={opened}
       onClose={() => setOpened(false)}
+      centered
       title={t("unrecognized_videos.video_info")}
     >
       <Text size="sm" mb="sm">
@@ -123,93 +125,141 @@ function EditVideo({
           {...form.getInputProps("lang")}
         />
       </Group>
-      <Group
-        position="center"
-        mb="sm"
-        grow
-        hidden={form.values["type"] === "tvshow" ? false : true}
-      >
-        <NumberInput
-          autoComplete="off"
-          label={t("unrecognized_videos.video_info.season")}
-          {...form.getInputProps("season")}
-        />
-        <NumberInput
-          autoComplete="off"
-          label={t("unrecognized_videos.video_info.episode")}
-          {...form.getInputProps("episode")}
-        />
-      </Group>
-      <Group
-        position="center"
-        mb="sm"
-        grow
-        hidden={form.values["type"] === "tvshow" ? false : true}
-      >
-        <TextInput
-          autoComplete="off"
-          mb="xs"
-          label={t("unrecognized_videos.video_info.title")}
-          onClick={() => {
-            if (form.values.id && form.values.provider && form.values.lang) {
-              invoke("get_tvshow_title", {
-                id: form.values.id,
-                provider: form.values.provider,
-                lang: form.values.lang,
-              })
-                .then((res) => {
-                  form.setFieldValue("title", res as string);
-                })
-                .catch((e) => {
-                  notifications.show({
-                    color: "red",
-                    icon: <IconX />,
-                    autoClose: false,
-                    title: t("unrecognized_videos.video_info.title_not_found"),
-                    message: e,
-                  });
-                });
-            }
-          }}
-          {...form.getInputProps("title")}
-        />
-      </Group>
+      <div hidden={!(form.values["type"] === "tvshow")}>
+        <Group position="center" mb="sm" grow>
+          <NumberInput
+            autoComplete="off"
+            label={t("unrecognized_videos.video_info.season")}
+            {...form.getInputProps("season")}
+          />
+          <NumberInput
+            autoComplete="off"
+            label={t("unrecognized_videos.video_info.episode")}
+            {...form.getInputProps("episode")}
+          />
+        </Group>
+      </div>
       <Group position="center" mt="xl" grow>
         <Button variant="outline" color="red" onClick={() => form.reset()}>
           {t("UI.reset")}
         </Button>
-        <Button
-          variant="outline"
-          color="blue"
-          onClick={() => {
-            if (!form.validate().hasErrors) {
-              form.reset();
-              setOpened(false);
-              flowResult(unrecognizedVideosStore.submit(form.values))
-                .then(() => {
-                  notifications.show({
-                    icon: <IconCheck />,
-                    title: t("unrecognized_videos.video_info.submit_success"),
-                    message: "✌️🙄✌️",
-                  });
-                })
-                .catch((e) => {
-                  notifications.show({
-                    color: "red",
-                    icon: <IconX />,
-                    autoClose: false,
-                    title: t("unrecognized_videos.video_info.submit_failed"),
-                    message: e,
-                  });
-                });
-            }
-          }}
-        >
-          {t("UI.submit")}
-        </Button>
+        <Submit form={form} setOpened={setOpened} />
       </Group>
     </Modal>
   );
 }
 
 export default EditVideo;
+
+function Submit({
+  form,
+  setOpened,
+}: {
+  form: UseFormReturnType<any, any>;
+  setOpened: Dispatch<SetStateAction<boolean>>;
+}) {
+  const { unrecognizedVideosStore } = useStore();
+  const { t } = useTranslation();
+  const [confirmOpened, setConfirmOpened] = useState(false);
+  const getTitle = async (id: string, provider: string, lang: string) => {
+    if (id && provider && lang) {
+      let result = await invoke("get_title", {
+        id: id,
+        provider: provider,
+        lang: lang,
+        type: form.values.type,
+      });
+      if (result) {
+        return result;
+      } else {
+        throw new Error("Failed to get Info");
+      }
+    }
+  };
+
+  return (
+    <Popover position="bottom" withArrow shadow="md" opened={confirmOpened}>
+      <Popover.Target>
+        <Button
+          variant="outline"
+          color="blue"
+          onClick={async () => {
+            if (!form.validate().hasErrors) {
+              try {
+                let title = await getTitle(
+                  form.values.id,
+                  form.values.provider,
+                  form.values.lang
+                );
+                if (title) {
+                  form.setFieldValue("title", title);
+                  setConfirmOpened(true);
+                }
+              } catch (error: any) {
+                notifications.show({
+                  color: "red",
+                  icon: <IconX />,
+                  autoClose: false,
+                  title: t("UI.get_info_failed"),
+                  message: error,
+                });
+              }
+            }
+          }}
+        >
+          {t("UI.submit")}
+        </Button>
+      </Popover.Target>
+      <Popover.Dropdown>
+        <Text size="md">{form.values.title}</Text>
+        <Center>
+          <Group>
+            <Button
+              variant="outline"
+              radius="xs"
+              size="sm"
+              mt="xs"
+              onClick={() => {
+                setConfirmOpened(false);
+              }}
+              compact
+            >
+              {t("UI.false")}
+            </Button>
+            <Button
+              variant="outline"
+              radius="xs"
+              size="sm"
+              mt="xs"
+              color="blue"
+              compact
+              onClick={() => {
+                form.reset();
+                setOpened(false);
+                flowResult(unrecognizedVideosStore.submit(form.values))
+                  .then(() => {
+                    notifications.show({
+                      icon: <IconCheck />,
+                      title: t("unrecognized_videos.video_info.submit_success"),
+                      message: "✌️🙄✌️",
+                    });
+                  })
+                  .catch((e) => {
+                    notifications.show({
+                      color: "red",
+                      icon: <IconX />,
+                      autoClose: false,
+                      title: t("unrecognized_videos.video_info.submit_failed"),
+                      message: e,
+                    });
+                  });
+              }}
+            >
+              {t("UI.true")}
+            </Button>
+          </Group>
+        </Center>
+      </Popover.Dropdown>
+    </Popover>
+  );
+}

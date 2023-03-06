@@ -52,20 +52,15 @@ function SubscribeRules() {
     initialValues: {
       title: "",
       id: "",
-      provider: "tmdb",
+      provider: settingStore.setting.scraper.default_provider,
       tvshow_regex: "",
       season: 1,
-      lang: settingStore.setting.ui.lang.replace("_", "-"),
+      lang: settingStore.setting.scraper.default_lang,
       episode_regex: "\\d+",
       episode_position: 1,
       episode_offset: 0,
     },
     validate: {
-      title: (value) => {
-        if (!value) {
-          return t("subscribe_rules.title_required");
-        }
-      },
       id: (value) => {
         if (!value) {
           return t("subscribe_rules.id_required");

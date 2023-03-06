@@ -1,18 +1,22 @@
 import { useStore } from "@/store";
 import {
   Button,
+  Center,
   Divider,
   Group,
   Modal,
   NumberInput,
+  Popover,
   Select,
+  Text,
   TextInput,
 } from "@mantine/core";
+import { UseFormReturnType } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { IconCheck, IconSearch, IconX } from "@tabler/icons-react";
 import { invoke } from "@tauri-apps/api";
 import { flowResult } from "mobx";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 function EditRule({
@@ -22,16 +26,16 @@ function EditRule({
 }: {
   opened: boolean;
   setOpened: Dispatch<SetStateAction<boolean>>;
-  form: any;
+  form: UseFormReturnType<any, any>;
 }) {
-  const { subscribeRulesStore } = useStore();
-
   const { t } = useTranslation();
+
   return (
     <Modal
       size="lg"
       opened={opened}
       onClose={() => setOpened(false)}
+      centered
       title={t("subscribe_rules")}
     >
       <Divider mb="xs" size="xs" />
@@ -106,70 +110,128 @@ function EditRule({
           {...form.getInputProps("episode_offset")}
         />
       </Group>
-      <TextInput
-        autoComplete="off"
-        mb="xs"
-        label={t("subscribe_rules.title")}
-        onClick={() => {
-          if (form.values.id && form.values.provider && form.values.lang) {
-            invoke("get_tvshow_title", {
-              id: form.values.id,
-              provider: form.values.provider,
-              lang: form.values.lang,
-            })
-              .then((res) => {
-                form.setFieldValue("title", res as string);
-              })
-              .catch((e) => {
-                notifications.show({
-                  color: "red",
-                  icon: <IconX />,
-                  autoClose: false,
-                  title: t("subscribe_rules.title_not_found"),
-                  message: e,
-                });
-              });
-          }
-        }}
-        {...form.getInputProps("title")}
-      />
       <Divider mb="sm" size="xs" />
       <Group position="center" grow>
         <Button variant="outline" color="red" onClick={() => form.reset()}>
           {t("UI.reset")}
         </Button>
-        <Button
-          variant="outline"
-          color="blue"
-          onClick={() => {
-            if (!form.validate().hasErrors) {
-              flowResult(subscribeRulesStore.addSubscribeRule(form.values))
-                .then(() => {
-                  form.reset();
-                  setOpened(false);
-                  notifications.show({
-                    icon: <IconCheck />,
-                    title: t("subscribe_rules.insert_success"),
-                    message: "✌️🙄✌️",
-                  });
-                })
-                .catch((e) => {
-                  notifications.show({
-                    color: "red",
-                    icon: <IconX />,
-                    autoClose: false,
-                    title: t("subscribe_rules.insert_failed"),
-                    message: e,
-                  });
-                });
-            }
-          }}
-        >
-          {t("UI.submit")}
-        </Button>
+        <Submit form={form} setOpened={setOpened} />
       </Group>
     </Modal>
   );
 }
 
 export default EditRule;
+
+function Submit({
+  form,
+  setOpened,
+}: {
+  form: UseFormReturnType<any, any>;
+  setOpened: Dispatch<SetStateAction<boolean>>;
+}) {
+  const { subscribeRulesStore } = useStore();
+  const { t } = useTranslation();
+  const [confirmOpened, setConfirmOpened] = useState(false);
+  const getTitle = async (id: string, provider: string, lang: string) => {
+    if (id && provider && lang) {
+      let result = await invoke("get_title", {
+        id: id,
+        provider: provider,
+        lang: lang,
+        type: "tvshow",
+      });
+      if (result) {
+        return result;
+      } else {
+        throw new Error("Failed to get Info");
+      }
+    }
+  };
+
+  return (
+    <Popover position="bottom" withArrow shadow="md" opened={confirmOpened}>
+      <Popover.Target>
+        <Button
+          variant="outline"
+          color="blue"
+          onClick={async () => {
+            if (!form.validate().hasErrors) {
+              try {
+                let title = await getTitle(
+                  form.values.id,
+                  form.values.provider,
+                  form.values.lang
+                );
+                if (title) {
+                  form.setFieldValue("title", title);
+                  setConfirmOpened(true);
+                }
+              } catch (error: any) {
+                notifications.show({
+                  color: "red",
+                  icon: <IconX />,
+                  autoClose: false,
+                  title: t("UI.get_info_failed"),
+                  message: error,
+                });
+              }
+            }
+          }}
+        >
+          {t("UI.submit")}
+        </Button>
+      </Popover.Target>
+      <Popover.Dropdown>
+        <Text size="md">{form.values.title}</Text>
+        <Center>
+          <Group>
+            <Button
+              variant="outline"
+              radius="xs"
+              size="sm"
+              mt="xs"
+              onClick={() => {
+                setConfirmOpened(false);
+              }}
+              compact
+            >
+              {t("UI.false")}
+            </Button>
+            <Button
+              variant="outline"
+              radius="xs"
+              size="sm"
+              mt="xs"
+              color="blue"
+              compact
+              onClick={() => {
+                flowResult(subscribeRulesStore.addSubscribeRule(form.values))
+                  .then(() => {
+                    form.reset();
+                    setOpened(false);
+                    notifications.show({
+                      icon: <IconCheck />,
+                      title: t("subscribe_rules.insert_success"),
+                      message: "✌️🙄✌️",
+                    });
+                  })
+                  .catch((e) => {
+                    notifications.show({
+                      color: "red",
+                      icon: <IconX />,
+                      autoClose: false,
+                      title: t("subscribe_rules.insert_failed"),
+                      message: e,
+                    });
+                  });
+              }}
+            >
+              {t("UI.true")}
+            </Button>
+          </Group>
+        </Center>
+      </Popover.Dropdown>
+    </Popover>
+  );
+}

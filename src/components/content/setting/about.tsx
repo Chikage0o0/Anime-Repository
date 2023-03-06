@@ -1,5 +1,21 @@
-import { createStyles, Avatar, Text, Group, Anchor } from "@mantine/core";
-import { IconHomeLink, IconSignRight } from "@tabler/icons-react";
+import {
+  createStyles,
+  Avatar,
+  Text,
+  Group,
+  Anchor,
+  Divider,
+  Flex,
+  Stack,
+} from "@mantine/core";
+import {
+  IconBrandGithub,
+  IconHomeLink,
+  IconSignRight,
+} from "@tabler/icons-react";
+import { getVersion } from "@tauri-apps/api/app";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const useStyles = createStyles((theme) => ({
   icon: {
@@ -23,7 +39,7 @@ interface DeveloperProps {
   sign: string;
 }
 
-export const developer_list: DeveloperProps[] = [
+const developer_list: DeveloperProps[] = [
   {
     avatar: "https://avatars.githubusercontent.com/u/89348590",
     name: "Chikage",
@@ -34,7 +50,81 @@ export const developer_list: DeveloperProps[] = [
   },
 ];
 
-export function Developer({
+export default function About({ classes }: { classes: any }) {
+  const [appVersion, setAppVersion] = useState("0.0.0");
+  const developer = developer_list.map((item) => {
+    return <Developer key={item.name} {...item} />;
+  });
+  const { t } = useTranslation();
+
+  useEffect(() => {
+    getVersion().then((version) => {
+      setAppVersion(version);
+    });
+  }, []);
+  return (
+    <>
+      <Divider
+        my="md"
+        label={t("setting.about")}
+        labelProps={{
+          component: "p",
+          style: { fontSize: 16, fontWeight: 500 },
+        }}
+        labelPosition="center"
+      />
+      <Flex
+        className={classes.input}
+        gap="md"
+        justify="flex-start"
+        align="flex-start"
+        direction="row"
+        wrap="wrap"
+      >
+        {developer}
+      </Flex>
+      <Stack align="center" spacing={0}>
+        <Group position="center">
+          <Text
+            size="sm"
+            sx={(theme) => ({
+              color: theme.colors.gray[6],
+            })}
+          >
+            Copyright © Anime Repository Develop Team 2023
+          </Text>
+          <IconBrandGithub
+            onClick={() => {
+              window.open(
+                "https://github.com/Chikage0o0/Anime-Repository",
+                "_blank"
+              );
+            }}
+            size={16}
+          />
+        </Group>
+        <Text
+          size="sm"
+          sx={(theme) => ({
+            color: theme.colors.gray[6],
+          })}
+        >
+          Anime Repository is licensed under the GNU General Public License v3.0
+        </Text>
+        <Text
+          size="sm"
+          sx={(theme) => ({
+            color: theme.colors.gray[6],
+          })}
+        >
+          Version: {appVersion}
+        </Text>
+      </Stack>
+    </>
+  );
+}
+
+function Developer({
   avatar,
   name,
   title,
@@ -44,39 +134,37 @@ export function Developer({
 }: DeveloperProps) {
   const { classes } = useStyles();
   return (
-    <div>
-      <Group noWrap>
-        <Avatar src={avatar} size={94} radius="md" />
-        <div>
-          <Text fz="xs" tt="uppercase" fw={700} c="dimmed">
-            {title}
+    <Group noWrap>
+      <Avatar src={avatar} size={94} radius="md" />
+      <div>
+        <Text fz="xs" tt="uppercase" fw={700} c="dimmed">
+          {title}
+        </Text>
+
+        <Text fz="lg" fw={500} className={classes.name}>
+          {name}
+        </Text>
+
+        <Group noWrap spacing={10} mt={3}>
+          <IconSignRight stroke={1.5} size="1rem" className={classes.icon} />
+          <Text fz="xs" c="dimmed">
+            {sign}
           </Text>
+        </Group>
 
-          <Text fz="lg" fw={500} className={classes.name}>
-            {name}
-          </Text>
-
-          <Group noWrap spacing={10} mt={3}>
-            <IconSignRight stroke={1.5} size="1rem" className={classes.icon} />
-            <Text fz="xs" c="dimmed">
-              {sign}
-            </Text>
-          </Group>
-
-          <Group noWrap spacing={10} mt={5}>
-            <IconHomeLink stroke={1.5} size="1rem" className={classes.icon} />
-            <Anchor
-              onClick={() => {
-                window.open(home_page, "_blank");
-              }}
-              fz="xs"
-              c="dimmed"
-            >
-              {home_page_name}
-            </Anchor>
-          </Group>
-        </div>
-      </Group>
-    </div>
+        <Group noWrap spacing={10} mt={5}>
+          <IconHomeLink stroke={1.5} size="1rem" className={classes.icon} />
+          <Anchor
+            onClick={() => {
+              window.open(home_page, "_blank");
+            }}
+            fz="xs"
+            c="dimmed"
+          >
+            {home_page_name}
+          </Anchor>
+        </Group>
+      </div>
+    </Group>
   );
 }

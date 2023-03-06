@@ -20,7 +20,7 @@
     "@tauri-apps/api": "^1.2.0",
     "i18next": "^22.4.10",
     "mobx": "^6.8.0",
-    "mobx-react-lite": "^3.4.0",
+    "mobx-react-lite": "^3.4.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-i18next": "^12.2.0",
@@ -29,7 +29,7 @@
   "devDependencies": {
     "@actions/github": "^5.1.1",
     "@tauri-apps/cli": "^1.2.3",
-    "@types/node": "^18.14.2",
+    "@types/node": "^18.14.6",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
     "@vitejs/plugin-react": "^3.1.0",

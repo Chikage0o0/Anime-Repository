@@ -32,43 +32,74 @@ pub fn remove(key: Key) -> Result<(), SubscribeServiceError> {
     Ok(())
 }
 
-pub async fn get_tvshow_title(
+pub async fn get_title(
     id: &str,
     provider: ProviderKnown,
     lang: &str,
+    r#type: &str,
 ) -> Result<String, SubscribeServiceError> {
-    match provider {
-        ProviderKnown::TMDB => {
-            let response = TMDBClient::default()
-                .get_tvshow_info(id, lang)
-                .await
-                .map_err(|e| SubscribeServiceError::NetworkError(e.to_string()))?;
-            match response.1 {
-                StatusCode::OK => {
-                    let data: serde_json::Value = serde_json::from_str(&response.0).unwrap();
-                    if let Some(name) = data.get("name") {
-                        return Ok(name.as_str().unwrap().to_string());
+    match r#type {
+        "tvshow" => match provider {
+            ProviderKnown::TMDB => {
+                let response = TMDBClient::default()
+                    .get_tvshow_info(id, lang)
+                    .await
+                    .map_err(|e| SubscribeServiceError::NetworkError(e.to_string()))?;
+                match response.1 {
+                    StatusCode::OK => {
+                        let data: serde_json::Value = serde_json::from_str(&response.0).unwrap();
+                        match data.get("name") {
+                            Some(name) => Ok(name.as_str().unwrap_or_default().to_string()),
+                            None => Err(SubscribeServiceError::NetworkError(
+                                "Failed to get title".to_string(),
+                            ))?,
+                        }
                     }
-                }
-                _ => {
-                    return Err(SubscribeServiceError::NetworkError(format!(
-                        "Failed to get tvshow title,{}",
+                    _ => Err(SubscribeServiceError::NetworkError(format!(
+                        "Failed to get title,{}",
                         response.1
-                    ))
-                    .into())
+                    )))?,
                 }
             }
-        }
-        ProviderKnown::IMDB => {
-            return Err(SubscribeServiceError::NetworkError(
+            ProviderKnown::IMDB => Err(SubscribeServiceError::NetworkError(
                 "IMDB provider not implemented yet".to_string(),
-            ))
-        }
-    };
-
-    Err(SubscribeServiceError::NetworkError(
-        "Failed to get tvshow title".to_string(),
-    ))
+            ))?,
+        },
+        "movie" => match provider {
+            ProviderKnown::TMDB => {
+                let response = TMDBClient::default()
+                    .get_movie_info(id, lang)
+                    .await
+                    .map_err(|e| SubscribeServiceError::NetworkError(e.to_string()))?;
+                match response.1 {
+                    StatusCode::OK => {
+                        let data: serde_json::Value = serde_json::from_str(&response.0).unwrap();
+                        match data.get("title") {
+                            Some(name) => Ok(name.as_str().unwrap_or_default().to_string()),
+                            None => Err(SubscribeServiceError::NetworkError(
+                                "Failed to get title".to_string(),
+                            ))?,
+                        }
+                    }
+                    _ => {
+                        return Err(SubscribeServiceError::NetworkError(format!(
+                            "Failed to get title,{}",
+                            response.1
+                        ))
+                        .into())
+                    }
+                }
+            }
+            ProviderKnown::IMDB => {
+                return Err(SubscribeServiceError::NetworkError(
+                    "IMDB provider not implemented yet".to_string(),
+                ))
+            }
+        },
+        _ => Err(SubscribeServiceError::NetworkError(
+            "Unknown type".to_string(),
+        ))?,
+    }
 }
 
 pub async fn process<P: AsRef<Path>>(

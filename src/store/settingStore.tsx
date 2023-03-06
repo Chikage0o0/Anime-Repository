@@ -4,12 +4,18 @@ import { flow, flowResult, makeAutoObservable } from "mobx";
 
 export type SettingObject = {
   ui: { lang: string; theme: string; primary_color: string };
-  network: { proxy: string; use_proxy: string };
+  scraper: {
+    use_openai: boolean;
+    openai_key: string;
+    default_lang: string;
+    default_provider: string;
+  };
   storage: {
     pending_path: string;
     repository_path: string;
   };
-  system: { auto_start: boolean; silent_start: boolean };
+  network: { proxy: string; use_proxy: string };
+  system: { auto_start: boolean; silent_start: boolean; scan_interval: number };
 };
 
 function autoTheme() {

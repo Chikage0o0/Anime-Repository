@@ -34,7 +34,8 @@ import EditVideo from "./editVideo";
 function UnrecognizedVideos() {
   const { t } = useTranslation();
   const { settingStore, unrecognizedVideosStore } = useStore();
-  const [opened, setOpened] = useState(false);
+  const [editVideoOpened, setEditVideoOpened] = useState(false);
+  const [insertRuleOpened, setInsertRuleOpened] = useState(false);
   const [search, setSearch] = useState("");
   useEffect(() => {
     unrecognizedVideosStore.update();
@@ -55,8 +56,8 @@ function UnrecognizedVideos() {
       type: "movie",
       path: "",
       id: "",
-      provider: "tmdb",
-      lang: "zh-CN",
+      provider: settingStore.setting.scraper.default_provider,
+      lang: settingStore.setting.scraper.default_lang,
       title: "",
       season: 1,
       episode: 1,
@@ -150,8 +151,7 @@ function UnrecognizedVideos() {
             <ActionIcon
               onClick={() => {
                 form.setValues(item);
-                setOpened(true);
-                console.log(item);
+                setEditVideoOpened(true);
               }}
             >
               <IconPencil size={16} stroke={1.5} />
@@ -221,7 +221,11 @@ function UnrecognizedVideos() {
           <tbody>{data}</tbody>
         </Table>
       </ScrollArea>
-      <EditVideo opened={opened} setOpened={setOpened} form={form} />
+      <EditVideo
+        opened={editVideoOpened}
+        setOpened={setEditVideoOpened}
+        form={form}
+      />
       <Affix
         hidden={settingStore.menu_open}
         position={{ bottom: 20, right: 20 }}

@@ -9,12 +9,22 @@ use sys_locale::get_locale;
 
 use crate::utils;
 
+use super::nfo::ProviderKnown;
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Setting {
     ui: UI,
     storage: Storage,
+    scraper: Scraper,
     network: Network,
     system: System,
+}
+#[derive(Serialize, Deserialize, Debug, Clone)]
+struct Scraper {
+    use_openai: bool,
+    openai_key: String,
+    default_lang: String,
+    default_provider: ProviderKnown,
 }
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct System {
@@ -76,22 +86,23 @@ impl Setting {
         let mut download_dir = download_dir().unwrap();
         download_dir.push("AnimeRepository");
 
+        let lang = get_locale().unwrap_or_else(|| String::from("en-US"));
+
         let setting_file = PathBuf::from(tauri::api::path::config_dir().unwrap())
             .join("AnimeRepository")
             .join("setting.toml");
 
         let s = Config::builder()
-            .set_default(
-                "ui.lang",
-                get_locale()
-                    .unwrap_or_else(|| String::from("en-US"))
-                    .replace("-", "_"),
-            )?
+            .set_default("ui.lang", lang.replace("-", "_"))?
             .set_default("ui.theme", "Auto")?
             .set_default("ui.primary_color", "gray")?
             .set_default("storage.pending_path", download_dir.to_str())?
             .set_default("storage.repository_path", video_dir.to_str())?
             .set_default("storage.pending_path_last_scan", utils::get_now_time())?
+            .set_default("scraper.use_openai", false)?
+            .set_default("scraper.openai_key", "")?
+            .set_default("scraper.default_lang", lang)?
+            .set_default("scraper.default_provider", "tmdb")?
             .set_default("network.use_proxy", false)?
             .set_default("network.proxy", "")?
             .set_default("system.auto_launch", false)?
@@ -147,10 +158,6 @@ impl Setting {
         Ok(())
     }
 
-    pub fn get_scan_interval() -> u64 {
-        CONFIG.lock().unwrap().system.scan_interval
-    }
-
     pub fn get_pending_path() -> PathBuf {
         CONFIG.lock().unwrap().storage.pending_path.clone()
     }
@@ -159,8 +166,21 @@ impl Setting {
         CONFIG.lock().unwrap().storage.repository_path.clone()
     }
 
+    pub fn get_openai_key() -> Option<String> {
+        let scraper = &CONFIG.lock().unwrap().scraper;
+        if scraper.use_openai {
+            Some(scraper.openai_key.clone())
+        } else {
+            None
+        }
+    }
+
     pub fn get_last_scan() -> u64 {
         CONFIG.lock().unwrap().storage.pending_path_last_scan
+    }
+
+    pub fn get_scan_interval() -> u64 {
+        CONFIG.lock().unwrap().system.scan_interval
     }
 
     pub fn set_last_scan(time: u64) {

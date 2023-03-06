@@ -2,7 +2,7 @@
 //电影 API
 GET https://api.themoviedb.org/3/movie/532321?language=zh-CN&append_to_response=images,credits&include_image_language=zh,null
 Content-Type: application/json;charset=utf-8
-Authorization: {{key}}
+Authorization: Bearer {{key}}
 
 //poster_path poster
 //backdrop_path fanart
@@ -13,13 +13,13 @@ Authorization: {{key}}
 //TV API
 GET https://api.themoviedb.org/3/tv/123249?language=zh-CN&append_to_response=images,aggregate_credits&include_image_language=zh
 Content-Type: application/json;charset=utf-8
-Authorization: {{key}}
+Authorization: Bearer {{key}}
 ###
 
 //TV episode API
 GET https://api.themoviedb.org/3/tv/63322/season/1/episode/1?language=zh-CN
 Content-Type: application/json;charset=utf-8
-Authorization: {{key}}
+Authorization: Bearer {{key}}
 
 ###
 //图片API
@@ -30,9 +30,26 @@ GET https://image.tmdb.org/t/p/original/mkq9bJNJS9PPCQKpCMycOyiXXPK.jpg
 //搜索电影
 GET https://api.themoviedb.org/3/search/movie?language=zh-CN&query=少女与战车&page=1&include_adult=true
 Content-Type: application/json;charset=utf-8
-Authorization: {{key}}
+Authorization: Bearer {{key}}
 ###
 //搜索TV
 GET https://api.themoviedb.org/3/search/tv?language=zh-CN&query=少女与战车&page=1&include_adult=true
 Content-Type: application/json;charset=utf-8
-Authorization: {{key}}
+Authorization: Bearer {{key}}
+
+###
+
+POST https://api.openai.com/v1/chat/completions
+Content-Type: application/json;charset=utf-8
+Authorization: Bearer {{OPENAI_KEY}}
+
+{
+  "model": "gpt-3.5-turbo",
+  "messages": [
+    {"role": "system", "content": "You are an api.I will give you a movie/tvshow file name.You need to generate a Json.\nFormat of json:{\"title\":string,\"season\":number|null,\"episode\":number|null}"},
+    {"role": "user", "content": "Royal.Rendezvous.2023.1080p.WEBRip.x264-RARBG.mkv"}
+  ],
+  "max_tokens": 100,
+  "temperature": 0.1
+}
+

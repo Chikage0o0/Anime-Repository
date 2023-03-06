@@ -28,9 +28,10 @@ import Storage from "./storage";
 import UI from "./ui";
 import { useForceUpdate } from "@mantine/hooks";
 import System from "./system";
-import { Developer, developer_list } from "./about";
+
 import { getVersion } from "@tauri-apps/api/app";
-const appVersion = await getVersion();
+import Scraper from "./scraper";
+import About from "./about";
 
 const useStyles = createStyles(() => {
   return {
@@ -53,29 +54,46 @@ function Setting() {
     validate: {
       network: {
         proxy: (value: string) => {
-          if (
-            !(
-              value === "" ||
-              /^(?:http(?:s?)|socks(?:5|5h)):\/\/(?:[A-Za-z0-9]*:[A-Za-z0-9]*@)*(?:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):(?:\d{2,5})$/.test(
+          if (form.values.network.use_proxy) {
+            if (
+              !/^(?:http(?:s?)|socks(?:5|5h)):\/\/(?:[A-Za-z0-9]*:[A-Za-z0-9]*@)*(?:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):(?:\d{2,5})$/.test(
                 value
               )
-            )
-          ) {
-            return t("setting.network.proxy_error");
+            ) {
+              return t("setting.network.proxy_error");
+            }
+          }
+        },
+      },
+      system: {
+        scan_interval: (value: number) => {
+          if (value < 1) {
+            return t("setting.system.scan_interval_error");
+          }
+        },
+      },
+      scraper: {
+        default_lang: (value: string) => {
+          if (!/^[a-z]{2}-[A-Z]{2}$/.test(value)) {
+            return t("setting.scraper.default_lang_error");
+          }
+        },
+        openai_key: (value: string) => {
+          if (form.values.scraper.use_openai) {
+            if (!value.startsWith("sk-")) {
+              return t("setting.scraper.openai_key_error");
+            }
           }
         },
       },
     },
   });
 
-  const developer = developer_list.map((item) => {
-    return <Developer {...item} />;
-  });
-
   return (
     <ScrollArea style={{ height: "100vh", padding: 30 }} type="scroll">
       <UI form={form} classes={classes} />
       <Storage form={form} classes={classes} />
+      <Scraper form={form} classes={classes} />
       <Network form={form} classes={classes} />
       <System form={form} classes={classes} />
       <Affix
@@ -116,64 +134,7 @@ function Setting() {
           <IconDeviceFloppy stroke={1.2} size={34} />
         </ActionIcon>
       </Affix>
-      <Divider
-        my="md"
-        label={t("setting.about")}
-        labelProps={{
-          component: "p",
-          style: { fontSize: 16, fontWeight: 500 },
-        }}
-        labelPosition="center"
-      />
-
-      <Flex
-        className={classes.input}
-        gap="md"
-        justify="flex-start"
-        align="flex-start"
-        direction="row"
-        wrap="wrap"
-      >
-        {developer}
-      </Flex>
-
-      <Stack align="center" spacing={0}>
-        <Group position="center">
-          <Text
-            size="sm"
-            sx={(theme) => ({
-              color: theme.colors.gray[6],
-            })}
-          >
-            Copyright © Anime Repository Develop Team 2023
-          </Text>
-          <IconBrandGithub
-            onClick={() => {
-              window.open(
-                "https://github.com/Chikage0o0/Anime-Repository",
-                "_blank"
-              );
-            }}
-            size={16}
-          />
-        </Group>
-        <Text
-          size="sm"
-          sx={(theme) => ({
-            color: theme.colors.gray[6],
-          })}
-        >
-          Anime Repository is licensed under the GNU General Public License v3.0
-        </Text>
-        <Text
-          size="sm"
-          sx={(theme) => ({
-            color: theme.colors.gray[6],
-          })}
-        >
-          Version: {appVersion}
-        </Text>
-      </Stack>
+      <About classes={classes} />
     </ScrollArea>
   );
 }

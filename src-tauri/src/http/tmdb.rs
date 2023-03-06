@@ -14,7 +14,10 @@ fn get_header() -> HeaderMap {
         reqwest::header::CONTENT_TYPE,
         "application/json;charset=utf-8".parse().unwrap(),
     );
-    headers.insert(reqwest::header::AUTHORIZATION, KEY.parse().unwrap());
+    headers.insert(
+        reqwest::header::AUTHORIZATION,
+        ("Bearer ".to_string() + KEY).parse().unwrap(),
+    );
     headers
 }
 

@@ -27,6 +27,7 @@ impl Client {
                 todo!()
             }
         }
+        builder = builder.connect_timeout(std::time::Duration::from_secs(3));
         Self {
             client: builder.build().unwrap(),
         }
