@@ -1,81 +1,107 @@
 import { useStore } from "@/store";
 import {
-  Box,
   Button,
   Center,
+  Divider,
   Group,
   Modal,
   NumberInput,
   Popover,
-  SegmentedControl,
   Select,
   Text,
   TextInput,
 } from "@mantine/core";
-import { UseFormReturnType } from "@mantine/form";
+import { useForm, UseFormReturnType } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
-import {
-  IconCheck,
-  IconDeviceTv,
-  IconMovie,
-  IconSearch,
-  IconX,
-} from "@tabler/icons-react";
+import { IconCheck, IconSearch, IconX } from "@tabler/icons-react";
 import { invoke } from "@tauri-apps/api";
 import { flowResult } from "mobx";
 import { Dispatch, SetStateAction, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-function EditVideo({
+function InsertRule({
   opened,
   setOpened,
-  form,
+  path,
 }: {
   opened: boolean;
   setOpened: Dispatch<SetStateAction<boolean>>;
-  form: UseFormReturnType<any, any>;
+  path: string;
 }) {
+  const { settingStore } = useStore();
   const { t } = useTranslation();
+  const form = useForm({
+    initialValues: {
+      title: "",
+      id: "",
+      provider: settingStore.setting.scraper.default_provider,
+      tvshow_regex: "",
+      season: 1,
+      lang: settingStore.setting.scraper.default_lang,
+      episode_regex: "\\d+",
+      episode_position: 1,
+      episode_offset: 0,
+    },
+    validate: {
+      id: (value) => {
+        if (!value) {
+          return t("subscribe_rules.id_required");
+        }
+      },
+      tvshow_regex: (value) => {
+        if (!value) {
+          return t("subscribe_rules.tvshow_regex_required");
+        }
+        try {
+          new RegExp(value);
+        } catch (e) {
+          return t("subscribe_rules.tvshow_regex_invalid");
+        }
+      },
+      season: (value) => {
+        if (value < 0) {
+          return t("subscribe_rules.season_invalid");
+        }
+      },
+      lang: (value) => {
+        if (!/^[a-z]{2}-[A-Z]{2}$/g.test(value)) {
+          return t("subscribe_rules.lang_invalid");
+        }
+      },
+      episode_regex: (value) => {
+        if (!value) {
+          return t("subscribe_rules.episode_regex_required");
+        }
+        try {
+          new RegExp(value);
+        } catch (e) {
+          return t("subscribe_rules.episode_regex_invalid");
+        }
+      },
+      episode_position: (value) => {
+        if (value < 1) {
+          return t("subscribe_rules.episode_position_invalid");
+        }
+      },
+    },
+  });
+
   return (
     <Modal
       size="lg"
       opened={opened}
       onClose={() => setOpened(false)}
       centered
-      title={t("unrecognized_videos.video_info")}
+      title={t("subscribe_rules")}
     >
       <Text size="sm" mb="sm">
-        {form.values["path"]}
+        {path}
       </Text>
-      <SegmentedControl
-        fullWidth
-        mb="xs"
-        data={[
-          {
-            value: "movie",
-            label: (
-              <Center>
-                <IconMovie size={16} />
-                <Box ml={10}>Movie</Box>
-              </Center>
-            ),
-          },
-          {
-            value: "tvshow",
-            label: (
-              <Center>
-                <IconDeviceTv size={16} />
-                <Box ml={10}>Tvshow</Box>
-              </Center>
-            ),
-          },
-        ]}
-        {...form.getInputProps("type")}
-      />
-      <Group position="center" mb="sm" grow>
+      <Divider mb="xs" size="xs" />
+      <Group position="center" mb="xs" grow>
         <TextInput
           autoComplete="off"
-          label={t("unrecognized_videos.video_info.ID")}
+          label={t("subscribe_rules.ID")}
           {...form.getInputProps("id")}
           rightSection={
             <IconSearch
@@ -84,18 +110,7 @@ function EditVideo({
                 let provider = form.values.provider;
                 let id = form.values.id;
                 if (provider === "tmdb") {
-                  if (form.values.type === "movie") {
-                    if (id !== "") {
-                      window.open(
-                        "https://www.themoviedb.org/movie/" + id,
-                        "_blank"
-                      );
-                    } else
-                      window.open(
-                        "https://www.themoviedb.org/search/movie?query=",
-                        "_blank"
-                      );
-                  } else if (id !== "") {
+                  if (id !== "") {
                     window.open(
                       "https://www.themoviedb.org/tv/" + id,
                       "_blank"
@@ -112,32 +127,50 @@ function EditVideo({
           }
         />
         <Select
-          label={t("unrecognized_videos.video_info.provider")}
+          label={t("subscribe_rules.provider")}
           data={[{ value: "tmdb", label: "TMDB" }]}
           {...form.getInputProps("provider")}
         />
+      </Group>
+      <TextInput
+        autoComplete="off"
+        mb="xs"
+        label={t("subscribe_rules.tvshow_regex")}
+        {...form.getInputProps("tvshow_regex")}
+      />
+      <Group position="center" mb="xs" grow>
+        <NumberInput
+          autoComplete="off"
+          label={t("subscribe_rules.season")}
+          {...form.getInputProps("season")}
+        />
         <TextInput
           autoComplete="off"
-          label={t("unrecognized_videos.video_info.lang")}
+          label={t("subscribe_rules.lang")}
           placeholder="zh-CN, en-US, etc"
           {...form.getInputProps("lang")}
         />
       </Group>
-      <div hidden={!(form.values["type"] === "tvshow")}>
-        <Group position="center" mb="sm" grow>
-          <NumberInput
-            autoComplete="off"
-            label={t("unrecognized_videos.video_info.season")}
-            {...form.getInputProps("season")}
-          />
-          <NumberInput
-            autoComplete="off"
-            label={t("unrecognized_videos.video_info.episode")}
-            {...form.getInputProps("episode")}
-          />
-        </Group>
-      </div>
-      <Group position="center" mt="xl" grow>
+      <Group position="center" mb="xs" grow>
+        <TextInput
+          autoComplete="off"
+          label={t("subscribe_rules.episode_regex")}
+          placeholder="\\d+"
+          {...form.getInputProps("episode_regex")}
+        />
+        <NumberInput
+          autoComplete="off"
+          label={t("subscribe_rules.episode_position")}
+          {...form.getInputProps("episode_position")}
+        />
+        <NumberInput
+          autoComplete="off"
+          label={t("subscribe_rules.episode_offset")}
+          {...form.getInputProps("episode_offset")}
+        />
+      </Group>
+      <Divider mb="sm" size="xs" />
+      <Group position="center" grow>
         <Button variant="outline" color="red" onClick={() => form.reset()}>
           {t("UI.reset")}
         </Button>
@@ -147,7 +180,7 @@ function EditVideo({
   );
 }
 
-export default EditVideo;
+export default InsertRule;
 
 function Submit({
   form,
@@ -156,7 +189,7 @@ function Submit({
   form: UseFormReturnType<any, any>;
   setOpened: Dispatch<SetStateAction<boolean>>;
 }) {
-  const { unrecognizedVideosStore } = useStore();
+  const { subscribeRulesStore } = useStore();
   const { t } = useTranslation();
   const [confirmOpened, setConfirmOpened] = useState(false);
   const getTitle = async (id: string, provider: string, lang: string) => {
@@ -165,7 +198,7 @@ function Submit({
         id: id,
         provider: provider,
         lang: lang,
-        type: form.values.type,
+        type: "tvshow",
       });
       if (result) {
         return result;
@@ -232,13 +265,13 @@ function Submit({
               color="blue"
               compact
               onClick={() => {
-                form.reset();
-                setOpened(false);
-                flowResult(unrecognizedVideosStore.submit(form.values))
+                flowResult(subscribeRulesStore.addSubscribeRule(form.values))
                   .then(() => {
+                    form.reset();
+                    setOpened(false);
                     notifications.show({
                       icon: <IconCheck />,
-                      title: t("unrecognized_videos.video_info.submit_success"),
+                      title: t("subscribe_rules.insert_success"),
                       message: "✌️🙄✌️",
                     });
                   })
@@ -247,7 +280,7 @@ function Submit({
                       color: "red",
                       icon: <IconX />,
                       autoClose: false,
-                      title: t("unrecognized_videos.video_info.submit_failed"),
+                      title: t("subscribe_rules.insert_failed"),
                       message: e,
                     });
                   });

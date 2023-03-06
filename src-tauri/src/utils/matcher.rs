@@ -94,7 +94,6 @@ impl Matcher {
                 }
             }
         } else {
-            log::warn!("Tvshow Name not match: {}", file_path.as_ref().display());
             Err(MatcherError::FileNotMatch(file_path.as_ref().to_path_buf()))
         }
     }

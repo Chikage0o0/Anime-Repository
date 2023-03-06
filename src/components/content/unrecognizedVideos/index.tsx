@@ -17,6 +17,7 @@ import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import {
   IconCheck,
+  IconHeartPlus,
   IconPencil,
   IconRefresh,
   IconSearch,
@@ -30,12 +31,14 @@ import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import EditVideo from "./editVideo";
+import InsertRule from "./insertRule";
 
 function UnrecognizedVideos() {
   const { t } = useTranslation();
   const { settingStore, unrecognizedVideosStore } = useStore();
   const [editVideoOpened, setEditVideoOpened] = useState(false);
   const [insertRuleOpened, setInsertRuleOpened] = useState(false);
+  const [path, setPath] = useState("");
   const [search, setSearch] = useState("");
   useEffect(() => {
     unrecognizedVideosStore.update();
@@ -150,6 +153,14 @@ function UnrecognizedVideos() {
           <Group spacing={0} position="right">
             <ActionIcon
               onClick={() => {
+                setPath(item?.path);
+                setInsertRuleOpened(true);
+              }}
+            >
+              <IconHeartPlus size={16} stroke={1.5} />
+            </ActionIcon>
+            <ActionIcon
+              onClick={() => {
                 form.setValues(item);
                 setEditVideoOpened(true);
               }}
@@ -225,6 +236,11 @@ function UnrecognizedVideos() {
         opened={editVideoOpened}
         setOpened={setEditVideoOpened}
         form={form}
+      />
+      <InsertRule
+        opened={insertRuleOpened}
+        setOpened={setInsertRuleOpened}
+        path={path}
       />
       <Affix
         hidden={settingStore.menu_open}
