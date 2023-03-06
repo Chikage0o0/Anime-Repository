@@ -100,124 +100,133 @@ impl Tvshow {
                 Provider::Known(ProviderKnown::TMDB) => {
                     log::info!("Get tvshow with id: {} from TMDB", id);
                     let json = get_json(TMDBClient::default().get_tvshow_info(id, lang).await?)?;
-                    let data: Value = serde_json::from_str(&json).unwrap();
+                    let data: Value = serde_json::from_str(&json)?;
 
-                    if let Some(name) = data.get("name") {
-                        if name != &Value::Null {
-                            self.title = name.as_str().unwrap().to_string();
-                        }
+                    if let Some(name) = data.get("name").and_then(|f| f.as_str()) {
+                        self.title = name.to_string();
                     }
 
-                    if let Some(original_name) = data.get("original_name") {
-                        if original_name != &Value::Null {
-                            self.original_title = Some(original_name.as_str().unwrap().to_string());
-                        }
+                    if let Some(original_name) = data.get("original_name").and_then(|f| f.as_str())
+                    {
+                        self.original_title = Some(original_name.to_string());
                     }
 
-                    if let Some(vote_average) = data.get("vote_average") {
-                        if let Some(vote_count) = data.get("vote_count") {
-                            if vote_average != &Value::Null && vote_count != &Value::Null {
-                                if let Some(ratings) = &mut self.ratings {
-                                    let themoviedb_rating = ratings
-                                        .rating
-                                        .iter_mut()
-                                        .find(|rating| rating.name == "themoviedb");
-                                    match themoviedb_rating {
-                                        Some(rating) => {
-                                            rating.value = vote_average.as_f64().unwrap();
-                                            rating.votes = vote_count.as_i64().unwrap();
-                                        }
-                                        None => ratings.rating.push(Rating {
-                                            name: "themoviedb".to_string(),
-                                            max: 10,
-                                            default: true,
-                                            value: vote_average.as_f64().unwrap(),
-                                            votes: vote_count.as_i64().unwrap(),
-                                        }),
+                    if let Some(vote_average) = data.get("vote_average").and_then(|f| f.as_f64()) {
+                        if let Some(vote_count) = data.get("vote_count").and_then(|f| f.as_i64()) {
+                            if let Some(ratings) = &mut self.ratings {
+                                let themoviedb_rating = ratings
+                                    .rating
+                                    .iter_mut()
+                                    .find(|rating| rating.name == "themoviedb");
+                                match themoviedb_rating {
+                                    Some(rating) => {
+                                        rating.value = vote_average;
+                                        rating.votes = vote_count;
                                     }
+                                    None => ratings.rating.push(Rating {
+                                        name: "themoviedb".to_string(),
+                                        max: 10,
+                                        default: true,
+                                        value: vote_average,
+                                        votes: vote_count,
+                                    }),
                                 }
+                            } else {
+                                self.ratings = Some(Ratings {
+                                    rating: vec![Rating {
+                                        name: "themoviedb".to_string(),
+                                        max: 10,
+                                        default: true,
+                                        value: vote_average,
+                                        votes: vote_count,
+                                    }],
+                                })
                             }
                         }
                     }
 
-                    if let Some(overview) = data.get("overview") {
-                        if overview != &Value::Null {
-                            self.plot = Some(overview.as_str().unwrap().to_string());
-                        }
+                    if let Some(overview) = data.get("overview").and_then(|f| f.as_str()) {
+                        self.plot = Some(overview.to_string());
                     }
 
-                    if let Some(poster_path) = data.get("poster_path") {
-                        if poster_path != &Value::Null {
-                            self.update_thumb(
-                                get_img_url(poster_path.as_str().unwrap()),
-                                Some("poster".to_string()),
-                                None,
-                                None,
-                                None,
-                            );
-                        }
+                    if let Some(poster_path) = data.get("poster_path").and_then(|f| f.as_str()) {
+                        self.update_thumb(
+                            get_img_url(poster_path),
+                            Some("poster".to_string()),
+                            None,
+                            None,
+                            None,
+                        );
                     }
 
-                    if let Some(genres) = data.get("genres") {
-                        if genres != &Value::Null {
-                            self.genre = genres
-                                .as_array()
-                                .unwrap()
-                                .into_iter()
-                                .map(|f| f["name"].as_str().unwrap().to_string())
-                                .collect();
-                        }
-                    }
-
-                    if let Some(first_air_date) = data.get("first_air_date") {
-                        if first_air_date != &Value::Null {
-                            self.premiered = Some(first_air_date.as_str().unwrap().to_string());
-                        }
-                    }
-
-                    if let Some(production_companies) = data.get("production_companies") {
-                        if production_companies != &Value::Null {
-                            self.studio = production_companies
-                                .as_array()
-                                .unwrap()
-                                .into_iter()
-                                .map(|f| f["name"].as_str().unwrap().to_string())
-                                .collect();
-                        }
-                    }
-
-                    if let Some(seasons) = data.get("seasons") {
-                        self.name_season = seasons
-                            .as_array()
-                            .unwrap()
+                    if let Some(genres) = data.get("genres").and_then(|f| f.as_array()) {
+                        self.genre = genres
                             .into_iter()
-                            .map(|f| {
-                                let number = f["season_number"].as_i64().unwrap();
-                                if f["poster_path"] != Value::Null {
-                                    self.update_thumb(
-                                        get_img_url(f["poster_path"].as_str().unwrap()),
-                                        Some("poster".to_string()),
-                                        Some("season".to_string()),
-                                        Some(number),
-                                        None,
-                                    );
-                                }
-                                if f["name"] != Value::Null {
-                                    Namedseason {
-                                        number,
-                                        value: f["name"].as_str().unwrap().to_string(),
-                                    }
-                                } else {
-                                    Namedseason {
-                                        number,
-                                        value: format!("Season {}", number),
-                                    }
-                                }
+                            .filter_map(|f| {
+                                f.get("name")
+                                    .and_then(|f| f.as_str())
+                                    .and_then(|f| Some(f.to_string()))
                             })
                             .collect();
                     }
 
-                    if let Some(backdrop_path) = data.get("backdrop_path") {
+                    if let Some(first_air_date) =
+                        data.get("first_air_date").and_then(|f| f.as_str())
+                    {
+                        if first_air_date != &Value::Null {
+                            self.premiered = Some(first_air_date.to_string());
+                        }
+                    }
+
+                    if let Some(production_companies) =
+                        data.get("production_companies").and_then(|f| f.as_array())
+                    {
+                        self.studio = production_companies
+                            .into_iter()
+                            .filter_map(|f| {
+                                f.get("name")
+                                    .and_then(|f| f.as_str())
+                                    .and_then(|f| Some(f.to_string()))
+                            })
+                            .collect();
+                    }
+
+                    if let Some(seasons) = data.get("seasons").and_then(|f| f.as_array()) {
+                        self.name_season = seasons
+                            .into_iter()
+                            .filter_map(|f| {
+                                f.get("season_number").and_then(|f| f.as_i64()).and_then(
+                                    |season_number| {
+                                        if let Some(poster_path) =
+                                            f.get("poster_path").and_then(|f| f.as_str())
+                                        {
+                                            self.update_thumb(
+                                                get_img_url(poster_path),
+                                                Some("poster".to_string()),
+                                                Some("season".to_string()),
+                                                Some(season_number),
+                                                None,
+                                            );
+                                        }
+                                        if let Some(name) = f.get("name").and_then(|f| f.as_str()) {
+                                            Some(Namedseason {
+                                                number: season_number,
+                                                value: name.to_string(),
+                                            })
+                                        } else {
+                                            Some(Namedseason {
+                                                number: season_number,
+                                                value: format!("Season {}", season_number),
+                                            })
+                                        }
+                                    },
+                                )
+                            })
+                            .collect();
+                    }
+
+                    if let Some(backdrop_path) = data.get("backdrop_path").and_then(|f| f.as_str())
+                    {
                         if backdrop_path != &Value::Null {
                             self.fanart = Some(Fanart {
                                 thumb: vec![Thumb {
@@ -225,7 +234,7 @@ impl Tvshow {
                                     r#type: None,
                                     season: None,
                                     preview: None,
-                                    value: get_img_url(backdrop_path.as_str().unwrap()),
+                                    value: get_img_url(backdrop_path),
                                 }],
                             });
                         }
@@ -233,9 +242,14 @@ impl Tvshow {
 
                     if let Some(images) = data.get("images") {
                         if let Some(logos) = images.get("logos") {
-                            if let Some(logo) = logos.as_array().unwrap().get(0) {
+                            if let Some(logo) = logos
+                                .as_array()
+                                .and_then(|f| f.first())
+                                .and_then(|f| f.get("file_path"))
+                                .and_then(|f| f.as_str())
+                            {
                                 self.update_thumb(
-                                    get_img_url(logo["file_path"].as_str().unwrap()),
+                                    get_img_url(logo),
                                     Some("clearlogo".to_string()),
                                     None,
                                     None,

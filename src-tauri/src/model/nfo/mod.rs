@@ -119,6 +119,8 @@ pub enum NfoGetError {
     ClientError(#[from] reqwest::Error),
     #[error("Error downloading thumb")]
     ServerError(StatusCode),
+    #[error(transparent)]
+    ParseJsonError(#[from] serde_json::Error),
 }
 
 fn get_json((json, status_code): (String, StatusCode)) -> Result<String, NfoGetError> {

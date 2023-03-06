@@ -99,63 +99,65 @@ impl Episode {
                             .get_tv_episode_info(id, season, episode, lang)
                             .await?,
                     )?;
-                    let data: Value = serde_json::from_str(&json).unwrap();
+                    let data: Value = serde_json::from_str(&json)?;
 
                     self.display_episode = Some(episode);
                     self.display_season = Some(season);
 
-                    if let Some(name) = data.get("name") {
-                        if name != &Value::Null {
-                            self.title = name.as_str().unwrap().to_string();
-                        }
+                    if let Some(name) = data.get("name").and_then(|f| f.as_str()) {
+                        self.title = name.to_string();
                     }
 
-                    if let Some(vote_average) = data.get("vote_average") {
-                        if let Some(vote_count) = data.get("vote_count") {
-                            if vote_average != &Value::Null && vote_count != &Value::Null {
-                                if let Some(ratings) = &mut self.ratings {
-                                    let themoviedb_rating = ratings
-                                        .rating
-                                        .iter_mut()
-                                        .find(|rating| rating.name == "themoviedb");
-                                    match themoviedb_rating {
-                                        Some(rating) => {
-                                            rating.value = vote_average.as_f64().unwrap();
-                                            rating.votes = vote_count.as_i64().unwrap();
-                                        }
-                                        None => ratings.rating.push(Rating {
-                                            name: "themoviedb".to_string(),
-                                            max: 10,
-                                            default: true,
-                                            value: vote_average.as_f64().unwrap(),
-                                            votes: vote_count.as_i64().unwrap(),
-                                        }),
+                    if let Some(vote_average) = data.get("vote_average").and_then(|f| f.as_f64()) {
+                        if let Some(vote_count) = data.get("vote_count").and_then(|f| f.as_i64()) {
+                            if let Some(ratings) = &mut self.ratings {
+                                let themoviedb_rating = ratings
+                                    .rating
+                                    .iter_mut()
+                                    .find(|rating| rating.name == "themoviedb");
+                                match themoviedb_rating {
+                                    Some(rating) => {
+                                        rating.value = vote_average;
+                                        rating.votes = vote_count;
                                     }
+                                    None => ratings.rating.push(Rating {
+                                        name: "themoviedb".to_string(),
+                                        max: 10,
+                                        default: true,
+                                        value: vote_average,
+                                        votes: vote_count,
+                                    }),
                                 }
+                            } else {
+                                self.ratings = Some(Ratings {
+                                    rating: vec![Rating {
+                                        name: "themoviedb".to_string(),
+                                        max: 10,
+                                        default: true,
+                                        value: vote_average,
+                                        votes: vote_count,
+                                    }],
+                                })
                             }
                         }
                     }
 
-                    if let Some(overview) = data.get("overview") {
-                        self.plot = Some(overview.as_str().unwrap().to_string());
+                    if let Some(overview) = data.get("overview").and_then(|f| f.as_str()) {
+                        self.plot = Some(overview.to_string());
                     }
 
-                    if let Some(still_path) = data.get("still_path") {
-                        if still_path != &Value::Null {
-                            self.update_thumb(
-                                get_img_url(still_path.as_str().unwrap()),
-                                Some("thumb".to_string()),
-                                None,
-                                None,
-                                None,
-                            );
-                        }
+                    if let Some(still_path) = data.get("still_path").and_then(|f| f.as_str()) {
+                        self.update_thumb(
+                            get_img_url(still_path),
+                            Some("thumb".to_string()),
+                            None,
+                            None,
+                            None,
+                        );
                     }
 
-                    if let Some(air_date) = data.get("air_date") {
-                        if air_date != &Value::Null {
-                            self.aired = Some(air_date.as_str().unwrap().to_string());
-                        }
+                    if let Some(air_date) = data.get("air_date").and_then(|f| f.as_str()) {
+                        self.aired = Some(air_date.to_string());
                     }
                 }
                 _ => todo!(),
