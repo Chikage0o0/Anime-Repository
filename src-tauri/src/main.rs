@@ -14,9 +14,14 @@ mod utils;
 use crate::{controller::*, model::setting::Setting, utils::tauri::*};
 use once_cell::sync::OnceCell;
 use std::path::PathBuf;
-use tauri::SystemTray;
+use tauri::{Manager, SystemTray};
 
 pub static APP_HANDLE: OnceCell<tauri::AppHandle> = OnceCell::new();
+#[derive(Clone, serde::Serialize)]
+struct Payload {
+    args: Vec<String>,
+    cwd: String,
+}
 
 fn main() {
     init_log();
@@ -24,6 +29,10 @@ fn main() {
     log::info!("start app");
 
     let app = tauri::Builder::default()
+        .plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
+            app.emit_all("single-instance", Payload { args: argv, cwd })
+                .unwrap();
+        }))
         .system_tray(SystemTray::new().with_menu(get_tray_menu()))
         .on_system_tray_event(tray_event)
         .invoke_handler(tauri::generate_handler![
