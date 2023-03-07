@@ -41,8 +41,9 @@ fn main() {
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application");
-
     APP_HANDLE.set(app.handle()).unwrap();
+
+    // 静默启动时不创建窗口
     if !Setting::get_slient_boot() {
         create_window(&app.handle())
     }
@@ -73,6 +74,7 @@ fn init_log() {
     use log4rs::config::{Appender, Config, Logger, Root};
     use log4rs::encode::pattern::PatternEncoder;
 
+    // 测试环境下输出到控制台，正式环境下输出到文件
     let config = if cfg!(debug_assertions) {
         let stdout = ConsoleAppender::builder()
             .encoder(Box::new(PatternEncoder::new(
@@ -90,10 +92,12 @@ fn init_log() {
             .build(Root::builder().appender("stdout").build(LevelFilter::Debug))
             .unwrap()
     } else {
+        // 日志文件夹
         let log_path = PathBuf::from(tauri::api::path::config_dir().unwrap())
             .join("AnimeRepository")
             .join("log");
 
+        // 自动归档日志
         let window_size = 3; // log0, log1, log2
         let fixed_window_roller = FixedWindowRoller::builder()
             .build(log_path.join("old-{}.log").to_str().unwrap(), window_size)

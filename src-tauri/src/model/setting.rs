@@ -8,6 +8,7 @@ use std::sync::Mutex;
 use sys_locale::get_locale;
 
 use crate::utils;
+use crate::utils::tauri::reboot_app;
 
 use super::nfo::ProviderKnown;
 
@@ -131,8 +132,12 @@ impl Setting {
     pub fn apply(setting: Setting) -> Result<(), SettingError> {
         let mut need_set_auto_run: Option<bool> = None;
         let mut need_rebuild_client = false;
+        let mut need_reboot = false;
         {
             let mut old_setting = CONFIG.lock().unwrap();
+            if old_setting.storage.pending_path != setting.storage.pending_path {
+                need_reboot = true;
+            }
             if old_setting.system.auto_launch != setting.system.auto_launch {
                 need_set_auto_run = Some(setting.system.auto_launch);
             }
@@ -149,6 +154,9 @@ impl Setting {
                 SettingError::SetAutoRunFailed(e)
             })?;
         }
+        if need_reboot {
+            crate::handler::stop(|| reboot_app());
+        }
         if need_rebuild_client {
             crate::http::client::Client::rebuild();
         }
@@ -164,6 +172,10 @@ impl Setting {
 
     pub fn get_repository_path() -> PathBuf {
         CONFIG.lock().unwrap().storage.repository_path.clone()
+    }
+
+    pub fn get_use_openai() -> bool {
+        CONFIG.lock().unwrap().scraper.use_openai
     }
 
     pub fn get_openai_key() -> Option<String> {

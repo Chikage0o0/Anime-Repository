@@ -41,6 +41,7 @@ log4rs = { version = "^1.2.0", features = [
 window-shadows = "^0.2.1"
 auto-launch = "^0.4.0"
 tokio = { version = "^1.26.0", features = ["time"] }
+notify-debouncer-mini = "0.2.1"
 
 [features]
 # by default Tauri runs in production mode

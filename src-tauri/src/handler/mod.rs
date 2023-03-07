@@ -1,6 +1,11 @@
 use crate::model::setting::Setting;
+use notify_debouncer_mini::{new_debouncer, notify::RecursiveMode};
 use once_cell::sync::Lazy;
-use std::{path::PathBuf, thread};
+use std::{
+    sync::mpsc::{self},
+    thread,
+    time::Duration,
+};
 
 mod pending_videos_list;
 mod scan;
@@ -11,12 +16,20 @@ pub enum Command {
     ScanPendingList,
     ScanUnrecognizedList,
     ScanPendingVideosFolder,
-    InsertPendingVideos((PathBuf, PathBuf)),
 }
 
-static HANDLER_TX: Lazy<std::sync::mpsc::SyncSender<Command>> = Lazy::new(|| {
-    let (tx, rx) = std::sync::mpsc::sync_channel(100);
+static HANDLER_TX: Lazy<mpsc::SyncSender<Command>> = Lazy::new(|| {
+    let (tx, rx) = mpsc::sync_channel(100);
+
+    // Watcher Pending Videos Folder
     thread::spawn(move || {
+        scan::first_boot();
+        let (wtx, wrx) = std::sync::mpsc::channel();
+        let mut debouncer = new_debouncer(Duration::from_secs(2), None, wtx).unwrap();
+        debouncer
+            .watcher()
+            .watch(&Setting::get_pending_path(), RecursiveMode::Recursive)
+            .unwrap();
         while let Ok(cmd) = rx.recv() {
             match cmd {
                 Command::Stop(stop) => {
@@ -31,10 +44,7 @@ static HANDLER_TX: Lazy<std::sync::mpsc::SyncSender<Command>> = Lazy::new(|| {
                     unrecognized_videos_list::process();
                 }
                 Command::ScanPendingVideosFolder => {
-                    scan::process();
-                }
-                Command::InsertPendingVideos((src_path, target_path)) => {
-                    pending_videos_list::insert(src_path, target_path);
+                    scan::process(&wrx);
                 }
             }
         }
@@ -44,8 +54,8 @@ static HANDLER_TX: Lazy<std::sync::mpsc::SyncSender<Command>> = Lazy::new(|| {
 
 pub fn run() {
     log::info!("Start background thread");
-    thread::spawn(|| loop {
-        let tx = HANDLER_TX.clone();
+    let tx = HANDLER_TX.clone();
+    thread::spawn(move || loop {
         tx.send(Command::ScanPendingVideosFolder).unwrap();
         tx.send(Command::ScanUnrecognizedList).unwrap();
         tx.send(Command::ScanPendingList).unwrap();

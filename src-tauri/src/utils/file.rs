@@ -1,6 +1,8 @@
 use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 
+use crate::data::pending_videos;
+
 pub fn walk_file<P: AsRef<Path>>(path: P) -> Vec<PathBuf> {
     WalkDir::new(path.as_ref())
         .follow_links(false)
@@ -46,7 +48,7 @@ pub fn create_shortcut<P: AsRef<Path>>(src: P, target: P) -> Result<(), std::io:
 
 pub fn is_video<P: AsRef<Path>>(path: P) -> bool {
     let path = path.as_ref();
-    if !path.is_file() || path.is_symlink() {
+    if !path.is_file() || path.is_symlink() || !path.exists() {
         return false;
     }
     let ext = path.extension().unwrap_or_default().to_str().unwrap();
@@ -56,4 +58,16 @@ pub fn is_video<P: AsRef<Path>>(path: P) -> bool {
         _ => false,
     };
     is_video
+}
+
+// If move file failed, insert it database
+pub fn move_file_with_queue(src_path: PathBuf, target_path: PathBuf) {
+    if let Ok(_) = move_file(&src_path, &target_path) {
+        pending_videos::delete(src_path.clone());
+        create_shortcut(&target_path, &src_path)
+            .unwrap_or_else(|err| log::error!("Create shortcut failed: {:?}", err));
+        super::tauri::send_storage_notification(target_path.file_name().unwrap().to_str().unwrap());
+    } else {
+        crate::data::pending_videos::insert(src_path, target_path);
+    }
 }

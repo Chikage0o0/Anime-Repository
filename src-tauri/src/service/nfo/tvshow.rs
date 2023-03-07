@@ -1,10 +1,10 @@
 use super::*;
 use crate::{
-    handler::get_handler_tx,
     model::{
         nfo::{episode::Episode, tvshow::Tvshow, Nfo, ProviderKnown},
         setting,
     },
+    utils::file,
 };
 use std::fmt::Debug;
 
@@ -79,12 +79,7 @@ pub async fn process<P: AsRef<Path>>(
         path.extension().unwrap().to_str().unwrap()
     ));
 
-    get_handler_tx()
-        .send(crate::handler::Command::InsertPendingVideos((
-            path.to_path_buf(),
-            episode_path.clone(),
-        )))
-        .unwrap();
+    file::move_file_with_queue(path.to_path_buf(), episode_path);
 
     write_nfo(&episode_nfo_path, &episode_nfo)?;
     if let Some(thumb) = episode_nfo.get_thumb() {

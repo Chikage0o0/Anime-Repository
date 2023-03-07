@@ -1,10 +1,10 @@
 use super::*;
 use crate::{
-    handler::get_handler_tx,
     model::{
         nfo::{movie::Movie, Nfo, ProviderKnown},
         setting,
     },
+    utils::file,
 };
 use std::path::Path;
 
@@ -41,12 +41,7 @@ pub async fn process<P: AsRef<Path>>(
         path.extension().unwrap().to_str().unwrap()
     ));
 
-    get_handler_tx()
-        .send(crate::handler::Command::InsertPendingVideos((
-            path.to_path_buf(),
-            movie_path.clone(),
-        )))
-        .unwrap();
+    file::move_file_with_queue(path.to_path_buf(), movie_path);
 
     write_nfo(&movie_nfo_path, &movie_nfo)?;
     for (path, thumb) in movie_nfo.get_thumb(&movie_folder_path) {
