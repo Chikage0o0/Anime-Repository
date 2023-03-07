@@ -8,7 +8,8 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tauri": "tauri",
-    "updater": "node scripts/updater.mjs"
+    "updater": "node scripts/updater.mjs",
+    "portable": "node scripts/portable.mjs"
   },
   "dependencies": {
     "@emotion/react": "^11.10.6",
@@ -36,6 +37,7 @@
     "fs-extra": "^11.1.0",
     "node-fetch": "^3.3.0",
     "typescript": "^4.9.5",
+    "adm-zip": "^0.5.10",
     "vite": "^4.1.4",
     "vite-plugin-top-level-await": "^1.3.0"
   },
