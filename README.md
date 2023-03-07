@@ -1,25 +1,88 @@
 # Anime Repository
 
-功能需求：
+A lightweight scraper,is designed to run in the background to automatically scrape specified directory files.
 
-1. 根据指定规则识别临时文件夹内的文件名以及集数
-2. 使用 tmdb 获取每集的详细信息，并写入符合 kodi 规则的 nfo 文件内
-3. 根据规则将文件移动到指定路径并规范重命名
-4. 显示视频并且支持断点续播
-5. 国际化支持
+I am not very proficient in drawing, if you are willing to design a logo for it, you can contact me, thank you very much.
 
-侧边菜单：
+This is the first program I wrote in Rust and Typescript, it is my graduation design.
 
-- 媒体库
-- 监控规则
-- 设置
 
-技术栈：
-tauri、vite、react-ts、mantine
+## Feature
 
-参考文档：
+- Customizable multiple rule matching files
+- Compatible with BT for seeding
+- Intelligent matching using OpenAI
 
-- [KODI.nfo](https://kodi.wiki/view/NFO_files)
-- [TMDB API](https://developers.themoviedb.org/3)
-- [antd](https://ant.design/components/overview-cn)
-- [tauri api](https://tauri.app/zh-cn/v1/api/config)
+## UI
+
+![UI](https://raw.githubusercontent.com/Chikage0o0/Anime-Repository/master/img/ui.png)
+
+
+### About Subscribe Rules
+
+**Subscribe rules have higher priority than OpenAI recognition**
+
+For example,The File is 
+```
+Downloads/AnimeRepository/[Lilith-Raws] Isekai Nonbiri Nouka - 03 [Baha][WEB-DL][1080p][AVC AAC][CHT][MP4].mp4
+```
+
+Tvshow Regex Can be `[Lilith-Raws] Isekai Nonbiri Nouka`,Just be part of the file path.
+ 
+The Episode Regex will remain the default in most cases, you only need to change the Position and Offset.
+
+Position is the position of the Episode in the file name matched by Regex.
+
+For example
+```
+// Episode Regex = \d+ This means that only numbers are matched
+
+[Lilith-Raws] Isekai Nonbiri Nouka - 03 [Baha][WEB-DL][1080p][AVC AAC][CHT][MP4].mp4
+
+Position 1=03
+Position 2=1080
+Position 3=4
+```
+
+For the rare cases where the Episode of the file name does not match the TMDB, Offset can be used to correct it.
+
+Here is an example rule
+
+![Rule](https://raw.githubusercontent.com/Chikage0o0/Anime-Repository/master/img/rule.png)
+
+### About OpenAI
+
+**OpenAI will not match files in subfolders.**
+
+All you need to do is fill in the OpenAI API KEY and turn on the switch, and the rest is all automatic.
+
+### About Config File AND LOG
+
+Windows: `%appdata%/AnimeRepository`
+
+
+
+## Develop
+
+Read [https://tauri.app/v1/guides/getting-started/prerequisites/](https://tauri.app/v1/guides/getting-started/prerequisites/)
+
+```bash
+git clone https://github.com/Chikage0o0/Anime-Repository
+cd Anime-Repository
+npm install
+code .
+//TMDB_KEY is v4
+export TMDB_KEY="xxxxxxxxx" or $Env:TMDB_KEY="xxxxxxxxx"
+yarn tauri dev 
+```
+
+
+## Thanks for
+
+[Tauri](https://tauri.app/) Without it there would be no such software.
+
+[Mantine](https://mantine.dev/) This is the best UI framework I have ever used.
+
+[Clash-Verge](https://github.com/zzzgydi/clash-verge) I learned a lot from the source code.
+
+[TMDB API](https://developers.themoviedb.org/) Thanks to TMDB for providing metadata and API.
