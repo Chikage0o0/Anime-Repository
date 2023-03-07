@@ -73,7 +73,7 @@ jobs:
           releaseId: ${{ needs.create-release.outputs.release_id }}
 
       - name: Portable Bundle
-        if: matrix.os == 'windows-latest'
+        if: matrix.platform == 'windows-latest'
         # rebuild with env settings
         run: |
           yarn tauri build
