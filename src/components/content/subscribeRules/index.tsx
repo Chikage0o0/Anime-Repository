@@ -132,8 +132,12 @@ function SubscribeRules() {
             </Anchor>
           </Group>
         </td>
-        <td>
-          <Text size="sm" weight={500}>
+        <td width="60%">
+          <Text
+            size="sm"
+            weight={500}
+            style={{ wordBreak: "break-all", wordWrap: "break-word" }}
+          >
             {item.title}
           </Text>
         </td>
@@ -143,7 +147,7 @@ function SubscribeRules() {
         <td>
           <Text size="sm">{item.lang}</Text>
         </td>
-        <td>
+        <td style={{ maxWidth: 50 }}>
           <Group spacing={0} position="right">
             <ActionIcon
               onClick={() => {
@@ -217,7 +221,7 @@ function SubscribeRules() {
               <th>{t("subscribe_rules.title")}</th>
               <th>{t("subscribe_rules.season")}</th>
               <th>{t("subscribe_rules.lang")}</th>
-              <th style={{ maxWidth: 100 }} />
+              <th />
             </tr>
           </thead>
           <tbody>{data}</tbody>

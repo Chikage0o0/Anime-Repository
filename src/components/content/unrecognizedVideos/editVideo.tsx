@@ -44,7 +44,11 @@ function EditVideo({
       centered
       title={t("unrecognized_videos.video_info")}
     >
-      <Text size="sm" mb="sm">
+      <Text
+        size="sm"
+        mb="sm"
+        style={{ wordBreak: "break-all", wordWrap: "break-word" }}
+      >
         {form.values["path"]}
       </Text>
       <SegmentedControl

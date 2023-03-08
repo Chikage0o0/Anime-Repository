@@ -117,8 +117,8 @@ pub trait Nfo {
 pub enum NfoGetError {
     #[error(transparent)]
     ClientError(#[from] reqwest::Error),
-    #[error("Error downloading thumb")]
-    ServerError(StatusCode),
+    #[error("Error status code: {0},{1:?}")]
+    ServerError(StatusCode, Option<String>),
     #[error(transparent)]
     ParseJsonError(#[from] serde_json::Error),
 }
@@ -127,6 +127,6 @@ fn get_json((json, status_code): (String, StatusCode)) -> Result<String, NfoGetE
     if status_code.is_success() {
         Ok(json)
     } else {
-        Err(NfoGetError::ServerError(status_code))
+        Err(NfoGetError::ServerError(status_code, Some(json)))
     }
 }

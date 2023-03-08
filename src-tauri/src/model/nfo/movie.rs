@@ -119,7 +119,7 @@ impl Movie {
                         if fall_back_lang != lang {
                             data_fallback = serde_json::from_str(&get_json(
                                 TMDBClient::default()
-                                    .get_tvshow_info(&id.clone(), &fall_back_lang)
+                                    .get_movie_info(&id.clone(), &fall_back_lang)
                                     .await?,
                             )?)?;
                         }

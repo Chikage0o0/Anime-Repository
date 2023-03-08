@@ -147,7 +147,12 @@ function UnrecognizedVideos() {
     .map((item) => (
       <tr key={item?.path}>
         <td>
-          <Text size="sm">{getRelativePath(item?.path)}</Text>
+          <Text
+            size="sm"
+            style={{ wordBreak: "break-all", wordWrap: "break-word" }}
+          >
+            {getRelativePath(item?.path)}
+          </Text>
         </td>
         <td>
           <Group spacing={0} position="right">

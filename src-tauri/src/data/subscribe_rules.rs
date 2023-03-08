@@ -102,24 +102,4 @@ mod test {
 
         Ok(())
     }
-
-    #[test]
-    fn insert() -> Result<(), SubscribeRulesDataError> {
-        let key = Key {
-            id: "tt1234567".to_string(),
-            provider: ProviderKnown::IMDB,
-        };
-        let value = Value {
-            title: "The Big Bang Theory".to_string(),
-            tvshow_regex: "The Big Bang Theory".to_string(),
-            season: 1,
-            episode_offset: 0,
-            episode_position: 0,
-            episode_regex: r"\d+".to_string(),
-            lang: "en_US".to_string(),
-        };
-        key.insert(&value)?;
-        dbg!(list());
-        Ok(())
-    }
 }

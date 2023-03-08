@@ -5,8 +5,11 @@ use crate::{
 };
 use once_cell::sync::Lazy;
 use regex::Regex;
-use std::path::{Path, PathBuf};
 use std::sync::Mutex;
+use std::{
+    num::ParseIntError,
+    path::{Path, PathBuf},
+};
 
 static MATCHERS: Lazy<Mutex<Vec<Matcher>>> = Lazy::new(|| Mutex::new(Matcher::get_all()));
 
@@ -76,18 +79,17 @@ impl Matcher {
             .is_match(file_path.as_ref().to_str().unwrap_or_default())
         {
             let file_name = file_path.as_ref().file_name().unwrap().to_str().unwrap();
-            match self.episode_regex.captures(file_name) {
-                Some(caps) if caps.len() == 1 => Ok((
-                    file_path.as_ref().to_path_buf(),
-                    (caps
-                        .get(self.episode_position.into())
-                        .unwrap()
-                        .as_str()
-                        .parse::<i64>()
-                        .unwrap()
-                        + self.episode_offset)
-                        .try_into()?,
-                )),
+            match self
+                .episode_regex
+                .captures_iter(file_name)
+                .collect::<Vec<_>>()
+                .get(self.episode_position as usize)
+            {
+                Some(cap) => {
+                    let episode =
+                        cap.get(0).unwrap().as_str().parse::<u64>()? + self.episode_offset as u64;
+                    Ok((file_path.as_ref().to_path_buf(), episode))
+                }
                 _ => {
                     log::warn!("Tvshow Episode not match: {}", file_path.as_ref().display());
                     Err(MatcherError::FileNotMatch(file_path.as_ref().to_path_buf()))
@@ -162,4 +164,6 @@ pub enum MatcherError {
     FileNotMatch(std::path::PathBuf),
     #[error("`{0}` not a file")]
     NotFile(std::path::PathBuf),
+    #[error(transparent)]
+    ParseIntError(#[from] ParseIntError),
 }
