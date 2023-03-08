@@ -86,14 +86,6 @@ function UnrecognizedVideos() {
           return t("unrecognized_videos.video_info.lang_invalid");
         }
       },
-      title: (value) => {
-        if (!value && form.values.type === "tvshow") {
-          return t("unrecognized_videos.video_info.title_required");
-        }
-        if (value === undefined && form.values.type === "movie") {
-          form.setFieldValue("title", "");
-        }
-      },
       season: (value) => {
         if (value < 0 && form.values.type === "tvshow") {
           return t("unrecognized_videos.video_info.season_invalid");
