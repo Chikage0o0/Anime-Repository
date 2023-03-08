@@ -33,8 +33,8 @@ jobs:
               tag_name: `v${process.env.PACKAGE_VERSION}`,
               name: `Anime Repository v${process.env.PACKAGE_VERSION}`,
               body: 'Take a look at the assets to download and install this app.',
-              draft: true,
-              prerelease: false
+              draft: false,
+              prerelease: true
             })
             return data.id
 

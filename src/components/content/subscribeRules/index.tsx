@@ -120,7 +120,7 @@ function SubscribeRules() {
     })
     .map((item) => (
       <tr key={item.provider + item.id}>
-        <td>
+        <td width="20%">
           <Group>
             <Text size="sm">{item.provider.toUpperCase() + ":"}</Text>
             <Anchor
@@ -132,7 +132,7 @@ function SubscribeRules() {
             </Anchor>
           </Group>
         </td>
-        <td width="60%">
+        <td width="50%">
           <Text
             size="sm"
             weight={500}
@@ -141,13 +141,13 @@ function SubscribeRules() {
             {item.title}
           </Text>
         </td>
-        <td>
+        <td width="5%">
           <Text size="sm">{item.season}</Text>
         </td>
-        <td>
+        <td width="13%">
           <Text size="sm">{item.lang}</Text>
         </td>
-        <td style={{ maxWidth: 50 }}>
+        <td width="12%">
           <Group spacing={0} position="right">
             <ActionIcon
               onClick={() => {
