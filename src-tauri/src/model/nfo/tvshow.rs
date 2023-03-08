@@ -333,7 +333,10 @@ impl Tvshow {
             .iter()
             .find(|thumb| thumb.aspect == Some("clearlogo".to_string()))
         {
-            thumbs.insert(path.join("clearlogo.png"), clearlogo.value.clone());
+            thumbs.insert(
+                path.join("clearlogo".to_string() + &thumb_extension(&clearlogo.value, "png")),
+                clearlogo.value.clone(),
+            );
         }
 
         //get poster
@@ -342,7 +345,10 @@ impl Tvshow {
             .iter()
             .find(|thumb| thumb.aspect == Some("poster".to_string()) && thumb.r#type == None)
         {
-            thumbs.insert(path.join("poster.jpg"), poster.value.clone());
+            thumbs.insert(
+                path.join("poster".to_string() + &thumb_extension(&poster.value, "jpg")),
+                poster.value.clone(),
+            );
         }
         // get season poster
         for thumb in self.thumb.iter().filter(|thumb| {
@@ -351,9 +357,15 @@ impl Tvshow {
                 && thumb.season != None
         }) {
             let season_poster = if thumb.season.unwrap() == 0 {
-                path.join("season-specials-poster.jpg")
+                path.join(
+                    "season-specials-poster".to_string() + &thumb_extension(&thumb.value, "jpg"),
+                )
             } else {
-                path.join(format!("season{:02}-poster.jpg", thumb.season.unwrap()))
+                path.join(format!(
+                    "season{:02}-poster{}",
+                    thumb.season.unwrap(),
+                    thumb_extension(&thumb.value, "jpg")
+                ))
             };
             thumbs.insert(season_poster, thumb.value.clone());
         }
@@ -361,7 +373,10 @@ impl Tvshow {
         //get fanart
         if let Some(fanart) = &self.fanart {
             for thumb in &fanart.thumb {
-                thumbs.insert(path.join("fanart.jpg"), thumb.value.clone());
+                thumbs.insert(
+                    path.join("fanart".to_string() + &thumb_extension(&thumb.value, "jpg")),
+                    thumb.value.clone(),
+                );
             }
         }
 

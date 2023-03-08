@@ -85,10 +85,10 @@ pub async fn process<P: AsRef<Path>>(
     if let Some(thumb) = episode_nfo.get_thumb() {
         download_thumb(
             episode_folder_path.join(format!(
-                "{} - S{:02}E{:02} - {}-thumb.jpg",
-                &tvshow_title, season, episode, &episode_title
+                "{} - S{:02}E{:02} - {}-thumb{}",
+                &tvshow_title, season, episode, &episode_title, &thumb.1
             )),
-            &thumb,
+            thumb.0,
         )
         .await?;
     }

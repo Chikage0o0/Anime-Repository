@@ -130,3 +130,8 @@ fn get_json((json, status_code): (String, StatusCode)) -> Result<String, NfoGetE
         Err(NfoGetError::ServerError(status_code, Some(json)))
     }
 }
+
+fn thumb_extension(url: &str, defalut: &str) -> String {
+    let ext = url.split('.').last().unwrap_or(defalut);
+    format!(".{}", ext)
+}
