@@ -4,6 +4,7 @@
 - 下载图片遵循图片原后缀
 - 使用api.tmdb.org替代api.themoviedb.org
 - 允许自定义OpenAi Api域名
+- 提高单个日志文件大小
 
 ## v0.1.3
 

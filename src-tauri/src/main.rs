@@ -112,7 +112,7 @@ fn init_log() {
             .build(log_path.join("old-{}.log").to_str().unwrap(), window_size)
             .unwrap();
 
-        let size_limit = 5 * 1024; // 5KB as max log file size to roll
+        let size_limit = 5 * 1024 * 1024; // 5MB as max log file size to roll
         let size_trigger = SizeTrigger::new(size_limit);
         let compound_policy =
             CompoundPolicy::new(Box::new(size_trigger), Box::new(fixed_window_roller));
