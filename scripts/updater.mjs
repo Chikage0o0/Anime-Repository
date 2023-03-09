@@ -4,6 +4,7 @@ import { resolveUpdateLog } from "./updatelog.mjs"
 
 const UPDATE_TAG_NAME = "updater"
 const UPDATE_JSON_FILE = "update.json"
+const UPDATE_JSON_PROXY = "update-proxy.json"
 
 /// generate update.json
 /// upload to update tag's release asset
@@ -111,13 +112,13 @@ async function resolveUpdater () {
     })
 
     // 生成一个代理github的更新文件
-    // 使用 https://hub.fastgit.xyz/ 做github资源的加速
     const updateDataNew = JSON.parse(JSON.stringify(updateData))
 
     Object.entries(updateDataNew.platforms).forEach(([key, value]) => {
         if (value.url) {
             updateDataNew.platforms[key].url = value.url.replace(
-                "https://github.com/"
+                "https://github.com/",
+                "https://anime-repository.939.me/update/https://github.com/"
             )
         } else {
             console.log(`[Error]: updateDataNew.platforms.${key} is null`)
@@ -138,7 +139,11 @@ async function resolveUpdater () {
                 asset_id: asset.id,
             })
         }
-
+        if (asset.name === UPDATE_JSON_PROXY) {
+            await github.rest.repos
+                .deleteReleaseAsset({ ...options, asset_id: asset.id })
+                .catch(console.error) // do not break the pipeline
+        }
     }
 
     // upload new assets
@@ -147,6 +152,12 @@ async function resolveUpdater () {
         release_id: updateRelease.id,
         name: UPDATE_JSON_FILE,
         data: JSON.stringify(updateData, null, 2),
+    })
+    await github.rest.repos.uploadReleaseAsset({
+        ...options,
+        release_id: updateRelease.id,
+        name: UPDATE_JSON_PROXY,
+        data: JSON.stringify(updateDataNew, null, 2),
     })
 }
 
