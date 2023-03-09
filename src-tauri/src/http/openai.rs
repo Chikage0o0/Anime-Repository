@@ -47,7 +47,10 @@ impl OPENAIClient {
     }
 
     pub async fn match_file(&self, filename: &str) -> reqwest::Result<(String, StatusCode)> {
-        let url = "https://api.openai.com/v1/chat/completions".to_string();
+        let url = format!(
+            "https://{}/v1/chat/completions",
+            Setting::get_openai_domain()
+        );
 
         let body = json!({
           "model": "gpt-3.5-turbo",

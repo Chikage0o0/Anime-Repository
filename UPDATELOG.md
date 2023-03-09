@@ -2,6 +2,8 @@
 
 - 修复无法手动入库Tvshow
 - 下载图片遵循图片原后缀
+- 使用api.tmdb.org替代api.themoviedb.org
+- 允许自定义OpenAi Api域名
 
 ## v0.1.3
 

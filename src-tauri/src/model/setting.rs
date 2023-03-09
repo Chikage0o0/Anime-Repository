@@ -58,6 +58,7 @@ struct Storage {
 pub struct Network {
     use_proxy: bool,
     proxy: String,
+    openai_domain: String,
 }
 
 static CONFIG: Lazy<Mutex<Setting>> = Lazy::new(|| Mutex::new(Setting::new().unwrap()));
@@ -109,6 +110,7 @@ impl Setting {
             .set_default("system.auto_launch", false)?
             .set_default("system.silent_start", false)?
             .set_default("system.scan_interval", 60)?
+            .set_default("network.openai_domain", "api.openai.com")?
             .add_source(config::File::with_name(setting_file.to_str().unwrap()).required(false))
             .build()?;
 
@@ -185,6 +187,10 @@ impl Setting {
         } else {
             None
         }
+    }
+
+    pub fn get_openai_domain() -> String {
+        CONFIG.lock().unwrap().network.openai_domain.clone()
     }
 
     pub fn get_default_lang() -> String {
