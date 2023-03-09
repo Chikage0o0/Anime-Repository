@@ -3,6 +3,7 @@ use std::ops::Deref;
 
 use super::client::Client;
 const KEY: &str = env!("TMDB_KEY");
+const TMDB: &str = "api.tmdb.org";
 
 pub struct TMDBClient {
     client: super::client::Client,
@@ -46,7 +47,7 @@ impl TMDBClient {
         id: &str,
         lang: &str,
     ) -> reqwest::Result<(String, StatusCode)> {
-        let url = format!("https://api.themoviedb.org/3/movie/{}?language={}&append_to_response=images,credits&include_image_language={}",id,lang,&lang[0..2]);
+        let url = format!("https://{}/3/movie/{}?language={}&append_to_response=images,credits&include_image_language={}",TMDB,id,lang,&lang[0..2]);
         self.get_string(url, get_header()).await
     }
 
@@ -55,7 +56,7 @@ impl TMDBClient {
         id: &str,
         lang: &str,
     ) -> reqwest::Result<(String, StatusCode)> {
-        let url = format!("https://api.themoviedb.org/3/tv/{}?language={}&append_to_response=images,aggregate_credits&include_image_language={}",id,lang,&lang[0..2]);
+        let url = format!("https://{}/3/tv/{}?language={}&append_to_response=images,aggregate_credits&include_image_language={}",TMDB,id,lang,&lang[0..2]);
         self.get_string(url, get_header()).await
     }
 
@@ -67,8 +68,8 @@ impl TMDBClient {
         lang: &str,
     ) -> reqwest::Result<(String, StatusCode)> {
         let url = format!(
-            "https://api.themoviedb.org/3/tv/{}/season/{}/episode/{}?language={}",
-            id, season, episode, lang
+            "https://{}/3/tv/{}/season/{}/episode/{}?language={}",
+            TMDB, id, season, episode, lang
         );
         self.get_string(url, get_header()).await
     }
@@ -80,8 +81,8 @@ impl TMDBClient {
         page: u64,
     ) -> reqwest::Result<(String, StatusCode)> {
         let url = format!(
-            "https://api.themoviedb.org/3/search/movie?query={}&language={}&page={}&include_adult=true",
-            key, lang, page
+            "https://{}/3/search/movie?query={}&language={}&page={}&include_adult=true",
+            TMDB, key, lang, page
         );
         self.get_string(url, get_header()).await
     }
@@ -93,8 +94,8 @@ impl TMDBClient {
         page: u64,
     ) -> reqwest::Result<(String, StatusCode)> {
         let url = format!(
-            "https://api.themoviedb.org/3/search/tv?query={}&language={}&page={}&include_adult=true",
-            key, lang, page
+            "https://{}/3/search/tv?query={}&language={}&page={}&include_adult=true",
+            TMDB, key, lang, page
         );
         self.get_string(url, get_header()).await
     }
