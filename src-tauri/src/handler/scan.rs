@@ -82,9 +82,15 @@ fn match_file(file_path: &Path, pending_path: &Path) {
                     .is_some()
                 {
                     let result = block_on(utils::openai::process(&file_path));
-                    if result.is_ok() {
-                        log::info!("Use OpenAI match the file: {:?}", file_path);
+                    match result {
+                        Ok(_)=>{
+                            log::info!("Use OpenAI match the file: {:?}", file_path);
                         return;
+                        }
+                        Err(e) => {
+                            log::warn!("Use OpenAI match the file failed: {:?}", e);
+                        }
+                        
                     }
                 }
             }

@@ -14,6 +14,7 @@ async fn get_match_result<P: AsRef<Path>>(
 
     let prompt = file_name.as_ref().file_name().unwrap().to_str().unwrap();
     let result = client.match_file(prompt).await;
+    log::debug!("OpenAI result: {:?}", result);
     let (body, status) = result?;
     if let StatusCode::OK = status {
         let response = serde_json::from_str::<serde_json::Value>(&body)?;

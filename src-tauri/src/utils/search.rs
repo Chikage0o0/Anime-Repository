@@ -18,6 +18,7 @@ pub async fn search(
     provider: ProviderKnown,
     r#type: &str,
 ) -> Result<Vec<SearchResult>, Box<dyn std::error::Error>> {
+    log::info!("Searching for {} on {:?}", title, &provider);
     match provider {
         ProviderKnown::TMDB => {
             let client = TMDBClient::new();
