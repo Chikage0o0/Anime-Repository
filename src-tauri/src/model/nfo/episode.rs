@@ -185,6 +185,36 @@ impl Episode {
                     if let Some(air_date) = data.get("air_date").and_then(|f| f.as_str()) {
                         self.aired = Some(air_date.to_string());
                     }
+
+                    if let Some(cast) = data
+                        .get("credits")
+                        .and_then(|f| f.get("cast"))
+                        .and_then(|f| f.as_array())
+                    {
+                        for actor in cast {
+                            let name = actor
+                                .get("name")
+                                .and_then(|f| f.as_str())
+                                .unwrap_or("Unknown")
+                                .to_string();
+                            let role = actor
+                                .get("character")
+                                .and_then(|f| f.as_str())
+                                .unwrap_or("Unknown")
+                                .to_string();
+                            let order = actor.get("order").and_then(|f| f.as_u64());
+                            let thumb = actor
+                                .get("profile_path")
+                                .and_then(|f| f.as_str())
+                                .map(|f| get_img_url(f));
+                            self.actor.push(Actor {
+                                name,
+                                role,
+                                order,
+                                thumb,
+                            });
+                        }
+                    }
                 }
                 _ => todo!(),
             }
@@ -400,6 +430,7 @@ mod tests {
         use tauri::async_runtime::block_on;
         let mut data = Episode::new("63322", Provider::Known(ProviderKnown::TMDB));
         block_on(data.update("zh-CN", 1, 1, "jp")).unwrap();
+        dbg!(&data);
         assert!(data.aired == Some("2012-01-06".to_string()));
     }
 }

@@ -56,7 +56,7 @@ impl TMDBClient {
         id: &str,
         lang: &str,
     ) -> reqwest::Result<(String, StatusCode)> {
-        let url = format!("https://{}/3/tv/{}?language={}&append_to_response=images,aggregate_credits&include_image_language={}",TMDB,id,lang,&lang[0..2]);
+        let url = format!("https://{}/3/tv/{}?language={}&append_to_response=images,credits&include_image_language={}",TMDB,id,lang,&lang[0..2]);
         self.get_string(url, get_header()).await
     }
 
@@ -68,7 +68,7 @@ impl TMDBClient {
         lang: &str,
     ) -> reqwest::Result<(String, StatusCode)> {
         let url = format!(
-            "https://{}/3/tv/{}/season/{}/episode/{}?language={}",
+            "https://{}/3/tv/{}/season/{}/episode/{}?language={}&append_to_response=credits",
             TMDB, id, season, episode, lang
         );
         self.get_string(url, get_header()).await

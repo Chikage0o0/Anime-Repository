@@ -11,13 +11,13 @@ Authorization: Bearer {{key}}
 ###
 
 //TV API
-GET https://api.themoviedb.org/3/tv/123249?language=zh-CN&append_to_response=images,aggregate_credits&include_image_language=zh
+GET https://api.themoviedb.org/3/tv/123249?language=zh-CN&append_to_response=images,credits&include_image_language=zh
 Content-Type: application/json;charset=utf-8
 Authorization: Bearer {{key}}
 ###
 
 //TV episode API
-GET https://api.themoviedb.org/3/tv/63322/season/1/episode/1?language=zh-CN
+GET https://api.themoviedb.org/3/tv/63322/season/1/episode/1?language=zh-CN&append_to_response=credits
 Content-Type: application/json;charset=utf-8
 Authorization: Bearer {{key}}
 
