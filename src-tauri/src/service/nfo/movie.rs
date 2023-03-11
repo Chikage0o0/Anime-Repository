@@ -44,8 +44,17 @@ pub async fn process<P: AsRef<Path>>(
     file::move_file_with_queue(path.to_path_buf(), movie_path);
 
     write_nfo(&movie_nfo_path, &movie_nfo)?;
+    // multi-thread download
+    let mut donwload_pool = Vec::new();
+
     for (path, thumb) in movie_nfo.get_thumb(&movie_folder_path) {
-        download_thumb(&path, &thumb).await?;
+        donwload_pool.push(tokio::spawn(
+            async move { download_thumb(&path, &thumb).await },
+        ));
+    }
+
+    for task in donwload_pool {
+        let _ = task.await;
     }
 
     Ok(())

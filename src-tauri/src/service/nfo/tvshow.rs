@@ -39,8 +39,18 @@ pub async fn process<P: AsRef<Path>>(
     }
 
     write_nfo(&tvshow_nfo_path, &tvshow_nfo)?;
+
+    // multi-thread download
+    let mut donwload_pool = Vec::new();
+
     for (path, thumb) in tvshow_nfo.get_thumb(&tvshow_path) {
-        download_thumb(&path, &thumb).await?;
+        donwload_pool.push(tokio::spawn(
+            async move { download_thumb(&path, &thumb).await },
+        ));
+    }
+
+    for task in donwload_pool {
+        let _ = task.await;
     }
 
     // 从网络Episode获取信息
