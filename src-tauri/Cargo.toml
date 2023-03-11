@@ -1,6 +1,6 @@
 [package]
 name = "anime_repository"
-version = "0.1.5"
+version = "0.1.6"
 description = "Developed by Chikage"
 authors = ["Chikage <chikage@939.me>"]
 license = "GPL-3.0"
