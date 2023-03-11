@@ -27,7 +27,7 @@ impl Client {
                 todo!()
             }
         }
-        builder = builder.connect_timeout(std::time::Duration::from_secs(3));
+        builder = builder.connect_timeout(std::time::Duration::from_secs(10));
         Self {
             client: builder.build().unwrap(),
         }
@@ -48,7 +48,13 @@ impl Client {
         url: String,
         headers: HeaderMap,
     ) -> Result<(String, StatusCode)> {
-        let res = self.client.get(&url).headers(headers).send().await?;
+        let mut retry = Setting::get_retry_times();
+        let mut res = self.client.get(&url).headers(headers.clone()).send().await;
+        while retry > 0 && res.is_err() {
+            retry -= 1;
+            res = self.client.get(&url).headers(headers.clone()).send().await;
+        }
+        let res = res?;
         let status = res.status();
         let text = res.text().await?;
         Ok((text, status))
@@ -59,7 +65,13 @@ impl Client {
         url: String,
         headers: HeaderMap,
     ) -> Result<(Vec<u8>, StatusCode)> {
-        let res = self.client.get(&url).headers(headers).send().await?;
+        let mut retry = Setting::get_retry_times();
+        let mut res = self.client.get(&url).headers(headers.clone()).send().await;
+        while retry > 0 && res.is_err() {
+            retry -= 1;
+            res = self.client.get(&url).headers(headers.clone()).send().await;
+        }
+        let res = res?;
         let status = res.status();
         let bytes = res.bytes().await?;
         Ok((bytes.to_vec(), status))
@@ -71,13 +83,25 @@ impl Client {
         headers: HeaderMap,
         body: String,
     ) -> Result<(String, StatusCode)> {
-        let res = self
+        let mut retry = Setting::get_retry_times();
+        let mut res = self
             .client
             .post(&url)
-            .headers(headers)
-            .body(body)
+            .headers(headers.clone())
+            .body(body.clone())
             .send()
-            .await?;
+            .await;
+        while retry > 0 && res.is_err() {
+            retry -= 1;
+            res = self
+                .client
+                .post(&url)
+                .headers(headers.clone())
+                .body(body.clone())
+                .send()
+                .await;
+        }
+        let res = res?;
         let status = res.status();
         let text = res.text().await?;
         Ok((text, status))

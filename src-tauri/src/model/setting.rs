@@ -59,6 +59,7 @@ pub struct Network {
     use_proxy: bool,
     proxy: String,
     openai_domain: String,
+    retry_times: u8,
 }
 
 static CONFIG: Lazy<Mutex<Setting>> = Lazy::new(|| Mutex::new(Setting::new().unwrap()));
@@ -107,10 +108,11 @@ impl Setting {
             .set_default("scraper.default_provider", "tmdb")?
             .set_default("network.use_proxy", false)?
             .set_default("network.proxy", "")?
+            .set_default("network.openai_domain", "api.openai.com")?
+            .set_default("network.retry_times", 3)?
             .set_default("system.auto_launch", false)?
             .set_default("system.silent_start", false)?
             .set_default("system.scan_interval", 60)?
-            .set_default("network.openai_domain", "api.openai.com")?
             .add_source(config::File::with_name(setting_file.to_str().unwrap()).required(false))
             .build()?;
 
@@ -120,6 +122,10 @@ impl Setting {
 impl Setting {
     pub fn get() -> Setting {
         CONFIG.lock().unwrap().clone()
+    }
+
+    pub fn get_retry_times() -> u8 {
+        CONFIG.lock().unwrap().network.retry_times
     }
 
     pub fn get_proxy() -> Option<String> {

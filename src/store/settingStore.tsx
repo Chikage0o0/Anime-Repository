@@ -14,7 +14,12 @@ export type SettingObject = {
     pending_path: string;
     repository_path: string;
   };
-  network: { proxy: string; use_proxy: string };
+  network: {
+    proxy: string;
+    use_proxy: string;
+    retry_times: number;
+    openai_domain: string;
+  };
   system: { auto_start: boolean; silent_start: boolean; scan_interval: number };
 };
 
