@@ -7,39 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  create-release:
-    permissions:
-      contents: write
-    runs-on: ubuntu-20.04
-    outputs:
-      release_id: ${{ steps.create-release.outputs.result }}
-
-    steps:
-      - uses: actions/checkout@v3
-      - name: setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-      - name: get version
-        run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
-      - name: create release
-        id: create-release
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const { data } = await github.rest.repos.createRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              tag_name: `v${process.env.PACKAGE_VERSION}`,
-              name: `Anime Repository v${process.env.PACKAGE_VERSION}`,
-              body: 'Take a look at the assets to download and install this app.',
-              draft: false,
-              prerelease: true
-            })
-            return data.id
-
   build-tauri:
-    needs: create-release
     permissions:
       contents: write
     strategy:
@@ -65,30 +33,22 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf
 
-      - name: Get yarn cache dir path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-
-      - name: Yarn Cache
-        uses: actions/cache@v2
-        id: yarn-cache
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
-
       - name: install frontend dependencies
         run: yarn install # change this to npm or pnpm depending on which one you use
 
-      - uses: tauri-apps/tauri-action@v0
+      - name: Build
+        uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
           TMDB_KEY: ${{ secrets.TMDB_KEY }}
           TAURI_PRIVATE_KEY: "${{ secrets.TAURI_PRIVATE_KEY }}"
           TAURI_KEY_PASSWORD: "${{ secrets.TAURI_KEY_PASSWORD }}"
         with:
-          releaseId: ${{ needs.create-release.outputs.release_id }}
+          tagName: v__VERSION__
+          releaseName: "Anime Repository v__VERSION__"
+          releaseBody: "More new features are now supported."
+          releaseDraft: false
+          prerelease: true
 
       - name: Portable Bundle
         if: matrix.platform == 'windows-latest'
@@ -106,7 +66,7 @@ jobs:
     permissions:
       contents: write
     runs-on: ubuntu-20.04
-    needs: [create-release, build-tauri]
+    needs: [build-tauri]
 
     steps:
       - name: publish release
@@ -125,21 +85,18 @@ jobs:
             })
 
   release-update:
-    needs: [create-release, build-tauri, publish-release]
+    needs: [build-tauri, publish-release]
     runs-on: ubuntu-latest
-    if: |
-      startsWith(github.repository, 'Chikage0o0') &&
-      startsWith(github.ref, 'refs/tags/v')
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Get yarn cache dir path
         id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
+        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
 
       - name: Yarn Cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: yarn-cache
         with:
           path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
