@@ -76,10 +76,6 @@ impl Nfo for Episode {
             }
         })
     }
-
-    fn read_from_file() -> Self {
-        todo!()
-    }
 }
 
 impl Episode {

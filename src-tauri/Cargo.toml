@@ -1,6 +1,6 @@
 [package]
 name = "anime_repository"
-version = "0.1.7"
+version = "0.2.0"
 description = "Developed by Chikage"
 authors = ["Chikage <chikage@939.me>"]
 license = "GPL-3.0"
@@ -51,6 +51,7 @@ auto-launch = "^0.4.0"
 tokio = { version = "^1.26.0", features = ["time"] }
 notify-debouncer-mini = "0.2.1"
 tauri-plugin-single-instance = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "dev" }
+fs_extra = "1.3.0"
 
 [features]
 # by default Tauri runs in production mode

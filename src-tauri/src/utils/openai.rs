@@ -12,7 +12,7 @@ async fn get_match_result<P: AsRef<Path>>(
 ) -> Result<(String, Option<u64>, Option<u64>), Box<dyn std::error::Error>> {
     let client = OPENAIClient::new();
 
-    let prompt = file_name.as_ref().file_name().unwrap().to_str().unwrap();
+    let prompt = file_name.as_ref().file_stem().unwrap().to_str().unwrap();
     let result = client.match_file(prompt).await;
     log::debug!("OpenAI result: {:?}", result);
     let (body, status) = result?;

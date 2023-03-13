@@ -45,15 +45,32 @@ function Storage({ form, classes }: { form: any; classes: any }) {
       <TextInput
         autoComplete="off"
         className={classes.input}
-        label={t("setting.storage.repository_path")}
-        {...form.getInputProps("storage.repository_path")}
+        label={t("setting.storage.movie_repository_path")}
+        {...form.getInputProps("storage.movie_repository_path")}
         rightSection={
           <IconFolder
             stroke={1}
             onClick={() =>
               selected(
-                "storage.repository_path",
-                form.values["storage"]["repository_path"]
+                "storage.movie_repository_path",
+                form.values["storage"]["movie_repository_path"]
+              )
+            }
+          />
+        }
+      />
+      <TextInput
+        autoComplete="off"
+        className={classes.input}
+        label={t("setting.storage.tvshow_repository_path")}
+        {...form.getInputProps("storage.tvshow_repository_path")}
+        rightSection={
+          <IconFolder
+            stroke={1}
+            onClick={() =>
+              selected(
+                "storage.tvshow_repository_path",
+                form.values["storage"]["tvshow_repository_path"]
               )
             }
           />

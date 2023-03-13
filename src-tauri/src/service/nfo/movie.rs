@@ -31,9 +31,7 @@ pub async fn process<P: AsRef<Path>>(
         movie_title
     };
 
-    let movie_folder_path = setting::Setting::get_repository_path()
-        .join("Movies")
-        .join(&folder_name);
+    let movie_folder_path = setting::Setting::get_movie_repository_path().join(&folder_name);
     let movie_nfo_path = movie_folder_path.join("movie.nfo");
     let movie_path = movie_folder_path.join(format!(
         "{}.{}",
@@ -41,7 +39,7 @@ pub async fn process<P: AsRef<Path>>(
         path.extension().unwrap().to_str().unwrap()
     ));
 
-    file::move_file_with_queue(path.to_path_buf(), movie_path);
+    file::move_video_file_with_queue(path.to_path_buf(), movie_path);
 
     write_nfo(&movie_nfo_path, &movie_nfo)?;
     // multi-thread download

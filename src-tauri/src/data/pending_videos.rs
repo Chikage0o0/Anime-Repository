@@ -2,7 +2,8 @@ use once_cell::sync::Lazy;
 use std::path::{Path, PathBuf};
 
 // 存放等待移动文件的列表
-
+// Key: Source Path
+// Value: Target Path
 static DB: Lazy<sled::Db> = Lazy::new(|| {
     sled::open(
         PathBuf::from(tauri::api::path::config_dir().unwrap())

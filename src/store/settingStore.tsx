@@ -12,7 +12,8 @@ export type SettingObject = {
   };
   storage: {
     pending_path: string;
-    repository_path: string;
+    movie_repository_path: string;
+    tvshow_repository_path: string;
   };
   network: {
     proxy: string;

@@ -55,7 +55,7 @@ impl OPENAIClient {
         let body = json!({
           "model": "gpt-3.5-turbo",
           "messages": [
-            {"role": "system", "content": "I will give you a movie/tvshow file name.You need to return a Json.\nPay attention to the correct identification of the film name.\n{\"title\":string,\"season\":number|null,\"episode\":number|null}"},
+            {"role": "system", "content": "I will give you a film/tvshow/anime file name.You need to return a Json.\nPay attention to the correct identification of the film/tvshow/anime name.\n{\"title\":string,\"season\":number|null,\"episode\":number|null}"},
             {"role": "user", "content": filename}
           ],
           "max_tokens": 100,
