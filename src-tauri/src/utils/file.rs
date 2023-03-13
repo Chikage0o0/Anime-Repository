@@ -2,6 +2,7 @@ use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 
 use crate::data::pending_videos;
+use fs_extra::file;
 
 pub fn walk_file<P: AsRef<Path>>(path: P) -> Vec<PathBuf> {
     WalkDir::new(path.as_ref())
@@ -13,12 +14,17 @@ pub fn walk_file<P: AsRef<Path>>(path: P) -> Vec<PathBuf> {
         .collect::<Vec<PathBuf>>()
 }
 
-pub fn move_file<P: AsRef<Path>>(from: P, to: P) -> Result<(), std::io::Error> {
+pub fn move_file<P: AsRef<Path>>(from: P, to: P) -> Result<(), fs_extra::error::Error> {
     if let Some(p) = to.as_ref().parent() {
         std::fs::create_dir_all(p).unwrap();
     }
     log::info!("move file from {:?} to {:?}", from.as_ref(), to.as_ref());
-    std::fs::rename(from.as_ref(), to.as_ref())?;
+    let option = file::CopyOptions {
+        overwrite: true,
+        skip_exist: false,
+        buffer_size: 64000,
+    };
+    file::move_file(from.as_ref(), to.as_ref(), &option)?;
     Ok(())
 }
 

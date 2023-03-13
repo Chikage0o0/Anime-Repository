@@ -5,6 +5,8 @@ use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
+// Key: (id, provider)
+// Value: (title, tvshow_regex, season, episode_offset, episode_position, episode_regex, lang)
 static DB: Lazy<sled::Db> = Lazy::new(|| {
     sled::open(
         PathBuf::from(tauri::api::path::config_dir().unwrap())

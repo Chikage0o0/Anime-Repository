@@ -4,6 +4,8 @@ use std::path::{Path, PathBuf};
 
 use crate::model::nfo::ProviderKnown;
 
+// Key: File Path
+// Value: VideoData
 static DB: Lazy<sled::Db> = Lazy::new(|| {
     sled::open(
         PathBuf::from(tauri::api::path::config_dir().unwrap())
