@@ -9,7 +9,7 @@ pub fn process() {
 
     list.iter().for_each(|(src_path, target_path)| {
         if src_path.is_file() && !src_path.is_symlink() {
-            if let Ok(_) = file::move_file(src_path, target_path) {
+            if let Ok(_) = file::move_video_file(src_path, target_path) {
                 delete(src_path.to_path_buf());
                 file::create_shortcut(&target_path, &src_path)
                     .unwrap_or_else(|err| log::error!("Create shortcut failed: {:?}", err));

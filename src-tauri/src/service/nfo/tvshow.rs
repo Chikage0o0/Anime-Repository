@@ -87,7 +87,7 @@ pub async fn process<P: AsRef<Path>>(
         path.extension().unwrap().to_str().unwrap()
     ));
 
-    file::move_file_with_queue(path.to_path_buf(), episode_path);
+    file::move_video_file_with_queue(path.to_path_buf(), episode_path);
 
     write_nfo(&episode_nfo_path, &episode_nfo)?;
     if let Some(thumb) = episode_nfo.get_thumb() {

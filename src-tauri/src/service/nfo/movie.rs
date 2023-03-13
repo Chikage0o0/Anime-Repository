@@ -39,7 +39,7 @@ pub async fn process<P: AsRef<Path>>(
         path.extension().unwrap().to_str().unwrap()
     ));
 
-    file::move_file_with_queue(path.to_path_buf(), movie_path);
+    file::move_video_file_with_queue(path.to_path_buf(), movie_path);
 
     write_nfo(&movie_nfo_path, &movie_nfo)?;
     // multi-thread download
