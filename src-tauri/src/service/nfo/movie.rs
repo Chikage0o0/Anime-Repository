@@ -31,9 +31,7 @@ pub async fn process<P: AsRef<Path>>(
         movie_title
     };
 
-    let movie_folder_path = setting::Setting::get_repository_path()
-        .join("Movies")
-        .join(&folder_name);
+    let movie_folder_path = setting::Setting::get_movie_repository_path().join(&folder_name);
     let movie_nfo_path = movie_folder_path.join("movie.nfo");
     let movie_path = movie_folder_path.join(format!(
         "{}.{}",

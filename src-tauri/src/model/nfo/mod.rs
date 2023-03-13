@@ -110,7 +110,6 @@ pub trait Nfo {
     fn get_id(&self, provider: Provider) -> Option<String>;
     /// 根据NFO获取默认的ID
     fn get_default_id(&self) -> Option<(String, Provider)>;
-    fn read_from_file() -> Self;
 }
 
 #[derive(thiserror::Error, Debug)]

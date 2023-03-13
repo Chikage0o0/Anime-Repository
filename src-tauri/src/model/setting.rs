@@ -49,7 +49,8 @@ enum Theme {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct Storage {
     pending_path: PathBuf,
-    repository_path: PathBuf,
+    movie_repository_path: PathBuf,
+    tvshow_repository_path: PathBuf,
     pending_path_last_scan: u64,
 }
 
@@ -86,6 +87,9 @@ impl Setting {
         let mut video_dir = video_dir().unwrap();
         video_dir.push("AnimeRepository");
 
+        let movie_dir = video_dir.join("Movies");
+        let tvshow_dir = video_dir.join("TVShows");
+
         let mut download_dir = download_dir().unwrap();
         download_dir.push("AnimeRepository");
 
@@ -100,7 +104,8 @@ impl Setting {
             .set_default("ui.theme", "Auto")?
             .set_default("ui.primary_color", "gray")?
             .set_default("storage.pending_path", download_dir.to_str())?
-            .set_default("storage.repository_path", video_dir.to_str())?
+            .set_default("storage.movie_repository_path", movie_dir.to_str())?
+            .set_default("storage.tvshow_repository_path", tvshow_dir.to_str())?
             .set_default("storage.pending_path_last_scan", utils::get_now_time())?
             .set_default("scraper.use_openai", false)?
             .set_default("scraper.openai_key", "")?
@@ -178,8 +183,17 @@ impl Setting {
         CONFIG.lock().unwrap().storage.pending_path.clone()
     }
 
-    pub fn get_repository_path() -> PathBuf {
-        CONFIG.lock().unwrap().storage.repository_path.clone()
+    pub fn get_movie_repository_path() -> PathBuf {
+        CONFIG.lock().unwrap().storage.movie_repository_path.clone()
+    }
+
+    pub fn get_tvshow_repository_path() -> PathBuf {
+        CONFIG
+            .lock()
+            .unwrap()
+            .storage
+            .tvshow_repository_path
+            .clone()
     }
 
     pub fn get_use_openai() -> bool {

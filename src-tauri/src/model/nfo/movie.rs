@@ -96,10 +96,6 @@ impl Nfo for Movie {
             }
         })
     }
-
-    fn read_from_file() -> Self {
-        todo!()
-    }
 }
 impl Movie {
     pub async fn update(&mut self, lang: &str) -> Result<(), NfoGetError> {

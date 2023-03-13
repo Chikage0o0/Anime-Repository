@@ -89,10 +89,6 @@ impl Nfo for Tvshow {
             }
         })
     }
-
-    fn read_from_file() -> Self {
-        todo!()
-    }
 }
 impl Tvshow {
     pub async fn update(&mut self, lang: &str) -> Result<(), NfoGetError> {

@@ -21,9 +21,7 @@ pub async fn process<P: AsRef<Path>>(
     log::info!("Processing {:?}", path);
 
     let tvshow_title = title.clone();
-    let tvshow_path = setting::Setting::get_repository_path()
-        .join("TV Shows")
-        .join(&tvshow_title);
+    let tvshow_path = setting::Setting::get_tvshow_repository_path().join(&tvshow_title);
     let tvshow_nfo_path = tvshow_path.join("tvshow.nfo");
 
     let mut tvshow_nfo: Tvshow;
