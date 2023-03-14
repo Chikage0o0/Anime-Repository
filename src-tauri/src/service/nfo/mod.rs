@@ -65,13 +65,13 @@ where
     }
 
     let mut file = File::create(path)?;
-    let mut ser = Serializer::new(
-        String::from(r#"<?xml version="1.0" encoding="utf-8" standalone="yes"?>"#) + "\n",
-    );
+    let mut writer =
+        String::from(r#"<?xml version="1.0" encoding="utf-8" standalone="yes"?>"#) + "\n";
+    let mut ser = Serializer::new(&mut writer);
     ser.indent(' ', 4);
-    let data = data.serialize(ser)?;
+    data.serialize(ser)?;
 
-    file.write_all(data.as_bytes())?;
+    file.write_all(writer.as_bytes())?;
 
     Ok(())
 }
