@@ -4,22 +4,12 @@ import {
   ActionIcon,
   Affix,
   createStyles,
-  Divider,
-  Text,
-  Flex,
   ScrollArea,
   useMantineTheme,
-  Group,
-  Stack,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
-import {
-  IconBrandGithub,
-  IconCheck,
-  IconDeviceFloppy,
-  IconX,
-} from "@tabler/icons-react";
+import { IconCheck, IconDeviceFloppy, IconX } from "@tabler/icons-react";
 import { flowResult } from "mobx";
 import { observer } from "mobx-react-lite";
 import { useTranslation } from "react-i18next";

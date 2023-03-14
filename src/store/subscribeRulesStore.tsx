@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api";
-import { flow, flowResult, makeAutoObservable } from "mobx";
+import { flow, makeAutoObservable } from "mobx";
 
 export type SubscribeObject = {
   id: string;
@@ -18,7 +18,7 @@ class SubscribeStore {
   menu_open = false;
   constructor() {
     makeAutoObservable(this, {
-      init: flow,
+      update: flow,
       addSubscribeRule: flow,
       delSubscribeRule: flow,
     });
@@ -37,7 +37,7 @@ class SubscribeStore {
         episodePosition: a.episode_position,
         episodeOffset: a.episode_offset,
       });
-      this.data = yield this.init();
+      yield this.update();
     } catch (e) {
       throw e;
     }
@@ -46,17 +46,20 @@ class SubscribeStore {
   *delSubscribeRule(id: string, provider: string) {
     try {
       yield invoke("delete_subscribe_rule", { id: id, provider: provider });
-      this.data = yield this.init();
+      yield this.update();
     } catch (e) {
       throw e;
     }
   }
 
-  *init() {
-    const res: SubscribeObject[] = yield invoke("get_subscribe_rules");
-    return res;
+  *update() {
+    try {
+      const res: SubscribeObject[] = yield invoke("get_subscribe_rules");
+      this.data = res;
+    } catch (e) {
+      throw e;
+    }
   }
 }
 const subscribeStore = new SubscribeStore();
-subscribeStore.data = await flowResult(subscribeStore.init());
 export default subscribeStore;
