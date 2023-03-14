@@ -130,7 +130,9 @@ pub fn move_video_file_with_queue(src_path: PathBuf, target_path: PathBuf) {
         pending_videos::delete(src_path.clone());
         create_shortcut(&target_path, &src_path)
             .unwrap_or_else(|err| log::error!("Create shortcut failed: {:?}", err));
-        super::tauri::send_storage_notification(target_path.file_name().unwrap().to_str().unwrap());
+        crate::controller::send_storage_notification(
+            target_path.file_name().unwrap().to_str().unwrap(),
+        );
     } else {
         crate::data::pending_videos::insert(src_path, target_path);
     }

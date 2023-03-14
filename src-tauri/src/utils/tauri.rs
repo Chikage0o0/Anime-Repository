@@ -203,21 +203,3 @@ fn get_auto_launch() -> auto_launch::AutoLaunch {
 
     auto
 }
-
-pub fn send_storage_notification(file_name: &str) {
-    use tauri::api::notification::Notification;
-
-    let title;
-    match Setting::get_lang().as_str() {
-        "zh_CN" => title = "Anime Repository: 新视频已经入库！",
-        "ja_JP" => title = "Anime Repository: 新しい動画が追加されました！",
-        _ => title = "Anime Repository: New video has been added!",
-    }
-
-    let context = tauri::generate_context!();
-    Notification::new(&context.config().tauri.bundle.identifier)
-        .title(title)
-        .body(format!("{}", file_name))
-        .show()
-        .unwrap();
-}

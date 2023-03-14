@@ -421,11 +421,10 @@ mod tests {
         assert!(data.get_id(Provider::Known(ProviderKnown::TMDB)) == Some("1168864".to_string()));
     }
 
-    #[test]
-    fn test_update() {
-        use tauri::async_runtime::block_on;
+    #[tokio::test]
+    async fn test_update() {
         let mut data = Episode::new("63322", Provider::Known(ProviderKnown::TMDB));
-        block_on(data.update("zh-CN", 1, 1, "jp")).unwrap();
+        data.update("zh-CN", 1, 1, "jp").await.unwrap();
         dbg!(&data);
         assert!(data.aired == Some("2012-01-06".to_string()));
     }
