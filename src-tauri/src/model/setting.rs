@@ -8,7 +8,6 @@ use std::sync::Mutex;
 use sys_locale::get_locale;
 
 use crate::utils;
-use crate::utils::tauri::reboot_app;
 
 use super::nfo::ProviderKnown;
 
@@ -29,8 +28,6 @@ struct Scraper {
 }
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct System {
-    auto_launch: bool,
-    silent_start: bool,
     scan_interval: u64,
 }
 
@@ -68,10 +65,7 @@ static CONFIG: Lazy<Mutex<Setting>> = Lazy::new(|| Mutex::new(Setting::new().unw
 impl Setting {
     pub fn write_to_file() -> Result<(), std::io::Error> {
         log::debug!("Writing setting to file");
-        let path = PathBuf::from(tauri::api::path::config_dir().unwrap())
-            .join("AnimeRepository")
-            .join("setting.toml");
-
+        let path = PathBuf::from("Config").join("setting.toml");
         if let Some(p) = path.parent() {
             fs::create_dir_all(p).unwrap();
         }
@@ -83,21 +77,16 @@ impl Setting {
     }
 
     fn new() -> Result<Setting, SettingError> {
-        use tauri::api::path::{download_dir, video_dir};
-        let mut video_dir = video_dir().unwrap();
-        video_dir.push("AnimeRepository");
+        let video_dir = PathBuf::from("AnimeRepository");
 
         let movie_dir = video_dir.join("Movies");
         let tvshow_dir = video_dir.join("TVShows");
 
-        let mut download_dir = download_dir().unwrap();
-        download_dir.push("AnimeRepository");
+        let download_dir = PathBuf::from("Pending");
 
         let lang = get_locale().unwrap_or_else(|| String::from("en-US"));
 
-        let setting_file = PathBuf::from(tauri::api::path::config_dir().unwrap())
-            .join("AnimeRepository")
-            .join("setting.toml");
+        let setting_file = PathBuf::from("Config").join("setting.toml");
 
         let s = Config::builder()
             .set_default("ui.lang", lang.replace("-", "_"))?
@@ -115,8 +104,6 @@ impl Setting {
             .set_default("network.proxy", "")?
             .set_default("network.openai_domain", "api.openai.com")?
             .set_default("network.retry_times", 3)?
-            .set_default("system.auto_launch", false)?
-            .set_default("system.silent_start", false)?
             .set_default("system.scan_interval", 60)?
             .add_source(config::File::with_name(setting_file.to_str().unwrap()).required(false))
             .build()?;
@@ -143,17 +130,10 @@ impl Setting {
     }
 
     pub fn apply(setting: Setting) -> Result<(), SettingError> {
-        let mut need_set_auto_run: Option<bool> = None;
         let mut need_rebuild_client = false;
-        let mut need_reboot = false;
         {
             let mut old_setting = CONFIG.lock().unwrap();
-            if old_setting.storage.pending_path != setting.storage.pending_path {
-                need_reboot = true;
-            }
-            if old_setting.system.auto_launch != setting.system.auto_launch {
-                need_set_auto_run = Some(setting.system.auto_launch);
-            }
+
             if old_setting.network.use_proxy != setting.network.use_proxy
                 || old_setting.network.proxy != setting.network.proxy
             {
@@ -161,15 +141,7 @@ impl Setting {
             }
             *old_setting = setting;
         }
-        if let Some(auto_run) = need_set_auto_run {
-            crate::utils::tauri::set_auto_launch(auto_run).map_err(|e| {
-                log::error!("Failed to set auto run: {}", e);
-                SettingError::SetAutoRunFailed(e)
-            })?;
-        }
-        if need_reboot {
-            crate::handler::stop(|| reboot_app());
-        }
+
         if need_rebuild_client {
             crate::http::client::Client::rebuild();
         }
@@ -233,14 +205,6 @@ impl Setting {
         let mut setting = CONFIG.lock().unwrap();
         setting.storage.pending_path_last_scan = time;
     }
-
-    pub fn get_lang() -> String {
-        CONFIG.lock().unwrap().ui.lang.clone()
-    }
-
-    pub fn get_slient_boot() -> bool {
-        CONFIG.lock().unwrap().system.silent_start
-    }
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -251,8 +215,6 @@ pub enum SettingError {
     IOError(#[from] std::io::Error),
     #[error(transparent)]
     ConfigError(#[from] config::ConfigError),
-    #[error("Failed to set auto run: {0}")]
-    SetAutoRunFailed(String),
 }
 
 impl serde::Serialize for SettingError {

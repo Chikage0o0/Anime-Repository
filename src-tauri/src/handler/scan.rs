@@ -8,7 +8,7 @@ use crate::{
 };
 use notify_debouncer_mini::{notify::Error, DebouncedEvent};
 use std::{path::Path, sync::mpsc::Receiver, time::UNIX_EPOCH};
-use tauri::async_runtime::block_on;
+use futures::executor::block_on;
 
 pub fn process(wrx: &Receiver<Result<Vec<DebouncedEvent>, Vec<Error>>>) {
     log::debug!("Processing pending videos folder");

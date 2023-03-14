@@ -1,4 +1,3 @@
-import { invoke } from "@tauri-apps/api";
 import { flow, flowResult, makeAutoObservable } from "mobx";
 
 export type unrecognizedVideoObject = {
@@ -21,7 +20,6 @@ class UnrecognizedVideosStore {
       init: flow,
       submit: flow,
       delete: flow,
-      update: flow,
     });
   }
 
@@ -58,7 +56,13 @@ class UnrecognizedVideosStore {
 
   *submit(values: unrecognizedVideoObject) {
     try {
-      yield invoke("update_unrecognized_video_info", values);
+      yield fetch("api/unrecognized_videos", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
       this.data = yield this.init();
     } catch (e) {
       throw e;
@@ -67,22 +71,31 @@ class UnrecognizedVideosStore {
 
   *delete(path: string) {
     try {
-      yield invoke("delete_unrecognized_video_info", { path: path });
-      this.data = yield this.init();
+      const res: Response = yield fetch(`api/unrecognized_videos/${path}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        const e: string = yield res.text();
+        throw res.statusText + "\n" + e;
+      }
+      yield this.init();
     } catch (e) {
       throw e;
     }
   }
 
-  *update() {
-    this.data = yield this.init();
-  }
-
   *init() {
-    const res: [] = yield invoke("get_unrecognized_videos_list");
-    return res;
+    try {
+      const res: Response = yield fetch("api/unrecognized_videos");
+      if (!res.ok) {
+        const e: string = yield res.text();
+        throw res.statusText + "\n" + e;
+      }
+      this.data = yield res.json();
+    } catch (e: any) {
+      throw e;
+    }
   }
 }
 const unrecognizedVideosStore = new UnrecognizedVideosStore();
-unrecognizedVideosStore.data = await flowResult(unrecognizedVideosStore.init());
 export default unrecognizedVideosStore;

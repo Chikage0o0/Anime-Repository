@@ -1,5 +1,4 @@
-import { invoke } from "@tauri-apps/api";
-import { flow, flowResult, makeAutoObservable } from "mobx";
+import { flow, makeAutoObservable } from "mobx";
 
 export type SubscribeObject = {
   id: string;
@@ -26,18 +25,18 @@ class SubscribeStore {
 
   *addSubscribeRule(a: SubscribeObject) {
     try {
-      yield invoke("insert_subscribe_rule", {
-        id: a.id,
-        provider: a.provider,
-        season: a.season,
-        title: a.title,
-        lang: a.lang,
-        tvshowRegex: a.tvshow_regex,
-        episodeRegex: a.episode_regex,
-        episodePosition: a.episode_position,
-        episodeOffset: a.episode_offset,
+      const res: Response = yield fetch("api/subscribe_rule", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(a),
       });
-      this.data = yield this.init();
+      if (!res.ok) {
+        const e: string = yield res.text();
+        throw res.statusText + "\n" + e;
+      }
+      yield this.init();
     } catch (e) {
       throw e;
     }
@@ -45,18 +44,34 @@ class SubscribeStore {
 
   *delSubscribeRule(id: string, provider: string) {
     try {
-      yield invoke("delete_subscribe_rule", { id: id, provider: provider });
-      this.data = yield this.init();
+      const res: Response = yield fetch(
+        `api/subscribe_rule?id=${id}&provider=${provider}`,
+        {
+          method: "DELETE",
+        }
+      );
+      if (!res.ok) {
+        const e: string = yield res.text();
+        throw res.statusText + "\n" + e;
+      }
+      yield this.init();
     } catch (e) {
       throw e;
     }
   }
 
   *init() {
-    const res: SubscribeObject[] = yield invoke("get_subscribe_rules");
-    return res;
+    try {
+      const res: Response = yield fetch("api/subscribe_rules");
+      if (!res.ok) {
+        const e: string = yield res.text();
+        throw res.statusText + "\n" + e;
+      }
+      this.data = yield res.json();
+    } catch (e: any) {
+      throw e;
+    }
   }
 }
 const subscribeStore = new SubscribeStore();
-subscribeStore.data = await flowResult(subscribeStore.init());
 export default subscribeStore;

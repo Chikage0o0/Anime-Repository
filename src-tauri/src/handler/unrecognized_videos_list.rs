@@ -8,18 +8,15 @@ pub fn process() {
     let list = get_all();
 
     list.into_iter().for_each(|(path, _)| {
-        if !path.exists()
-            || !path.is_file()
-            || path.is_symlink()
-            || !is_video(&path)
-            || !path.starts_with(Setting::get_pending_path().as_path())
-        {
+        if !path.exists() || !path.is_file() || path.is_symlink() || !is_video(&path) {
             if let Err(e) = delete(&path) {
                 log::error!(
                     "Delete {:?} from Unrecognized Video database failed: {:?}",
                     path,
                     e
                 );
+            } else {
+                log::debug!("Delete {:?} from Unrecognized Video database", path);
             }
         }
     })

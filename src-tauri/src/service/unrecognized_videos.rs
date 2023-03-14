@@ -1,10 +1,6 @@
 use crate::{
-    data::{
-        pending_videos,
-        unrecognized_videos::{get_all, VideoData},
-    },
+    data::{pending_videos, unrecognized_videos::VideoData},
     model::setting::Setting,
-    utils::tauri::send_event,
 };
 use std::path::Path;
 
@@ -20,7 +16,7 @@ pub fn delete<P: AsRef<Path>>(path: P) -> Result<(), UnrecognizedVideosServiceEr
     {
         std::fs::remove_file(path)?;
     }
-    send_event("main", "unrecognized_videos_list", get_all());
+    // send_event("main", "unrecognized_videos_list", get_all());
     Ok(())
 }
 
@@ -43,7 +39,7 @@ pub async fn insert<P: AsRef<Path>>(
         }
         VideoData::Undefined => {
             crate::data::unrecognized_videos::insert(path, video_data)?;
-            send_event("main", "unrecognized_videos_list", get_all());
+            // send_event("main", "unrecognized_videos_list", get_all());
         }
     };
 

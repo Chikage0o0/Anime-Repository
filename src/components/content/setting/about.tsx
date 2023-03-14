@@ -13,7 +13,6 @@ import {
   IconHomeLink,
   IconSignRight,
 } from "@tabler/icons-react";
-import { getVersion } from "@tauri-apps/api/app";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -51,17 +50,11 @@ const developer_list: DeveloperProps[] = [
 ];
 
 export default function About({ classes }: { classes: any }) {
-  const [appVersion, setAppVersion] = useState("0.0.0");
   const developer = developer_list.map((item) => {
     return <Developer key={item.name} {...item} />;
   });
   const { t } = useTranslation();
 
-  useEffect(() => {
-    getVersion().then((version) => {
-      setAppVersion(version);
-    });
-  }, []);
   return (
     <>
       <Divider
@@ -117,7 +110,7 @@ export default function About({ classes }: { classes: any }) {
             color: theme.colors.gray[6],
           })}
         >
-          Version: {appVersion}
+          Version: 0.2.0
         </Text>
       </Stack>
     </>

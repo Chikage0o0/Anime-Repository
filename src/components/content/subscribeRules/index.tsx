@@ -25,7 +25,7 @@ import {
 } from "@tabler/icons-react";
 import { flowResult } from "mobx";
 import { observer } from "mobx-react-lite";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import EditRule from "./editRule";
 
@@ -46,6 +46,9 @@ function getLink(provider: string, id: string): string {
 function SubscribeRules() {
   const { t } = useTranslation();
   const { settingStore, subscribeRulesStore: subscribeStore } = useStore();
+  useEffect(() => {
+    flowResult(subscribeStore.init());
+  }, []);
   const [opened, setOpened] = useState(false);
   const [search, setSearch] = useState("");
   const form = useForm({

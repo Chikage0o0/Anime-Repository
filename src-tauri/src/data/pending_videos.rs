@@ -4,14 +4,8 @@ use std::path::{Path, PathBuf};
 // 存放等待移动文件的列表
 // Key: Source Path
 // Value: Target Path
-static DB: Lazy<sled::Db> = Lazy::new(|| {
-    sled::open(
-        PathBuf::from(tauri::api::path::config_dir().unwrap())
-            .join("AnimeRepository")
-            .join("pending_videos"),
-    )
-    .unwrap()
-});
+static DB: Lazy<sled::Db> =
+    Lazy::new(|| sled::open(PathBuf::from("Config").join("pending_videos")).unwrap());
 
 pub fn get_all() -> Vec<(PathBuf, PathBuf)> {
     DB.iter()

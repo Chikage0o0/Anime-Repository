@@ -1,18 +1,17 @@
-import { Divider, NumberInput, TextInput } from "@mantine/core";
+import { Divider, TextInput } from "@mantine/core";
 import { IconFolder } from "@tabler/icons-react";
-import { open } from "@tauri-apps/api/dialog";
 import { useTranslation } from "react-i18next";
 
 function Storage({ form, classes }: { form: any; classes: any }) {
   const { t } = useTranslation();
-  const selected = async (name: string, default_path: string) => {
-    const res = await open({
-      directory: true,
-      multiple: false,
-      defaultPath: default_path,
-    });
-    if (res != null) form.setFieldValue(name, res);
-  };
+  // const selected = async (name: string, default_path: string) => {
+  //   const res = await open({
+  //     directory: true,
+  //     multiple: false,
+  //     defaultPath: default_path,
+  //   });
+  //   if (res != null) form.setFieldValue(name, res);
+  // };
 
   return (
     <>
@@ -33,12 +32,12 @@ function Storage({ form, classes }: { form: any; classes: any }) {
         rightSection={
           <IconFolder
             stroke={1}
-            onClick={() =>
-              selected(
-                "storage.pending_path",
-                form.values["storage"]["pending_path"]
-              )
-            }
+            // onClick={() =>
+            //   selected(
+            //     "storage.pending_path",
+            //     form.values["storage"]["pending_path"]
+            //   )
+            // }
           />
         }
       />
@@ -50,12 +49,12 @@ function Storage({ form, classes }: { form: any; classes: any }) {
         rightSection={
           <IconFolder
             stroke={1}
-            onClick={() =>
-              selected(
-                "storage.movie_repository_path",
-                form.values["storage"]["movie_repository_path"]
-              )
-            }
+            // onClick={() =>
+            //   selected(
+            //     "storage.movie_repository_path",
+            //     form.values["storage"]["movie_repository_path"]
+            //   )
+            // }
           />
         }
       />
@@ -67,12 +66,12 @@ function Storage({ form, classes }: { form: any; classes: any }) {
         rightSection={
           <IconFolder
             stroke={1}
-            onClick={() =>
-              selected(
-                "storage.tvshow_repository_path",
-                form.values["storage"]["tvshow_repository_path"]
-              )
-            }
+            // onClick={() =>
+            //   selected(
+            //     "storage.tvshow_repository_path",
+            //     form.values["storage"]["tvshow_repository_path"]
+            //   )
+            // }
           />
         }
       />

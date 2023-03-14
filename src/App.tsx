@@ -2,10 +2,8 @@ import Layout from "@/layout";
 import { useStore } from "@/store";
 import { MantineProvider } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
-import { emit } from "@tauri-apps/api/event";
 import i18n from "i18next";
 import { observer } from "mobx-react-lite";
-import { useEffect } from "react";
 import { initReactI18next } from "react-i18next";
 import { BrowserRouter } from "react-router-dom";
 import { resources } from "./locales/locales";
@@ -30,12 +28,6 @@ function App() {
   // const outlet = useRoutes(routes)
   // const theme = getTheme(setting.setting as SettingObject)
   const { settingStore } = useStore();
-
-  useEffect(() => {
-    emit("show_window", {
-      theMessage: "Hello World!",
-    });
-  }, []);
 
   return (
     <MantineProvider

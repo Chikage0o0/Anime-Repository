@@ -6,14 +6,8 @@ use crate::model::nfo::ProviderKnown;
 
 // Key: File Path
 // Value: VideoData
-static DB: Lazy<sled::Db> = Lazy::new(|| {
-    sled::open(
-        PathBuf::from(tauri::api::path::config_dir().unwrap())
-            .join("AnimeRepository")
-            .join("unrecognized_videos"),
-    )
-    .unwrap()
-});
+static DB: Lazy<sled::Db> =
+    Lazy::new(|| sled::open(PathBuf::from("Config").join("unrecognized_videos")).unwrap());
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Hash)]
 /// The type of video that is unrecognized
@@ -73,4 +67,15 @@ pub enum UnrecognizedVideosDataError {
     KeyNotFound(String),
     #[error(transparent)]
     SledError(#[from] sled::Error),
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_get_all() {
+        let all = get_all();
+        dbg!(&all);
+    }
 }

@@ -1,6 +1,6 @@
 use crate::{
     data::pending_videos::{delete, get_all},
-    utils::{file, tauri},
+    utils::file,
 };
 
 pub fn process() {
@@ -13,9 +13,9 @@ pub fn process() {
                 delete(src_path.to_path_buf());
                 file::create_shortcut(&target_path, &src_path)
                     .unwrap_or_else(|err| log::error!("Create shortcut failed: {:?}", err));
-                tauri::send_storage_notification(
-                    target_path.file_name().unwrap().to_str().unwrap(),
-                );
+                // tauri::send_storage_notification(
+                //     target_path.file_name().unwrap().to_str().unwrap(),
+                // );
             }
         } else {
             eprintln!("{} not exists", src_path.to_str().unwrap());

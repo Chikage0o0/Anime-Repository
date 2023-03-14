@@ -14,9 +14,8 @@ import {
 import { UseFormReturnType } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { IconCheck, IconSearch, IconX } from "@tabler/icons-react";
-import { invoke } from "@tauri-apps/api";
 import { flowResult } from "mobx";
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 function EditRule({
@@ -135,16 +134,15 @@ function Submit({
   const [confirmOpened, setConfirmOpened] = useState(false);
   const getTitle = async (id: string, provider: string, lang: string) => {
     if (id && provider && lang) {
-      let result = await invoke("get_title", {
-        id: id,
-        provider: provider,
-        lang: lang,
-        type: "tvshow",
-      });
-      if (result) {
-        return result;
+      let result = await fetch(
+        `api/get_title/${id}/${provider}/${lang}/tvshow`
+      );
+      if (result.ok) {
+        let title = await result.json();
+        return title;
       } else {
-        throw new Error("Failed to get Info");
+        const e: string = await result.text();
+        throw result.statusText + "\n" + e;
       }
     }
   };

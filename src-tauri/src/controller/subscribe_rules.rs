@@ -1,10 +1,10 @@
-use serde::Serialize;
-
 use crate::{
     data::subscribe_rules::{list, Key, Value},
     model::nfo::ProviderKnown,
     service::subscribe,
 };
+use actix_web::{delete, get, post, web, Responder, Result};
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize)]
 pub struct SubscribeRule {
@@ -35,25 +35,33 @@ impl From<(Key, Value)> for SubscribeRule {
     }
 }
 
-#[tauri::command]
-pub fn get_subscribe_rules() -> Vec<SubscribeRule> {
-    list().into_iter().map(|x| SubscribeRule::from(x)).collect()
+#[get("/api/subscribe_rules")]
+pub async fn get_subscribe_rules() -> impl Responder {
+    web::Json(
+        list()
+            .into_iter()
+            .map(|x| SubscribeRule::from(x))
+            .collect::<Vec<SubscribeRule>>(),
+    )
 }
 
-#[tauri::command]
-pub fn delete_subscribe_rule(id: String, provider: ProviderKnown) -> Result<(), String> {
-    subscribe::remove(Key { id, provider }).map_err(|e| e.to_string())
+#[delete("/api/subscribe_rule")]
+pub async fn delete_subscribe_rule(info: web::Query<Key>) -> Result<impl Responder> {
+    subscribe::remove(info.0).map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
+    Ok(web::Json(()))
 }
 
-#[tauri::command]
-pub fn get_subscribe_rule(id: String, provider: ProviderKnown) -> Result<SubscribeRule, String> {
-    let key = Key { id, provider };
-    let value = key.get().map_err(|e| e.to_string())?;
-    Ok(SubscribeRule::from((key, value)))
+#[get("/api/subscribe_rule")]
+pub async fn get_subscribe_rule(info: web::Query<Key>) -> Result<impl Responder> {
+    let key = info.0;
+    let value = key
+        .get()
+        .map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
+    Ok(web::Json(SubscribeRule::from((key, value))))
 }
 
-#[tauri::command]
-pub async fn insert_subscribe_rule(
+#[derive(Deserialize)]
+pub struct InsertJson {
     id: String,
     provider: ProviderKnown,
     title: String,
@@ -63,7 +71,21 @@ pub async fn insert_subscribe_rule(
     episode_position: u8,
     episode_regex: String,
     lang: String,
-) -> Result<(), String> {
+}
+
+#[post("/api/subscribe_rule")]
+pub async fn insert_subscribe_rule(info: web::Json<InsertJson>) -> Result<impl Responder> {
+    let InsertJson {
+        id,
+        provider,
+        title,
+        tvshow_regex,
+        season,
+        episode_offset,
+        episode_position,
+        episode_regex,
+        lang,
+    } = info.into_inner();
     subscribe::insert((
         Key { id, provider },
         Value {
@@ -77,5 +99,6 @@ pub async fn insert_subscribe_rule(
         },
     ))
     .await
-    .map_err(|e| e.to_string())
+    .map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
+    Ok(web::Json(()))
 }

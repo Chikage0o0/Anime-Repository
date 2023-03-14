@@ -6,7 +6,6 @@ import {
   IconRss,
   IconSettings,
 } from "@tabler/icons-react";
-import { appWindow } from "@tauri-apps/api/window";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -144,16 +143,6 @@ export function Menu() {
         >
           <IconSettings className={classes.linkIcon} stroke={1.5} />
           <span>{t("setting")}</span>
-        </a>
-        <a
-          className={classes.link}
-          onClick={() => {
-            appWindow.hide();
-            appWindow.close();
-          }}
-        >
-          <IconMinimize className={classes.linkIcon} stroke={1.5} />
-          <span>{t("UI.minimize_to_tray")}</span>
         </a>
       </Navbar.Section>
     </Navbar>

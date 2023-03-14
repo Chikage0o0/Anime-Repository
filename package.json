@@ -18,7 +18,6 @@
     "@mantine/hooks": "^6.0.1",
     "@mantine/notifications": "^6.0.1",
     "@tabler/icons-react": "^2.9.0",
-    "@tauri-apps/api": "^1.2.0",
     "i18next": "^22.4.11",
     "mobx": "^6.8.0",
     "mobx-react-lite": "^3.4.3",

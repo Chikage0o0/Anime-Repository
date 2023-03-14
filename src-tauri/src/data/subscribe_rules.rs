@@ -7,14 +7,8 @@ use serde_json::json;
 
 // Key: (id, provider)
 // Value: (title, tvshow_regex, season, episode_offset, episode_position, episode_regex, lang)
-static DB: Lazy<sled::Db> = Lazy::new(|| {
-    sled::open(
-        PathBuf::from(tauri::api::path::config_dir().unwrap())
-            .join("AnimeRepository")
-            .join("subscribe_rules"),
-    )
-    .unwrap()
-});
+static DB: Lazy<sled::Db> =
+    Lazy::new(|| sled::open(PathBuf::from("Config").join("subscribe_rules")).unwrap());
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Hash)]
 pub struct Key {

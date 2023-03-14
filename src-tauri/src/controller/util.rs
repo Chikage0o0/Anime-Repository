@@ -1,13 +1,13 @@
 use crate::{model::nfo::ProviderKnown, service::subscribe};
+use actix_web::{get, web, Responder, Result};
 
-#[tauri::command]
+#[get("/api/get_title/{id}/{provider}/{lang}/{type}")]
 pub async fn get_title(
-    id: &str,
-    provider: ProviderKnown,
-    lang: &str,
-    r#type: &str,
-) -> Result<String, String> {
-    subscribe::get_title(id, provider, lang, r#type)
+    info: web::Path<(String, ProviderKnown, String, String)>,
+) -> Result<impl Responder> {
+    let (id, provider, lang, r#type) = info.into_inner();
+    let title = subscribe::get_title(&id, provider, &lang, &r#type)
         .await
-        .map_err(|e| e.to_string())
+        .map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
+    Ok(web::Json(title))
 }

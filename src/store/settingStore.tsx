@@ -1,5 +1,4 @@
 // 异步的获取
-import { invoke } from "@tauri-apps/api";
 import { flow, flowResult, makeAutoObservable } from "mobx";
 
 export type SettingObject = {
@@ -55,9 +54,20 @@ class SettingStore {
   *applySetting(a: SettingObject) {
     this.loading = true;
     try {
-      yield invoke("save_setting", { setting: a });
+      const s: Response = yield fetch("api/setting", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        body: JSON.stringify(a),
+      });
+      if (!s.ok) {
+        const e: string = yield s.text();
+        throw s.statusText + "\n" + e;
+      }
       this.setting = a;
-    } catch (e) {
+    } catch (e: any) {
       throw e;
     } finally {
       this.loading = false;
@@ -82,8 +92,9 @@ class SettingStore {
   }
 
   *init() {
-    const res: SettingObject = yield invoke("get_setting");
-    return res;
+    const res: Response = yield fetch("api/setting");
+    const setting: SettingObject = yield res.json();
+    return setting;
   }
 }
 const settingStore = new SettingStore();
