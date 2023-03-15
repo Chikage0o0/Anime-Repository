@@ -48,7 +48,10 @@ pub fn first_boot() {
         // 排除非视频文件以及已经加入处理队列的文件
         (filter_file(file_path)                
         // 排除上次扫描之前的文件
-            && file_path.metadata().unwrap().accessed().unwrap().duration_since(UNIX_EPOCH).unwrap().as_secs() > Setting::get_last_scan())
+            && file_path.metadata().ok()
+            .and_then(|m|m.accessed().ok())
+            .and_then(|f|f.duration_since(UNIX_EPOCH).ok())
+            .and_then(|t|Some(t.as_secs()> Setting::get_last_scan())).unwrap_or_default())
             .then(|| file_path)
         })
         // 对视频文件进行匹配

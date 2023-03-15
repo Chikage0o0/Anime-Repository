@@ -14,11 +14,15 @@ pub fn process() {
                 file::create_shortcut(&target_path, &src_path)
                     .unwrap_or_else(|err| log::error!("Create shortcut failed: {:?}", err));
                 crate::controller::send_storage_notification(
-                    target_path.file_name().unwrap().to_str().unwrap(),
+                    target_path
+                        .file_name()
+                        .unwrap_or_default()
+                        .to_str()
+                        .unwrap_or_default(),
                 );
             }
         } else {
-            eprintln!("{} not exists", src_path.to_str().unwrap());
+            eprintln!("{} not exists", src_path.to_str().unwrap_or_default());
             delete(src_path.to_path_buf());
         }
     });
