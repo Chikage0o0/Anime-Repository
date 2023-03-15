@@ -262,6 +262,7 @@ pub async fn internal_matcher<P: AsRef<Path>>(file: P) -> Result<(), MatcherErro
                                 )
                                 .await
                                 .map_err(|e| MatcherError::ProcessError(e.to_string()))?;
+                                return Ok(());
                             } else {
                                 log::error!("Can't find `{}`", title);
                             }
@@ -281,6 +282,7 @@ pub async fn internal_matcher<P: AsRef<Path>>(file: P) -> Result<(), MatcherErro
                                 nfo::movie::process(&id, provider, lang, &path)
                                     .await
                                     .map_err(|e| MatcherError::ProcessError(e.to_string()))?;
+                                return Ok(());
                             } else {
                                 log::error!("Can't find `{}`", title);
                             }
@@ -293,5 +295,5 @@ pub async fn internal_matcher<P: AsRef<Path>>(file: P) -> Result<(), MatcherErro
             }
         }
     }
-    Ok(())
+    return Err(MatcherError::FileNotMatch(file.as_ref().to_path_buf()));
 }
