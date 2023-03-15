@@ -16,7 +16,7 @@ pub struct SearchResult {
 pub async fn search(
     title: &str,
     provider: ProviderKnown,
-    r#type: &str,
+    r#type: super::r#Type,
 ) -> Result<Vec<SearchResult>, Box<dyn std::error::Error>> {
     log::info!("Searching for {} on {:?}", title, &provider);
     match provider {
@@ -24,17 +24,16 @@ pub async fn search(
             let client = TMDBClient::new();
             let result: (String, StatusCode);
             match r#type {
-                "tvshow" => {
+                super::r#Type::Tvshow => {
                     result = client
                         .search_tvshows(&title, &Setting::get_default_lang(), 1)
                         .await?;
                 }
-                "movie" => {
+                super::r#Type::Movie => {
                     result = client
                         .search_movie(&title, &Setting::get_default_lang(), 1)
                         .await?;
                 }
-                _ => return Err("Unknown type".into()),
             }
             let (body, status) = result;
             if let StatusCode::OK = status {

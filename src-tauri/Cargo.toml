@@ -1,6 +1,6 @@
 [package]
 name = "anime_repository"
-version = "0.2.0"
+version = "0.2.1"
 description = "Developed by Chikage"
 authors = ["Chikage <chikage@939.me>"]
 license = "GPL-3.0"
@@ -30,7 +30,7 @@ toml = "^0.7.2"
 thiserror = "^1.0.38"
 sys-locale = "^0.2.3"
 reqwest = { version = "^0.11.14", features = ["socks"] }
-quick-xml = { version = "^0.27.1", features = [
+quick-xml = { version = "^0.28.0", features = [
     "serialize",
     "overlapped-lists",
 ] }
@@ -48,10 +48,11 @@ log4rs = { version = "^1.2.0", features = [
 ] }
 window-shadows = "^0.2.1"
 auto-launch = "^0.4.0"
-tokio = { version = "^1.26.0", features = ["time"] }
+tokio = { version = "^1.26.0", features = ["time", "rt", "macros"] }
 notify-debouncer-mini = "0.2.1"
 tauri-plugin-single-instance = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "dev" }
 fs_extra = "1.3.0"
+pcre2 = "*"
 
 [features]
 # by default Tauri runs in production mode

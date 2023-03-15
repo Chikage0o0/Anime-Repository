@@ -87,26 +87,33 @@ fn map_sub_target_path(video_src_stem: &str, video_target_path: &Path, sub_path:
 }
 
 pub fn create_shortcut<P: AsRef<Path>>(src: P, target: P) -> Result<(), std::io::Error> {
+    //if path is relative, convert to absolute path
+    let src = if src.as_ref().is_relative() {
+        std::fs::canonicalize(src.as_ref())?
+    } else {
+        src.as_ref().to_path_buf()
+    };
+    let target = if target.as_ref().is_relative() {
+        std::fs::canonicalize(target.as_ref())?
+    } else {
+        target.as_ref().to_path_buf()
+    };
     #[cfg(target_os = "windows")]
     {
         use std::os::windows::fs::symlink_file;
-        symlink_file(src.as_ref(), target.as_ref())?;
+        symlink_file(&src, &target)?;
     }
     #[cfg(target_os = "linux")]
     {
         use std::os::unix::fs::symlink;
-        symlink(src.as_ref(), target.as_ref())?;
+        symlink(&src, &target)?;
     }
     #[cfg(target_os = "macos")]
     {
         use std::os::unix::fs::symlink;
-        symlink(src.as_ref(), target.as_ref())?;
+        symlink(&src, &target)?;
     }
-    log::info!(
-        "create shortcut from {:?} to {:?}",
-        src.as_ref(),
-        target.as_ref()
-    );
+    log::info!("create shortcut from {:?} to {:?}", &src, &target);
     Ok(())
 }
 
@@ -130,7 +137,9 @@ pub fn move_video_file_with_queue(src_path: PathBuf, target_path: PathBuf) {
         pending_videos::delete(src_path.clone());
         create_shortcut(&target_path, &src_path)
             .unwrap_or_else(|err| log::error!("Create shortcut failed: {:?}", err));
-        super::tauri::send_storage_notification(target_path.file_name().unwrap().to_str().unwrap());
+        crate::controller::send_storage_notification(
+            target_path.file_name().unwrap().to_str().unwrap(),
+        );
     } else {
         crate::data::pending_videos::insert(src_path, target_path);
     }

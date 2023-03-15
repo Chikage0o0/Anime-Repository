@@ -15,7 +15,7 @@ pub async fn insert((key, value): (Key, Value)) -> Result<(), SubscribeServiceEr
     key.insert(&value)?;
     matcher.insert();
 
-    tauri::async_runtime::spawn(async move {
+    tokio::spawn(async move {
         for i in matcher.match_all_videos().iter() {
             process(&key, &i.0, i.1).await.unwrap();
             crate::service::unrecognized_videos::delete(&i.0).unwrap();

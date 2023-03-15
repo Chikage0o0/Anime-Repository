@@ -1,3 +1,4 @@
+import { getTitle } from "@/invoke";
 import { useStore } from "@/store";
 import {
   Box,
@@ -163,21 +164,6 @@ function Submit({
   const { unrecognizedVideosStore } = useStore();
   const { t } = useTranslation();
   const [confirmOpened, setConfirmOpened] = useState(false);
-  const getTitle = async (id: string, provider: string, lang: string) => {
-    if (id && provider && lang) {
-      let result = await invoke("get_title", {
-        id: id,
-        provider: provider,
-        lang: lang,
-        type: form.values.type,
-      });
-      if (result) {
-        return result;
-      } else {
-        throw new Error("Failed to get Info");
-      }
-    }
-  };
 
   return (
     <Popover position="bottom" withArrow shadow="md" opened={confirmOpened}>
@@ -191,7 +177,8 @@ function Submit({
                 let title = await getTitle(
                   form.values.id,
                   form.values.provider,
-                  form.values.lang
+                  form.values.lang,
+                  form.values.type
                 );
                 if (title) {
                   form.setFieldValue("title", title);

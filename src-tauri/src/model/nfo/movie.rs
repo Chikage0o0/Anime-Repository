@@ -577,11 +577,10 @@ mod tests {
         assert!(data.get_id(Provider::Known(ProviderKnown::TMDB)) == Some("532321".to_string()));
     }
 
-    #[test]
-    fn test_update() {
-        use tauri::async_runtime::block_on;
+    #[tokio::test]
+    async fn test_update() {
         let mut data: Movie = Movie::new("937278", Provider::Known(ProviderKnown::TMDB));
-        let _result = block_on(data.update("zh-CN"));
+        let _result = data.update("zh-CN").await;
         dbg!(data);
     }
 }

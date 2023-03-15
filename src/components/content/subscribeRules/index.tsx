@@ -25,7 +25,7 @@ import {
 } from "@tabler/icons-react";
 import { flowResult } from "mobx";
 import { observer } from "mobx-react-lite";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import EditRule from "./editRule";
 
@@ -45,7 +45,10 @@ function getLink(provider: string, id: string): string {
 
 function SubscribeRules() {
   const { t } = useTranslation();
-  const { settingStore, subscribeRulesStore: subscribeStore } = useStore();
+  const { settingStore, subscribeRulesStore } = useStore();
+  useEffect(() => {
+    subscribeRulesStore.update();
+  }, []);
   const [opened, setOpened] = useState(false);
   const [search, setSearch] = useState("");
   const form = useForm({
@@ -111,7 +114,7 @@ function SubscribeRules() {
     setSearch(value);
   };
 
-  const data = subscribeStore.data
+  const data = subscribeRulesStore.data
     .filter((item) => {
       if (search === "") {
         return true;
@@ -174,7 +177,10 @@ function SubscribeRules() {
                     mt="xs"
                     onClick={() =>
                       flowResult(
-                        subscribeStore.delSubscribeRule(item.id, item.provider)
+                        subscribeRulesStore.delSubscribeRule(
+                          item.id,
+                          item.provider
+                        )
                       )
                         .then(() => {
                           notifications.show({

@@ -4,7 +4,7 @@ use crate::{
         unrecognized_videos::{self, UnrecognizedVideosDataError},
     },
     model::setting::Setting,
-    utils::{self, file, matcher::Matcher},
+    utils::{self, file, matcher},
 };
 use notify_debouncer_mini::{notify::Error, DebouncedEvent};
 use std::{path::Path, sync::mpsc::Receiver, time::UNIX_EPOCH};
@@ -66,7 +66,7 @@ fn filter_file<P: AsRef<Path>>(file_path: P) -> bool {
 }
 
 fn match_file(file_path: &Path, pending_path: &Path) {
-    match Matcher::matchers_video(&file_path) {
+    match matcher::Matcher::matchers_video(&file_path) {
         Some((key, file_path, episode)) => {
             log::info!("Found Subscribe video: {:?}", file_path);
             block_on(crate::service::subscribe::process(&key, file_path, episode))
@@ -74,6 +74,16 @@ fn match_file(file_path: &Path, pending_path: &Path) {
         }
         // 未匹配到的视频文件
         None => {
+            match block_on(matcher::internal_matcher(&file_path)){
+                Ok(_) => {
+                    log::info!("Use Internal Matcher match the file: {:?}", file_path);
+                    return;
+                }
+                Err(e) => {
+                    log::warn!("Use internal matcher match the {:?} failed: {:?}",file_path, e);
+                }
+            }
+
             if Setting::get_use_openai() {
                 // 未匹配的文件，且在根目录，则使用 OpenAI 进行匹配
                 if file_path
@@ -88,7 +98,7 @@ fn match_file(file_path: &Path, pending_path: &Path) {
                         return;
                         }
                         Err(e) => {
-                            log::warn!("Use OpenAI match the file failed: {:?}", e);
+                            log::warn!("Use OpenAI match the {:?} failed: {:?}", file_path, e);
                         }
                         
                     }
