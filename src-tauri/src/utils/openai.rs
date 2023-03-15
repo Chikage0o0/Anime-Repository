@@ -45,8 +45,8 @@ async fn get_match_result<P: AsRef<Path>>(
 pub async fn process<P: AsRef<Path>>(path: P) -> Result<(), Box<dyn std::error::Error>> {
     let (title, mut season, episode) = get_match_result(&path).await?;
     let r#type = match episode {
-        Some(_) => "tvshow",
-        None => "movie",
+        Some(_) => super::r#Type::Tvshow,
+        None => super::r#Type::Movie,
     };
 
     if episode.is_some() && season.is_none() {
@@ -70,7 +70,7 @@ pub async fn process<P: AsRef<Path>>(path: P) -> Result<(), Box<dyn std::error::
     let lang = &Setting::get_default_lang();
 
     match r#type {
-        "tvshow" => {
+        super::r#Type::Tvshow => {
             nfo::tvshow::process(
                 id,
                 provider,
@@ -82,8 +82,7 @@ pub async fn process<P: AsRef<Path>>(path: P) -> Result<(), Box<dyn std::error::
             )
             .await?
         }
-        "movie" => nfo::movie::process(id, provider, lang, &path).await?,
-        _ => return Err("Unknown type".into()),
+        super::r#Type::Movie => nfo::movie::process(id, provider, lang, &path).await?,
     };
     Ok(())
 }

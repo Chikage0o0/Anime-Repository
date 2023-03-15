@@ -10,3 +10,9 @@ pub fn get_now_time() -> u64 {
     let since_the_epoch = now.duration_since(UNIX_EPOCH).expect("Time went backwards");
     since_the_epoch.as_secs()
 }
+
+#[derive(Clone, Copy)]
+pub enum r#Type {
+    Tvshow,
+    Movie,
+}
