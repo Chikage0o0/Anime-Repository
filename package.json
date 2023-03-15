@@ -1,7 +1,7 @@
 {
   "name": "anime-repository",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.2.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -13,10 +13,10 @@
   },
   "dependencies": {
     "@emotion/react": "^11.10.6",
-    "@mantine/core": "^6.0.1",
-    "@mantine/form": "^6.0.1",
-    "@mantine/hooks": "^6.0.1",
-    "@mantine/notifications": "^6.0.1",
+    "@mantine/core": "^6.0.2",
+    "@mantine/form": "^6.0.2",
+    "@mantine/hooks": "^6.0.2",
+    "@mantine/notifications": "^6.0.2",
     "@tabler/icons-react": "^2.9.0",
     "@tauri-apps/api": "^1.2.0",
     "i18next": "^22.4.11",
@@ -30,13 +30,13 @@
   "devDependencies": {
     "@actions/github": "^5.1.1",
     "@tauri-apps/cli": "^1.2.3",
-    "@types/node": "^18.15.0",
+    "@types/node": "^18.15.3",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
     "@vitejs/plugin-react": "^3.1.0",
     "adm-zip": "^0.5.10",
     "fs-extra": "^11.1.0",
-    "node-fetch": "^3.3.0",
+    "node-fetch": "^3.3.1",
     "typescript": "^4.9.5",
     "vite": "^4.1.4",
     "vite-plugin-top-level-await": "^1.3.0"

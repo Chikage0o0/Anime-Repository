@@ -46,7 +46,7 @@ jobs:
         with:
           tagName: v__VERSION__
           releaseName: "Anime Repository v__VERSION__"
-          releaseBody: "More new features are now supported."
+          releaseBody: "Please see UPDATELOG.md."
           releaseDraft: false
           prerelease: true
 
@@ -62,30 +62,8 @@ jobs:
           TAURI_PRIVATE_KEY: "${{ secrets.TAURI_PRIVATE_KEY }}"
           TAURI_KEY_PASSWORD: "${{ secrets.TAURI_KEY_PASSWORD }}"
 
-  publish-release:
-    permissions:
-      contents: write
-    runs-on: ubuntu-20.04
-    needs: [build-tauri]
-
-    steps:
-      - name: publish release
-        id: publish-release
-        uses: actions/github-script@v6
-        env:
-          release_id: ${{ needs.create-release.outputs.release_id }}
-        with:
-          script: |
-            github.rest.repos.updateRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              release_id: process.env.release_id,
-              draft: false,
-              prerelease: false
-            })
-
   release-update:
-    needs: [build-tauri, publish-release]
+    needs: [build-tauri]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
