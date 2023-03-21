@@ -123,24 +123,6 @@ impl Setting {
 
         Ok(s.try_deserialize()?)
     }
-}
-impl Setting {
-    pub fn get() -> Setting {
-        CONFIG.lock().unwrap().clone()
-    }
-
-    pub fn get_retry_times() -> u8 {
-        CONFIG.lock().unwrap().network.retry_times
-    }
-
-    pub fn get_proxy() -> Option<String> {
-        let network = CONFIG.lock().unwrap().network.clone();
-        if network.use_proxy && network.proxy.len() > 0 {
-            Some(network.proxy)
-        } else {
-            None
-        }
-    }
 
     pub fn apply(setting: Setting) -> Result<(), SettingError> {
         let mut need_set_auto_run: Option<bool> = None;
@@ -177,6 +159,25 @@ impl Setting {
         log::info!("Setting applied");
 
         Ok(())
+    }
+}
+
+impl Setting {
+    pub fn get() -> Setting {
+        CONFIG.lock().unwrap().clone()
+    }
+
+    pub fn get_retry_times() -> u8 {
+        CONFIG.lock().unwrap().network.retry_times
+    }
+
+    pub fn get_proxy() -> Option<String> {
+        let network = CONFIG.lock().unwrap().network.clone();
+        if network.use_proxy && network.proxy.len() > 0 {
+            Some(network.proxy)
+        } else {
+            None
+        }
     }
 
     pub fn get_pending_path() -> PathBuf {

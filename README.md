@@ -56,13 +56,25 @@ Here is an example rule
 
 All you need to do is fill in the OpenAI API KEY and turn on the switch, and the rest is all automatic.
 
+### About create shortcut
+
+In Windows, creating soft links requires administrator privileges. You can bypass the administrator privilege by the following methods.
+
+- Enable Developer Mode(This applies to local directories only).
+- Edit the Group Policy
+  1. Open Group Policy
+  2. Go to `Computer Configuration\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+  3. Open `Create symbolic links`
+  4. Add your username
+  5. Reboot
+
 ### About Config File AND LOG
 
 Windows: `%appdata%/AnimeRepository`
 
 
 
-## Develop
+## Developer
 
 Read [https://tauri.app/v1/guides/getting-started/prerequisites/](https://tauri.app/v1/guides/getting-started/prerequisites/)
 
