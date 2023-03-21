@@ -1,5 +1,12 @@
 import { useTranslation } from "react-i18next";
-import { Divider, Group, Select, Switch, TextInput } from "@mantine/core";
+import {
+  Divider,
+  Group,
+  PasswordInput,
+  Select,
+  Switch,
+  TextInput,
+} from "@mantine/core";
 import { useState } from "react";
 
 function Scraper({ form, classes }: { form: any; classes: any }) {
@@ -42,7 +49,7 @@ function Scraper({ form, classes }: { form: any; classes: any }) {
         label={t("setting.scraper.use_openai")}
       />
 
-      <TextInput
+      <PasswordInput
         className={classes.input}
         label={t("setting.scraper.openai_key")}
         placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
