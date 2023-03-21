@@ -15,7 +15,11 @@ pub fn get_unrecognized_videos_list() -> Vec<(PathBuf, VideoData)> {
 pub fn refresh_unrecognized_videos_list() -> Result<(), String> {
     get_handler_tx()
         .send(crate::handler::Command::ScanPendingVideosFolder)
-        .map_err(|e| e.to_string())
+        .map_err(|e| e.to_string())?;
+    get_handler_tx()
+        .send(crate::handler::Command::ScanUnrecognizedList)
+        .map_err(|e| e.to_string())?;
+    Ok(())
 }
 
 #[tauri::command]
