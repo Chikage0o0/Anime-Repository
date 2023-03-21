@@ -39,11 +39,11 @@ async function resolveUpdater () {
         pub_date: new Date().toISOString(),
         platforms: {
             win64: { signature: "", url: "" }, // compatible with older formats
-            // linux: { signature: "", url: "" }, // compatible with older formats
+            linux: { signature: "", url: "" }, // compatible with older formats
             // darwin: { signature: "", url: "" }, // compatible with older formats
             // "darwin-aarch64": { signature: "", url: "" },
             // "darwin-intel": { signature: "", url: "" },
-            // "linux-x86_64": { signature: "", url: "" },
+            "linux-x86_64": { signature: "", url: "" },
             "windows-x86_64": { signature: "", url: "" },
             // "windows-i686": { signature: "", url: "" }, // no supported
         },
@@ -86,17 +86,17 @@ async function resolveUpdater () {
         //     updateData.platforms["darwin-aarch64"].signature = sig
         // }
 
-        // // linux url
-        // if (name.endsWith(".AppImage.tar.gz")) {
-        //     updateData.platforms.linux.url = browser_download_url
-        //     updateData.platforms["linux-x86_64"].url = browser_download_url
-        // }
-        // // linux signature
-        // if (name.endsWith(".AppImage.tar.gz.sig")) {
-        //     const sig = await getSignature(browser_download_url)
-        //     updateData.platforms.linux.signature = sig
-        //     updateData.platforms["linux-x86_64"].signature = sig
-        // }
+        // linux url
+        if (name.endsWith(".AppImage.tar.gz")) {
+            updateData.platforms.linux.url = browser_download_url
+            updateData.platforms["linux-x86_64"].url = browser_download_url
+        }
+        // linux signature
+        if (name.endsWith(".AppImage.tar.gz.sig")) {
+            const sig = await getSignature(browser_download_url)
+            updateData.platforms.linux.signature = sig
+            updateData.platforms["linux-x86_64"].signature = sig
+        }
     })
 
     await Promise.allSettled(promises)

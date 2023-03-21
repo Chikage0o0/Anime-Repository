@@ -166,6 +166,13 @@ pub fn create_window(app_handle: &AppHandle) {
             Err(err) => log::error!(target: "app", "{err}"),
         }
     }
+
+    #[cfg(target_os = "linux")]
+    builder
+        .decorations(false)
+        .inner_size(1000.0, 600.0)
+        .visible(false)
+        .build();
 }
 
 pub fn set_auto_launch(switch: bool) -> Result<(), String> {
