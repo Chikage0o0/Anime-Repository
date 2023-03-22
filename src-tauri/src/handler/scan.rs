@@ -11,6 +11,7 @@ use std::{path::Path, sync::mpsc::Receiver, time::UNIX_EPOCH};
 use tauri::async_runtime::block_on;
 
 pub fn process(wrx: &Receiver<Result<Vec<DebouncedEvent>, Vec<Error>>>) {
+
     log::debug!("Processing pending videos folder");
     while let Ok(events_result) = wrx.try_recv() {
         match events_result {
@@ -18,7 +19,12 @@ pub fn process(wrx: &Receiver<Result<Vec<DebouncedEvent>, Vec<Error>>>) {
                 for event in events {
                     let file_path = event.path;
                     if filter_file(&file_path) {
-                        match_file(&file_path, &Setting::get_pending_path());
+                        match_file(&file_path);
+                    }else  if file_path.is_dir() && !file_path.is_symlink() && file_path.exists(){
+                        file::walk_file(file_path.clone())
+                            .iter()
+                            .filter(|file_path| filter_file(file_path))
+                            .for_each(|file_path| match_file(file_path));
                     }
                 }
             }
@@ -34,8 +40,8 @@ pub fn process(wrx: &Receiver<Result<Vec<DebouncedEvent>, Vec<Error>>>) {
 
 // 第一次启动时使用轮询的方式扫描
 pub fn first_boot() {
-    let pending_path = Setting::get_pending_path();
-    log::debug!("BOOT:Scan pending videos folder: {:?}", &pending_path);
+    let pending_path=Setting::get_pending_path();
+    log::debug!("BOOT:Scan pending videos folder");
     if !pending_path.exists() {
         std::fs::create_dir_all(&pending_path).expect("Can't create pending path");
     }
@@ -55,7 +61,7 @@ pub fn first_boot() {
             .then(|| file_path)
         })
         // 对视频文件进行匹配
-        .for_each(|file_path| match_file(file_path, &pending_path));
+        .for_each(|file_path| match_file(file_path));
     Setting::set_last_scan(utils::get_now_time());
 }
 
@@ -68,7 +74,7 @@ fn filter_file<P: AsRef<Path>>(file_path: P) -> bool {
         )
 }
 
-fn match_file(file_path: &Path, pending_path: &Path) {
+fn match_file(file_path: &Path) {
     match matcher::Matcher::matchers_video(&file_path) {
         Some((key, file_path, episode)) => {
             log::info!("Found Subscribe video: {:?}", file_path);
@@ -91,7 +97,7 @@ fn match_file(file_path: &Path, pending_path: &Path) {
                 // 未匹配的文件，且在根目录，则使用 OpenAI 进行匹配
                 if file_path
                     .parent()
-                    .and_then(|f| (f == pending_path).then(|| ()))
+                    .and_then(|f| (f == &Setting::get_pending_path()).then(|| ()))
                     .is_some()
                 {
                     let result = block_on(utils::openai::process(&file_path));

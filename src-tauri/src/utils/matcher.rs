@@ -12,6 +12,8 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use super::file;
+
 static MATCHERS: Lazy<Mutex<Vec<Matcher>>> = Lazy::new(|| Mutex::new(Matcher::get_all()));
 
 #[derive(Clone, Debug)]
@@ -104,6 +106,7 @@ impl Matcher {
     pub fn match_all_videos(&self) -> Vec<(PathBuf, u64)> {
         walk_file(Setting::get_pending_path())
             .iter()
+            .filter(|f| file::is_video(f))
             .filter_map(|f| self.match_video(f).ok())
             .collect::<Vec<(PathBuf, u64)>>()
     }
