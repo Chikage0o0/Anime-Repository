@@ -17,6 +17,8 @@ pub struct Episode {
     display_episode: Option<u64>,
     #[serde(rename = "displayseason")]
     display_season: Option<u64>,
+    episode: Option<u64>,
+    season: Option<u64>,
     plot: Option<String>,
     tagline: Option<String>,
     runtime: Option<String>,
@@ -109,8 +111,8 @@ impl Episode {
                         )?)?;
                     }
 
-                    self.display_episode = Some(episode);
-                    self.display_season = Some(season);
+                    self.episode = Some(episode);
+                    self.season = Some(season);
 
                     if let Some(name) = data.get("name").and_then(|f| f.as_str()) {
                         self.title = name.to_string();
