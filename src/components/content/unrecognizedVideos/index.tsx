@@ -25,7 +25,6 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import { invoke } from "@tauri-apps/api";
-import { listen } from "@tauri-apps/api/event";
 import { flowResult } from "mobx";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
@@ -41,18 +40,17 @@ function UnrecognizedVideos() {
   const [path, setPath] = useState("");
   const [search, setSearch] = useState("");
   useEffect(() => {
-    unrecognizedVideosStore.update();
-    const unlisten = async () => {
-      await listen<unrecognizedVideoObject[]>(
-        "unrecognized_videos_list",
-        (event) => {
-          unrecognizedVideosStore.set_data(event.payload);
-        }
-      );
-    };
-    return () => {
-      unlisten();
-    };
+    flowResult(unrecognizedVideosStore.update()).catch((err) => {
+      notifications.show({
+        title: t("unrecognized_videos.update_failed"),
+        message: err.message,
+        color: "red",
+      });
+    });
+    const intervalId = setInterval(() => {
+      unrecognizedVideosStore.update();
+    }, 5000); // 每 5 秒发送一次请求
+    return () => clearInterval(intervalId);
   }, []);
   const form = useForm({
     initialValues: {

@@ -89,13 +89,13 @@ pub fn tray_event(app: &AppHandle, event: SystemTrayEvent) {
     }
 }
 
-pub fn send_event(window: &str, event: &str, data: impl serde::Serialize + Clone) {
-    if let Some(app_handle) = crate::APP_HANDLE.get() {
-        if let Some(window) = app_handle.get_window(window) {
-            let _ = window.emit(event, data);
-        }
-    }
-}
+// pub fn send_event(window: &str, event: &str, data: impl serde::Serialize + Clone) {
+//     if let Some(app_handle) = crate::APP_HANDLE.get() {
+//         if let Some(window) = app_handle.get_window(window) {
+//             let _ = window.emit(event, data);
+//         }
+//     }
+// }
 
 pub fn exit_app() {
     Setting::write_to_file().unwrap_or_else(|err| {

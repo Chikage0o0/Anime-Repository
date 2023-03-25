@@ -22,7 +22,6 @@ import {
   IconSearch,
   IconX,
 } from "@tabler/icons-react";
-import { invoke } from "@tauri-apps/api";
 import { flowResult } from "mobx";
 import { Dispatch, SetStateAction, useState } from "react";
 import { useTranslation } from "react-i18next";
