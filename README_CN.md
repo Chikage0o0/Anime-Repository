@@ -51,7 +51,9 @@ Downloads/AnimeRepository/[Lilith-Raws] Isekai Nonbiri Nouka - 03 [Baha][WEB-DL]
 
 你所需要做的就是填写 OpenAI API KEY 并打开开关，其余全部自动完成。
 
-### 关于创建快捷方式
+### 关于创建软链接
+如果需要BT文件在移动后继续做种，需要允许程序创建软链接，这在Windows平台需要额外的操作。
+
 在 Windows 中，创建软链接需要管理员权限。您可以通过以下方法绕过管理员权限。
 
 - 启用开发者模式（仅适用于本地目录）。

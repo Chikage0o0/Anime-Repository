@@ -67,6 +67,7 @@ Here is an example rule
 All you need to do is fill in the OpenAI API KEY and turn on the switch, and the rest is all automatic.
 
 ### About create shortcut
+If you need BT files to continue to do seeding after moving, you need to allow the program to create soft links, which requires additional operations on the Windows platform.
 
 In Windows, creating soft links requires administrator privileges. You can bypass the administrator privilege by the following methods.
 
