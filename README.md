@@ -1,4 +1,5 @@
 # Anime Repository
+English | [中文](README_CN.md)
 
 A lightweight scraper,is designed to run in the background to automatically scrape specified directory files.
 
@@ -6,6 +7,15 @@ I am not very proficient in drawing, if you are willing to design a logo for it,
 
 This is the first program I wrote in Rust and Typescript, it is my graduation design.
 
+## TODO
+
+- [ ] Provide web-based running mode
+- [ ] Integrated [MkvAutoSubset](https://github.com/MkvAutoSubset/MkvAutoSubset) (All refactored using RUST)
+- [ ] Integrated RSS feeds and BT downloads
+- [ ] Integrated media library maintenance
+- [ ] Integrated video playback
+
+If you are interested in development, you are very welcome to join us.
 
 ## Feature
 
