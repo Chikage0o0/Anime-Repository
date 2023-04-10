@@ -119,7 +119,7 @@ pub fn create_shortcut<P: AsRef<Path>>(src: P, target: P) -> Result<(), std::io:
 
 pub fn is_video<P: AsRef<Path>>(path: P) -> bool {
     let path = path.as_ref();
-    if !path.is_file() || path.is_symlink() || !path.exists() {
+    if !path.exists() || !path.is_file() || path.is_symlink() {
         return false;
     }
     let ext = path.extension().unwrap_or_default().to_str().unwrap();
