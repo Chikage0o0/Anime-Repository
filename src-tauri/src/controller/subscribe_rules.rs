@@ -36,17 +36,20 @@ impl From<(Key, Value)> for SubscribeRule {
 }
 
 #[tauri::command]
-pub fn get_subscribe_rules() -> Vec<SubscribeRule> {
+pub async fn get_subscribe_rules() -> Vec<SubscribeRule> {
     list().into_iter().map(|x| SubscribeRule::from(x)).collect()
 }
 
 #[tauri::command]
-pub fn delete_subscribe_rule(id: String, provider: ProviderKnown) -> Result<(), String> {
+pub async fn delete_subscribe_rule(id: String, provider: ProviderKnown) -> Result<(), String> {
     subscribe::remove(Key { id, provider }).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-pub fn get_subscribe_rule(id: String, provider: ProviderKnown) -> Result<SubscribeRule, String> {
+pub async fn get_subscribe_rule(
+    id: String,
+    provider: ProviderKnown,
+) -> Result<SubscribeRule, String> {
     let key = Key { id, provider };
     let value = key.get().map_err(|e| e.to_string())?;
     Ok(SubscribeRule::from((key, value)))

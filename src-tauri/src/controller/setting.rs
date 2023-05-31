@@ -6,6 +6,6 @@ pub fn get_setting() -> Setting {
 }
 
 #[tauri::command]
-pub fn save_setting(setting: Setting) -> Result<(), SettingError> {
+pub async fn save_setting(setting: Setting) -> Result<(), SettingError> {
     Setting::apply(setting)
 }

@@ -23,7 +23,7 @@ pub fn refresh_unrecognized_videos_list() -> Result<(), String> {
 }
 
 #[tauri::command]
-pub fn delete_unrecognized_video_info(path: PathBuf) -> Result<(), String> {
+pub async fn delete_unrecognized_video_info(path: PathBuf) -> Result<(), String> {
     crate::service::unrecognized_videos::delete(path).map_err(|e| e.to_string())?;
     Ok(())
 }

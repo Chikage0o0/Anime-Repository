@@ -25,9 +25,8 @@ pub fn send_storage_notification(file_name: &str) {
     }
 
     let context = tauri::generate_context!();
-    Notification::new(&context.config().tauri.bundle.identifier)
+    let _ = Notification::new(&context.config().tauri.bundle.identifier)
         .title(title)
         .body(format!("{}", file_name))
-        .show()
-        .unwrap();
+        .show();
 }
