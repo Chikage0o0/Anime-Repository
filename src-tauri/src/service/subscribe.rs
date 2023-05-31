@@ -13,7 +13,7 @@ pub async fn insert((key, value): (Key, Value)) -> Result<(), SubscribeServiceEr
     log::info!("Inserting subscribe {:?}{:?}", key, value);
     let matcher: Matcher = (key.clone(), value.clone()).try_into()?;
     key.insert(&value)?;
-    matcher.insert();
+    Matcher::reload();
 
     tokio::spawn(async move {
         for i in matcher.match_all_videos().iter() {

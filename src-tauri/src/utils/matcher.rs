@@ -143,10 +143,10 @@ impl Matcher {
             .collect()
     }
 
-    pub fn insert(&self) {
+    pub fn reload() {
         let mut matchers = MATCHERS.lock().unwrap();
-        matchers.push(self.clone());
-        log::info!("Insert matcher: {:?}", self);
+        *matchers = Matcher::get_all();
+        log::info!("Reload matcher");
     }
 
     pub fn delete(id: &str, provider: ProviderKnown) {
