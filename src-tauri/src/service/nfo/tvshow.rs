@@ -67,7 +67,21 @@ pub async fn process<P: AsRef<Path>>(
         return Err(TvshowNfoServiceError::NetworkError(e));
     }
 
-    let episode_title = episode_nfo.title.clone();
+    // 去除文件名中的非法字符
+    let episode_file_title = episode_nfo.title.replace(
+        |c: char| {
+            c == '/'
+                || c == '\\'
+                || c == '?'
+                || c == '*'
+                || c == '<'
+                || c == '>'
+                || c == '|'
+                || c == ':'
+                || c == '"'
+        },
+        "",
+    );
 
     let episode_folder_path = tvshow_path.join(if season == 0 {
         "Specials".to_string()
@@ -76,14 +90,14 @@ pub async fn process<P: AsRef<Path>>(
     });
     let episode_nfo_path = episode_folder_path.join(format!(
         "{} - S{:02}E{:02} - {}.nfo",
-        &tvshow_title, season, episode, &episode_title
+        &tvshow_title, season, episode, &episode_file_title
     ));
     let episode_path = episode_folder_path.join(format!(
         "{} - S{:02}E{:02} - {}.{}",
         &tvshow_title,
         season,
         episode,
-        &episode_title,
+        &episode_file_title,
         path.extension().unwrap().to_str().unwrap()
     ));
 
@@ -94,7 +108,7 @@ pub async fn process<P: AsRef<Path>>(
         download_thumb(
             episode_folder_path.join(format!(
                 "{} - S{:02}E{:02} - {}-thumb{}",
-                &tvshow_title, season, episode, &episode_title, &thumb.1
+                &tvshow_title, season, episode, &episode_file_title, &thumb.1
             )),
             thumb.0,
         )

@@ -57,7 +57,7 @@ fn find_same_name_sub<P: AsRef<Path>>(
                     .unwrap_or_default()
                     .to_str()
                     .unwrap_or_default(),
-                "srt" | "ass" | "ssa" | "smi" | "vtt" | "idx" | "sub"
+                "srt" | "ass" | "ssa" | "smi" | "vtt" | "idx" | "sub" | "mks"
             )
         })
         .filter_map(|f| {
