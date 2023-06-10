@@ -7,7 +7,7 @@
   },
   "package": {
     "productName": "Anime Repository",
-    "version": "0.2.7"
+    "version": "0.2.8"
   },
   "tauri": {
     "allowlist": {
