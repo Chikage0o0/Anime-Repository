@@ -262,31 +262,14 @@ impl Tvshow {
                         }
                     }
 
-                    let mut set_logo = |logo_data: &Value| {
-                        if let Some(logo) = logo_data.get("file_path").and_then(|f| f.as_str()) {
-                            self.update_thumb(
-                                get_img_url(logo),
-                                Some("clearlogo".to_string()),
-                                None,
-                                None,
-                                None,
-                            );
-                        };
-                    };
-                    if let Some(logos) = data
-                        .get("images")
-                        .and_then(|f| f.get("logos"))
-                        .and_then(|f| f.as_array())
-                        .and_then(|f| f.first())
-                    {
-                        set_logo(logos);
-                    } else if let Some(logos) = data_fallback
-                        .get("images")
-                        .and_then(|f| f.get("logos"))
-                        .and_then(|f| f.as_array())
-                        .and_then(|f| f.first())
-                    {
-                        set_logo(logos);
+                    if let Some(logo_url) = get_logo(&data, &data_fallback) {
+                        self.update_thumb(
+                            logo_url,
+                            Some("clearlogo".to_string()),
+                            None,
+                            None,
+                            None,
+                        );
                     }
 
                     if let Some(cast) = data

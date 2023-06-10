@@ -5,6 +5,7 @@ pub mod tvshow;
 
 use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use serde_with::skip_serializing_none;
 
 #[skip_serializing_none]
@@ -133,4 +134,53 @@ fn get_json((json, status_code): (String, StatusCode)) -> Result<String, NfoGetE
 fn thumb_extension(url: &str, defalut: &str) -> String {
     let ext = url.split('.').last().unwrap_or(defalut);
     format!(".{}", ext)
+}
+
+fn get_logo(data: &Value, data_fallback: &Value) -> Option<String> {
+    fn get_logo_url(logos: &Value) -> Option<String> {
+        logos
+            .as_array()
+            .and_then(|f| {
+                f.iter()
+                    .find_map(|value| value.get("file_path").and_then(|value| value.as_str()))
+            })
+            .map(|value| get_img_url(value))
+    }
+
+    fn get_png_logo_url(logos: &Value) -> Option<String> {
+        logos
+            .as_array()
+            .and_then(|f| {
+                f.iter()
+                    .find_map(|value| value.get("file_path").and_then(|value| value.as_str()))
+            })
+            .and_then(|value| {
+                if value.ends_with("png") {
+                    Some(get_img_url(value))
+                } else {
+                    None
+                }
+            })
+    }
+
+    data.get("images")
+        .and_then(|f| f.get("logos"))
+        .and_then(|f| get_png_logo_url(f))
+        .or_else(|| {
+            data_fallback
+                .get("images")
+                .and_then(|f| f.get("logos"))
+                .and_then(|f| get_png_logo_url(f))
+        })
+        .or_else(|| {
+            data.get("images")
+                .and_then(|f| f.get("logos"))
+                .and_then(|f| get_logo_url(f))
+        })
+        .or_else(|| {
+            data_fallback
+                .get("images")
+                .and_then(|f| f.get("logos"))
+                .and_then(|f| get_logo_url(f))
+        })
 }
