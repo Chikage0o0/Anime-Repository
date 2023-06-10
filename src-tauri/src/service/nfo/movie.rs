@@ -26,9 +26,9 @@ pub async fn process<P: AsRef<Path>>(
     let movie_title = movie_nfo.title.clone();
     let year = movie_nfo.get_year();
     let folder_name = if let Some(year) = year {
-        format!("{} ({})", movie_title, year)
+        format!("{} ({})", make_vaild_pathname(&movie_title), year)
     } else {
-        movie_title
+        make_vaild_pathname(&movie_title)
     };
 
     let movie_folder_path = setting::Setting::get_movie_repository_path().join(&folder_name);

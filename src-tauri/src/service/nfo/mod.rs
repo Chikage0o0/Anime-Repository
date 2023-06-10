@@ -76,6 +76,18 @@ where
     Ok(())
 }
 
+fn make_vaild_pathname(name: &str) -> String {
+    name.replace("/", "／")
+        .replace("\\", "＼")
+        .replace(":", "：")
+        .replace("*", "＊")
+        .replace("?", "？")
+        .replace("\"", "＂")
+        .replace("<", "＜")
+        .replace(">", "＞")
+        .replace("|", "｜")
+}
+
 #[derive(thiserror::Error, Debug)]
 pub enum NfoServiceError {
     #[error(transparent)]
