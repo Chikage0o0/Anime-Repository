@@ -138,29 +138,26 @@ fn thumb_extension(url: &str, defalut: &str) -> String {
 
 fn get_logo(data: &Value, data_fallback: &Value) -> Option<String> {
     fn get_logo_url(logos: &Value) -> Option<String> {
-        logos
-            .as_array()
-            .and_then(|f| {
-                f.iter()
-                    .find_map(|value| value.get("file_path").and_then(|value| value.as_str()))
-            })
-            .map(|value| get_img_url(value))
+        logos.as_array().and_then(|f| {
+            f.iter()
+                .flat_map(|value| value.get("file_path").and_then(|value| value.as_str()))
+                .map(|value| get_img_url(value))
+                .next()
+        })
     }
 
     fn get_png_logo_url(logos: &Value) -> Option<String> {
-        logos
-            .as_array()
-            .and_then(|f| {
-                f.iter()
-                    .find_map(|value| value.get("file_path").and_then(|value| value.as_str()))
-            })
-            .and_then(|value| {
-                if value.ends_with("png") {
-                    Some(get_img_url(value))
-                } else {
-                    None
-                }
-            })
+        logos.as_array().and_then(|f| {
+            f.iter()
+                .flat_map(|value| {
+                    value
+                        .get("file_path")
+                        .and_then(|value| value.as_str())
+                        .filter(|value| value.ends_with("png"))
+                        .map(|value| get_img_url(value))
+                })
+                .next()
+        })
     }
 
     data.get("images")
