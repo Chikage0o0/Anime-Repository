@@ -219,7 +219,7 @@ function Submit({
                   icon: <IconX />,
                   autoClose: false,
                   title: t("UI.get_info_failed"),
-                  message: error,
+                  message: error.message,
                 });
               }
             }
