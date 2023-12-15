@@ -20,7 +20,7 @@ pub async fn process<P: AsRef<Path>>(
     let path = path.as_ref();
     log::info!("Processing {:?}", path);
 
-    let tvshow_title = title.clone();
+    let tvshow_title = title;
     let tvshow_folder = make_vaild_pathname(&tvshow_title);
     let tvshow_path = setting::Setting::get_tvshow_repository_path().join(&tvshow_folder);
     let tvshow_nfo_path = tvshow_path.join("tvshow.nfo");

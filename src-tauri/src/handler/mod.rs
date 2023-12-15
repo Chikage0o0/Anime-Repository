@@ -25,7 +25,7 @@ static HANDLER_TX: Lazy<mpsc::SyncSender<Command>> = Lazy::new(|| {
     thread::spawn(move || {
         scan::first_boot();
         let (wtx, wrx) = std::sync::mpsc::channel();
-        let mut debouncer = new_debouncer(Duration::from_secs(2), None, wtx).unwrap();
+        let mut debouncer = new_debouncer(Duration::from_secs(2), wtx).unwrap();
         debouncer
             .watcher()
             .watch(&Setting::get_pending_path(), RecursiveMode::Recursive)

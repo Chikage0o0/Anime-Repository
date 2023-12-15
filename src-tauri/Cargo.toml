@@ -1,6 +1,6 @@
 [package]
 name = "anime_repository"
-version = "0.2.9"
+version = "0.2.10"
 description = "Developed by Chikage"
 authors = ["Chikage <chikage@939.me>"]
 license = "GPL-3.0"
@@ -14,10 +14,10 @@ rust-version = "1.67.1"
 tauri-build = { version = "1.2.1", features = [] }
 
 [dependencies]
-log = "0.4.18"
-serde_json = "1.0.96"
-serde = { version = "1.0.163", features = ["derive"] }
-tauri = { version = "1.3.0", features = [
+log = "0.4.20"
+serde_json = "1.0.108"
+serde = { version = "1.0.193", features = ["derive"] }
+tauri = { version = "1.5.3", features = [
     "dialog-open",
     "global-shortcut-all",
     "notification-all",
@@ -26,27 +26,27 @@ tauri = { version = "1.3.0", features = [
     "updater",
     "window-all",
 ] }
-toml = "0.7.4"
-thiserror = "1.0.40"
-sys-locale = "0.3.0"
-reqwest = { version = "0.11.18", features = ["socks"] }
-quick-xml = { version = "0.28.2", features = ["serialize", "overlapped-lists"] }
-serde_with = "3.0.0"
-chrono = "0.4.24"
+toml = "0.8.8"
+thiserror = "1.0.50"
+sys-locale = "0.3.1"
+reqwest = { version = "0.11.22", features = ["socks"] }
+quick-xml = { version = "0.31.0", features = ["serialize", "overlapped-lists"] }
+serde_with = "3.4.0"
+chrono = "0.4.31"
 sled = "0.34.7"
-regex = "1.8.3"
+regex = "1.10.2"
 bincode = "1.3.3"
-walkdir = "2.3.3"
-config = { version = "0.13.3", features = ["toml"] }
-once_cell = "1.17.1"
+walkdir = "2.4.0"
+config = { version = "0.13.4", features = ["toml"] }
+once_cell = "1.19.0"
 log4rs = { version = "1.2.0", features = ["console_appender", "file_appender"] }
-window-shadows = "0.2.1"
-auto-launch = "0.4.0"
-tokio = { version = "1.28.2", features = ["time", "rt", "macros"] }
-notify-debouncer-mini = "0.3.0"
+window-shadows = "0.2.2"
+auto-launch = "0.5.0"
+tokio = { version = "1.35.0", features = ["time", "rt", "macros"] }
+notify-debouncer-mini = "0.4.1"
 tauri-plugin-single-instance = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "dev" }
 fs_extra = "1.3.0"
-pcre2 = "0.2.3"
+pcre2 = "0.2.6"
 
 [features]
 # by default Tauri runs in production mode

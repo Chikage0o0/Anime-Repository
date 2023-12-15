@@ -10,7 +10,7 @@ use notify_debouncer_mini::{notify::Error, DebouncedEvent};
 use std::{path::Path, sync::mpsc::Receiver, time::UNIX_EPOCH};
 use tauri::async_runtime::block_on;
 
-pub fn process(wrx: &Receiver<Result<Vec<DebouncedEvent>, Vec<Error>>>) {
+pub fn process(wrx: &Receiver<Result<Vec<DebouncedEvent>, Error>>) {
 
     log::debug!("Processing pending videos folder");
     while let Ok(events_result) = wrx.try_recv() {
@@ -28,10 +28,8 @@ pub fn process(wrx: &Receiver<Result<Vec<DebouncedEvent>, Vec<Error>>>) {
                     }
                 }
             }
-            Err(errors) => {
-                for error in errors {
-                    log::error!("Watch error: {}", error);
-                }
+            Err(error) => {
+                log::error!("Watch error: {}", error);
             }
         }
     }
