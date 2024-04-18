@@ -172,7 +172,8 @@ pub fn create_window(app_handle: &AppHandle) {
         .decorations(false)
         .inner_size(1000.0, 600.0)
         .visible(false)
-        .build();
+        .build()
+        .unwrap();
 }
 
 pub fn set_auto_launch(switch: bool) -> Result<(), String> {

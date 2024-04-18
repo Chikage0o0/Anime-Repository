@@ -17,8 +17,20 @@ pub async fn insert((key, value): (Key, Value)) -> Result<(), SubscribeServiceEr
 
     tokio::spawn(async move {
         for i in matcher.match_all_videos().iter() {
-            process(&key, &i.0, i.1).await.unwrap();
-            crate::service::unrecognized_videos::delete(&i.0).unwrap();
+            match process(&key, &i.0, i.1).await {
+                Ok(_) => {
+                    let _ = crate::service::unrecognized_videos::delete(&i.0);
+                }
+                Err(e) => {
+                    crate::service::unrecognized_videos::insert(
+                        &i.0,
+                        crate::data::unrecognized_videos::VideoData::Undefined,
+                    )
+                    .await
+                    .unwrap_or_else(|e| log::error!("Insert unrecognized video error: {:?}", e));
+                    log::error!("Process video error: {:?}", e);
+                }
+            }
         }
     });
 

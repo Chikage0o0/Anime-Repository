@@ -14,10 +14,10 @@ rust-version = "1.67.1"
 tauri-build = { version = "1.2.1", features = [] }
 
 [dependencies]
-log = "0.4.20"
-serde_json = "1.0.108"
-serde = { version = "1.0.193", features = ["derive"] }
-tauri = { version = "1.5.3", features = [
+log = "0.4.21"
+serde_json = "1.0.116"
+serde = { version = "1.0.198", features = ["derive"] }
+tauri = { version = "1.6.1", features = [
     "dialog-open",
     "global-shortcut-all",
     "notification-all",
@@ -26,27 +26,27 @@ tauri = { version = "1.5.3", features = [
     "updater",
     "window-all",
 ] }
-toml = "0.8.8"
-thiserror = "1.0.50"
+toml = "0.8.12"
+thiserror = "1.0.58"
 sys-locale = "0.3.1"
-reqwest = { version = "0.11.22", features = ["socks"] }
+reqwest = { version = "0.12.3", features = ["socks"] }
 quick-xml = { version = "0.31.0", features = ["serialize", "overlapped-lists"] }
-serde_with = "3.4.0"
-chrono = "0.4.31"
+serde_with = "3.7.0"
+chrono = "0.4.38"
 sled = "0.34.7"
-regex = "1.10.2"
+regex = "1.10.4"
 bincode = "1.3.3"
-walkdir = "2.4.0"
-config = { version = "0.13.4", features = ["toml"] }
+walkdir = "2.5.0"
+config = { version = "0.14.0", features = ["toml"] }
 once_cell = "1.19.0"
-log4rs = { version = "1.2.0", features = ["console_appender", "file_appender"] }
+log4rs = { version = "1.3.0", features = ["console_appender", "file_appender"] }
 window-shadows = "0.2.2"
 auto-launch = "0.5.0"
-tokio = { version = "1.35.0", features = ["time", "rt", "macros"] }
+tokio = { version = "1.37.0", features = ["time", "rt", "macros"] }
 notify-debouncer-mini = "0.4.1"
-tauri-plugin-single-instance = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "dev" }
+tauri-plugin-single-instance = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
 fs_extra = "1.3.0"
-pcre2 = "0.2.6"
+pcre2 = "0.2.7"
 
 [features]
 # by default Tauri runs in production mode
